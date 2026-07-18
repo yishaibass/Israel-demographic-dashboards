@@ -535,7 +535,7 @@ function chartHBarGrouped(containerId, rows, labelKey, series, opts){
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH;
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH+2, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH+2, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
     series.forEach((s,si)=>{
       const v = num(r[s.key])||0;
       const by = cy + si*(barH+gap);
@@ -579,7 +579,11 @@ function chartBarWithMedianTick(containerId, rows, labelKey, meanKey, medianKey,
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH;
     const meanV = num(r[meanKey])||0, medV = num(r[medianKey])||0;
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    // anchor 'end' (ambient/explicit direction:rtl) pins the label's LEFT edge
+    // at MX(leftPad-10) -- just outside the bar's gutter boundary -- and grows
+    // the text RIGHTWARD into the open right-margin, away from the bar. 'start'
+    // would pin the right edge and grow the text back over the bar.
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
     const w = Math.max(x(meanV),1.5);
     const rect = sv('rect',{class:'mark', x:MX(leftPad+w), y:cy, width:w, height:barH, rx:4, fill:PRIMARY_ACCENT});
     svgEl.appendChild(rect);
@@ -620,7 +624,7 @@ function chartStacked100(containerId, groups, segmentGetter, segments, opts){
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   groups.forEach((g,i)=>{
     const cy = topPad + i*rowH;
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-5, tr(g), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-5, tr(g), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
     let cx = leftPad;
     segments.forEach((s,si)=>{
       const share = segmentGetter(g, s.key) || 0;
@@ -663,7 +667,7 @@ function chartStackedAbs(containerId, rows, labelKey, segments, opts){
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH + (rowH-barH)/2 - 3;
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-7, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-7, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
     const total = totals[i];
     let cx = leftPad;
     segments.forEach((s,si)=>{
@@ -760,7 +764,7 @@ function chartHBarSingle(containerId, rows, labelKey, valueKey, opts){
     const cy = topPad + i*rowH;
     const v = num(r[valueKey])||0;
     const color = opts.colorFn ? opts.colorFn(r) : (opts.color||'#3987e5');
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
     const bx = Math.min(x0, xOf(v)), bw = Math.max(Math.abs(xOf(v)-x0),1.5);
     const rect = sv('rect',{class:'mark', x:MX(bx+bw), y:cy, width:bw, height:barH, rx:4, fill:color});
     svgEl.appendChild(rect);
@@ -812,7 +816,7 @@ function chartBoxPlot(containerId, rows, labelKey, opts){
     const cy = topPad + i*rowH + 18;
     const isAll = r[labelKey]==='All';
     const boxColor = isAll ? GROUP_ALL_COLOR : PRIMARY_ACCENT;
-    svgEl.appendChild(svText(MX(leftPad-10), cy+4, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', 'font-style': isAll?'italic':'normal', direction:'rtl'}));
+    svgEl.appendChild(svText(MX(leftPad-10), cy+4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', 'font-style': isAll?'italic':'normal', direction:'rtl'}));
     const p10=num(r.p10), p25=num(r.p25), p50=num(r.p50), p75=num(r.p75), p90=num(r.p90);
     const mP10 = MX(xOf(p10)), mP90 = MX(xOf(p90)), mP25 = MX(xOf(p25)), mP75 = MX(xOf(p75)), mP50 = MX(xOf(p50));
 
