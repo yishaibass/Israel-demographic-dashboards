@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ישראל — החשבון הפיסקלי של שלושת המגזרים, 2018 ← 2023</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#1a1f29; --muted:#6b7280; --line:#e3e6ea; --paper:#ffffff; --bg:#f6f7f9;
+    --blue:#1f5fa6; --blue-soft:#7fa8d0; --amber:#c8841a; --amber-soft:#e0b673;
+    --pos:#2e7d57; --neg:#b4452f; --navy:#2b3a55; --grey:#aab1bb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Arial","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;}
+  .sans{font-family:"Arial","Helvetica Neue",sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 32px 80px;}
+  header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:8px;}
+  h1{font-size:30px;line-height:1.15;margin:0 0 6px;letter-spacing:-0.01em;}
+  .kicker{font-family:"Arial","Helvetica Neue",sans-serif;text-transform:uppercase;
+    letter-spacing:.08em;font-size:11px;color:var(--blue);font-weight:700;margin-bottom:10px;}
+  .sub{color:var(--muted);font-size:14px;max-width:760px;margin:0;}
+  /* top tabs */
+  .tabs{display:flex;gap:2px;margin:22px 0 0;border-bottom:1px solid var(--line);}
+  .tabs button{font-family:"Arial","Helvetica Neue",sans-serif;border:0;background:none;cursor:pointer;
+    font-size:13px;font-weight:700;color:var(--muted);padding:10px 18px;border-bottom:2px solid transparent;
+    margin-bottom:-1px;letter-spacing:.02em;}
+  .tabs button.on{color:var(--ink);border-bottom-color:var(--ink);}
+  .toolbar{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin:22px 0 6px;}
+  section{margin-top:34px;}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:22px 24px;
+    box-shadow:0 1px 2px rgba(16,24,40,.04);}
+  h2{font-size:15px;font-family:"Arial","Helvetica Neue",sans-serif;font-weight:700;margin:0 0 2px;
+    letter-spacing:.01em;}
+  .cap{color:var(--muted);font-size:12.5px;margin:2px 0 16px;font-family:"Arial","Helvetica Neue",sans-serif;}
+  .chartbox{position:relative;width:100%;}
+  .grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;}
+  .heroRow{display:grid;grid-template-columns:1.857fr 1fr;gap:22px;align-items:stretch;}
+  .gapblock{margin:0 0 16px;padding:0 0 16px;border-bottom:1px solid var(--line);}
+  .gapblock:last-child{margin-bottom:0;padding-bottom:0;border-bottom:0;}
+  .gapblock .nm{font-family:"Arial","Helvetica Neue",sans-serif;font-weight:700;font-size:12.5px;
+    color:var(--ink);margin-bottom:4px;}
+  .gapblock .g23{font-size:28px;font-weight:700;line-height:1;letter-spacing:-0.02em;
+    font-family:"Arial","Helvetica Neue",sans-serif;direction:ltr;unicode-bidi:embed;display:inline-block;}
+  .gapblock .g18{font-family:"Arial","Helvetica Neue",sans-serif;font-size:12.5px;color:var(--muted);
+    margin-top:4px;font-weight:600;}
+  .gapblock .lbl{font-family:"Arial","Helvetica Neue",sans-serif;font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .secbtns-slim{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;}
+  .secbtns-slim button{font-family:"Arial","Helvetica Neue",sans-serif;cursor:pointer;
+    border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 18px;
+    font-size:12.5px;font-weight:700;color:var(--muted);}
+  .secbtns-slim button.on{border-color:var(--ink);background:var(--ink);color:#fff;}
+  .secbtns{display:flex;gap:10px;flex-wrap:wrap;}
+  .secbtns button{font-family:"Arial","Helvetica Neue",sans-serif;cursor:pointer;border:1px solid var(--line);
+    background:#fff;border-radius:9px;padding:12px 18px;text-align:right;min-width:190px;}
+  .secbtns button .nm{font-weight:700;font-size:14px;}
+  .secbtns button .vv{font-size:12px;color:var(--muted);margin-top:3px;}
+  .secbtns button.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset;}
+  .pill{display:inline-block;font-family:"Arial","Helvetica Neue",sans-serif;font-size:11px;font-weight:700;
+    padding:2px 8px;border-radius:20px;}
+  .pill.io-in{background:#eaf1f9;color:var(--blue);}
+  .pill.io-out{background:#fbf1e1;color:var(--amber);}
+  .big{font-size:40px;font-weight:700;line-height:1;letter-spacing:-0.02em;font-family:"Arial","Helvetica Neue",sans-serif;
+    direction:ltr;unicode-bidi:embed;display:inline-block;}
+  .big.sub{font-size:13px;color:var(--muted);font-weight:600;direction:rtl;}
+  .headline{display:flex;gap:26px;align-items:flex-end;flex-wrap:wrap;margin:4px 0 14px;}
+  .demo{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .metric{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#fcfcfd;}
+  .metric .k{font-family:"Arial","Helvetica Neue",sans-serif;font-size:11px;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--muted);font-weight:700;text-align:right;}
+  .metric .v{font-family:"Arial","Helvetica Neue",sans-serif;font-size:26px;font-weight:700;margin-top:4px;
+    direction:ltr;unicode-bidi:embed;display:block;}
+  .metric .v small{font-size:13px;color:var(--grey);font-weight:600;margin-right:8px;}
+  .earnbar{display:flex;height:16px;border-radius:5px;overflow:hidden;margin-top:8px;border:1px solid var(--line);direction:ltr;}
+  .earnbar i{display:flex;align-items:center;justify-content:center;height:100%;overflow:hidden;}
+  .earnbar i span{font-family:"Arial","Helvetica Neue",sans-serif;font-size:10px;font-weight:700;color:#fff;
+    text-shadow:0 1px 1px rgba(0,0,0,.45);direction:ltr;white-space:nowrap;}
+  .earnleg{font-family:"Arial","Helvetica Neue",sans-serif;font-size:11px;color:var(--muted);display:flex;
+    gap:14px;margin-top:7px;flex-wrap:wrap;direction:ltr;}
+  .earnleg span[dir="rtl"]{direction:rtl;unicode-bidi:isolate;}
+  .earnleg b{color:var(--ink);}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-left:5px;vertical-align:middle;}
+  /* financial table — RTL: label col rightmost, numbers flow left */
+  .fintbl{width:100%;border-collapse:collapse;font-family:"Arial","Helvetica Neue",sans-serif;
+    font-variant-numeric:tabular-nums;font-size:13px;}
+  .fintbl caption{text-align:right;}
+  .fintbl thead th{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+    font-weight:700;padding:7px 10px;border-bottom:1.5px solid var(--ink);text-align:right;white-space:nowrap;}
+  .fintbl thead th.rght{text-align:right;}
+  .fintbl tbody td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;}
+  .fintbl tbody td.rght{text-align:right;color:var(--ink);}
+  .fintbl tbody tr.tot td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:700;color:var(--ink);}
+  .fintbl tbody tr.tot td.rght{text-transform:uppercase;font-size:11.5px;letter-spacing:.04em;}
+  .grp-in td.rght::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;
+    background:var(--blue);margin-left:8px;vertical-align:middle;opacity:.85;}
+  .grp-out td.rght::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;
+    background:var(--amber);margin-left:8px;vertical-align:middle;opacity:.85;}
+  .secthead td{padding:14px 10px 5px;font-size:11px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.1em;color:var(--ink);text-align:right;}
+  .secthead.t-in td{color:var(--blue);} .secthead.t-out td{color:var(--amber);}
+  .chg-pos{color:var(--pos);} .chg-neg{color:var(--neg);}
+  .sharecell{position:relative;}
+  .sharebar{position:absolute;left:10px;top:50%;transform:translateY(-50%);height:8px;border-radius:2px;
+    background:var(--line);opacity:.9;z-index:0;}
+  .shareval{position:relative;z-index:1;}
+  /* methodology */
+  .method h3{font-family:"Arial","Helvetica Neue",sans-serif;font-size:13px;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--blue);margin:22px 0 8px;font-weight:700;}
+  .method h3:first-child{margin-top:0;}
+  .method p,.method li{font-size:14px;line-height:1.7;color:var(--ink);margin:0 0 10px;}
+  .method ul{margin:0 0 12px;padding-right:20px;padding-left:0;}
+  .method .small{color:var(--muted);font-size:12.5px;font-family:"Arial","Helvetica Neue",sans-serif;}
+  .method a{color:var(--blue);text-decoration:underline;}
+  .method code{background:#f1f3f5;border-radius:4px;padding:1px 5px;font-size:12px;}
+  .flag{border-right:3px solid var(--amber);border-left:0;background:#fdf8ef;
+    padding:10px 14px;border-radius:8px 0 0 8px;margin:0 0 10px;font-size:13.5px;line-height:1.6;}
+  .attrib{border-right:3px solid var(--blue);border-left:0;background:#f1f6fc;
+    padding:12px 16px;border-radius:8px 0 0 8px;margin:0 0 14px;font-size:14px;line-height:1.6;}
+  footer{margin-top:46px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);
+    font-size:11.5px;font-family:"Arial","Helvetica Neue",sans-serif;line-height:1.55;}
+  .hide{display:none;}
+  details{margin-top:34px;}
+  details summary{cursor:pointer;font-family:"Arial","Helvetica Neue",sans-serif;font-size:12.5px;
+    font-weight:700;color:var(--muted);padding:12px 16px;background:var(--paper);border:1px solid var(--line);
+    border-radius:12px;list-style:none;}
+  details summary::-webkit-details-marker{display:none;}
+  details summary::before{content:"◂ ";color:var(--blue);}
+  details[open] summary::before{content:"▾ ";}
+  details[open] summary{border-radius:12px 12px 0 0;border-bottom:0;}
+  details section{margin-top:0;}
+  details[open] section .card{border-radius:0 0 12px 12px;border-top:0;}
+  .legend-inline{font-family:"Arial","Helvetica Neue",sans-serif;font-size:11.5px;color:var(--muted);
+    display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;}
+  @media(max-width:880px){.grid2,.demo,.heroRow{grid-template-columns:1fr;}}
+  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  @media(max-width:600px){
+    .wrap{padding:20px 14px 56px;}
+    h1{font-size:22px;}
+    .sub{font-size:13px;}
+    .card{padding:16px 14px;}
+    .tabs button{padding:9px 10px;font-size:12px;}
+    .demo{grid-template-columns:1fr;}
+    .big{font-size:32px;}
+    .secbtns-slim button{padding:6px 13px;font-size:11.5px;}
+    .fintbl{font-size:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">ניתוח נטל פיסקלי · בעקבות קרלינסקי, שדה, יוגב ושראל · ₪ למשק בית לחודש</div>
+    <h1>החשבון הפיסקלי של שלושת המגזרים בישראל</h1>
+    <p class="sub">המאזן הפיסקלי הנטו למשק בית — מה שכל מגזר משלם למדינה בניכוי מה שהוא מקבל ממנה, 2018 לעומת 2023.</p>
+    <div class="kicker" style="margin-top:6px">מאמר מקור: <a href="https://ieca.org.il/wp-content/uploads/2025/11/taxes_and_wonders.pdf" target="_blank" rel="noopener noreferrer">״על המיסים ועל הנפלאות״</a> · קרלינסקי, שדה, יוגב ושראל, <i>הרבעון לכלכלה</i>, כרך&nbsp;23</div>
+    <div class="tabs" id="tabs">
+      <button data-tab="dash" class="on">דשבורד · ₪ נומינלי</button>
+      <button data-tab="real">ריאלי · ₪ 2018</button>
+      <button data-tab="method">מתודולוגיה ומקורות</button>
+    </div>
+  </header>
+
+  <!-- ============ DASHBOARD TAB (nominal) ============ -->
+  <div id="tab-dash"></div>
+
+  <!-- ============ REAL-TERMS TAB (2018 ₪) ============ -->
+  <div id="tab-real" class="hide"></div>
+
+  <!-- ============ METHODOLOGY TAB ============ -->
+  <div id="tab-method" class="hide">
+    <section><div class="card method" id="methodBody"></div></section>
+  </div>
+
+  <footer id="prov"></footer>
+</div>
+
+<script>
+const DATA = {"state": {"2018": {"tax_bn": 405.47142, "transfer_bn": 267.75, "net_bn": 137.72142, "net_hh": 52788.64354416121, "tax_hh": 155417.2637613298, "transfer_hh": 102628.6202171686}, "2023": {"tax_bn": 546.0066, "transfer_bn": 389.7260685015164, "net_bn": 156.2805314984836, "net_hh": 53282.71525505205, "tax_hh": 186156.9954761857, "transfer_hh": 132874.2802211336}}, "sectors": {"Jewish non-Haredi": {"net_hh": {"2018": 72800.75670596428, "2023": 78028.27498598468}, "tax_hh": {"2018": 168219.2844964973, "2023": 203201.3425071551}, "transfer_hh": {"2018": 95418.52779053306, "2023": 125173.0675211704}, "total_fisc_bn": {"2018": 149.9864607751511, "2023": 176.8972572634902}, "tax_bn": {"2018": 346.5707810931426, "2023": 460.676083999439}, "transfer_bn": {"2018": 196.5843203179915, "2023": 283.7788267359488}, "nhh_m": {"2018": 2.060232167378877, "2023": 2.2670917343138015}, "tax_items": [{"name": "Income tax + cap gains", "v2018": 43435.72717517862, "v2023": 56590.7667799483, "pct": 30.28621934131481}, {"name": "VAT", "v2018": 38960.17757600997, "v2023": 42413.69066992798, "pct": 8.864212918897312}, {"name": "NII + health", "v2018": 29981.74115264658, "v2023": 36833.41391731462, "pct": 22.85281808612779}, {"name": "Corporate tax", "v2018": 17446.43008180443, "v2023": 25213.54849438373, "pct": 44.51981509202809}, {"name": "Financial+nonprofit VAT", "v2018": 6225.933120271229, "v2023": 6922.795106839461, "pct": 11.19289226380051}, {"name": "Other (10 items)", "v2018": 32169.2753905865, "v2023": 35227.12753874106, "pct": 9.505505209636642}], "transfer_items": [{"name": "NII cash transfers", "v2018": 26850.67303690334, "v2023": 41045.4686328235, "pct": 52.86569754289197}, {"name": "Education K-12", "v2018": 20063.74101168242, "v2023": 25975.55662503983, "pct": 29.46517107609775}, {"name": "Public health", "v2018": 22937.94805088955, "v2023": 27681.0794382542, "pct": 20.67809804452281}, {"name": "Welfare in-kind", "v2018": 8708.773657093698, "v2023": 9615.898834577805, "pct": 10.41622176901121}, {"name": "Culture/sport", "v2018": 4185.723636779201, "v2023": 5814.035352506259, "pct": 38.90155817788293}, {"name": "Other (6 items)", "v2018": 12671.66839718483, "v2023": 15041.02863796887, "pct": 18.69809220473621}], "pop_share": {"2018": 70.52600998597957, "2023": 69.00132198345254}, "hh_share": {"2018": 78.96873376848585, "2023": 77.29485059864702}, "demo": {"income_m": {"2018": 22291.98636538696, "2023": 24916.50089422148}, "persons": {"2018": 2.879704561884891, "2023": 2.7845209716094628}, "kids": {"2018": 0.7973944964828851, "2023": 0.7621132429080443}, "pct65head": {"2018": 22.41117455429966, "2023": 25.859292833537236}, "earners": {"2018": {"0": 20.127212352152885, "1": 27.59510492049445, "2plus": 52.27768272735266}, "2023": {"0": 22.555455543238196, "1": 32.71188006037912, "2plus": 44.732664396382674}}}}, "Haredi": {"net_hh": {"2018": -46790.70138296802, "2023": -66544.90515186987}, "tax_hh": {"2018": 104254.7191393617, "2023": 121738.8327922107}, "transfer_hh": {"2018": 151045.4205223297, "2023": 188283.7379440805}, "total_fisc_bn": {"2018": -7.862738384210804, "2023": -14.56218238918963}, "tax_bn": {"2018": 17.5190274495556, "2023": 26.64040294176326}, "transfer_bn": {"2018": 25.3817658337664, "2023": 41.20258533095289}, "nhh_m": {"2018": 0.16804061815309457, "2023": 0.21883241633533895}, "tax_items": [{"name": "Income tax + cap gains", "v2018": 12566.52362987731, "v2023": 13860.63726659663, "pct": 10.29810371455894}, {"name": "VAT", "v2018": 34331.87533890447, "v2023": 37933.46677405979, "pct": 10.49051763005224}, {"name": "NII + health", "v2018": 15957.95380161506, "v2023": 20542.53808535883, "pct": 28.72914874136165}, {"name": "Corporate tax", "v2018": 13758.0552295575, "v2023": 19210.35176204908, "pct": 39.6298491430532}, {"name": "Financial+nonprofit VAT", "v2018": 4909.699653315185, "v2023": 5274.518547383416, "pct": 7.430574573373218}, {"name": "Other (10 items)", "v2018": 22730.61148609219, "v2023": 24917.32035676295, "pct": 9.620105785577795}], "transfer_items": [{"name": "NII cash transfers", "v2018": 28742.01769449824, "v2023": 40596.63019888938, "pct": 41.24488625118459}, {"name": "Education K-12", "v2018": 51583.74927139325, "v2023": 66072.37635476838, "pct": 28.087580464823}, {"name": "Public health", "v2018": 29768.44117649435, "v2023": 35271.18697205903, "pct": 18.4851660956629}, {"name": "Welfare in-kind", "v2018": 11845.33807259801, "v2023": 11338.53797584005, "pct": -4.278477268034616}, {"name": "Culture/sport", "v2018": 3350.115596083253, "v2023": 4722.826440605599, "pct": 40.97502922368513}, {"name": "Other (6 items)", "v2018": 25755.75871126261, "v2023": 30282.18000191811, "pct": 17.57440478224454}], "pop_share": {"2018": 9.586572912812928, "2023": 11.247339446355358}, "hh_share": {"2018": 6.440999731649743, "2023": 7.460932731908457}, "demo": {"income_m": {"2018": 16925.68910726482, "2023": 18775.654027573542}, "persons": {"2018": 4.794425236514831, "2023": 4.702770289100402}, "kids": {"2018": 2.8264977622126475, "2023": 2.733708596533689}, "pct65head": {"2018": 9.902088721268075, "2023": 8.213716818585318}, "earners": {"2018": {"0": 16.72984546251388, "1": 41.83543208860367, "2plus": 41.43472244888245}, "2023": {"0": 15.670550901474497, "1": 44.85785388874787, "2plus": 39.47159520977765}}}}, "Arab": {"net_hh": {"2018": -11565.26681617857, "2023": -13541.21864661351}, "tax_hh": {"2018": 108713.4265860596, "2023": 131262.6905107279}, "transfer_hh": {"2018": 120278.6934022381, "2023": 144803.9091573414}, "total_fisc_bn": {"2018": -4.402302390940338, "2023": -6.054543375817016}, "tax_bn": {"2018": 41.38161145730177, "2023": 58.69011305879772}, "transfer_bn": {"2018": 45.78391384824211, "2023": 64.74465643461474}, "nhh_m": {"2018": 0.3806485800035316, "2023": 0.4471195343508601}, "tax_items": [{"name": "Income tax + cap gains", "v2018": 10273.60002595523, "v2023": 15589.53057110775, "pct": 51.74360041000574}, {"name": "VAT", "v2018": 36340.18379019887, "v2023": 41025.27144771528, "pct": 12.89230589631747}, {"name": "NII + health", "v2018": 16311.81186056423, "v2023": 22812.46452232465, "pct": 39.85242545297212}, {"name": "Corporate tax", "v2018": 12280.07059460827, "v2023": 17522.66299949544, "pct": 42.69187513619836}, {"name": "Financial+nonprofit VAT", "v2018": 4382.266049601646, "v2023": 4811.135794659152, "pct": 9.786483527089626}, {"name": "Other (10 items)", "v2018": 29125.49426513131, "v2023": 29501.62517542559, "pct": 1.291414685946047}], "transfer_items": [{"name": "NII cash transfers", "v2018": 29663.98370156445, "v2023": 40016.81267621384, "pct": 34.90033260132689}, {"name": "Education K-12", "v2018": 40945.56258533602, "v2023": 43505.70935953745, "pct": 6.252562213220885}, {"name": "Public health", "v2018": 27217.21519371874, "v2023": 31593.2842367253, "pct": 16.07831297897252}, {"name": "Welfare in-kind", "v2018": 7927.013523218778, "v2023": 11940.06336341049, "pct": 50.6249904637757}, {"name": "Culture/sport", "v2018": 2557.429805964879, "v2023": 4127.623254202223, "pct": 61.39732338205602}, {"name": "Other (6 items)", "v2018": 11967.48859243529, "v2023": 13620.41626725203, "pct": 13.81181742560065}], "pop_share": {"2018": 19.88741710120749, "2023": 19.75133857019212}, "hh_share": {"2018": 14.590266499864416, "2023": 15.244216669444533}, "demo": {"income_m": {"2018": 14568.0305977008, "2023": 16780.65754161278}, "persons": {"2018": 4.395541879114805, "2023": 4.041092352204669}, "kids": {"2018": 1.7751953877343938, "2023": 1.4818386178766667}, "pct65head": {"2018": 11.037879045526855, "2023": 11.623172859583129}, "earners": {"2018": {"0": 19.088631083041612, "1": 38.60711977638163, "2plus": 42.30424914057676}, "2023": {"0": 20.671077130200697, "1": 35.74271724811027, "2plus": 43.586205621689025}}}}}, "decile": [{"d": "D1", "net2018": -77809.06240435789, "net2023": -82266.14840956868, "delta": -4457.086005210789}, {"d": "D2", "net2018": -54261.93922336364, "net2023": -67279.79593999182, "delta": -13017.85671662818}, {"d": "D3", "net2018": -29420.06319866373, "net2023": -53751.81921079032, "delta": -24331.75601212658}, {"d": "D4", "net2018": -8572.085879165841, "net2023": -28379.53995797618, "delta": -19807.45407881034}, {"d": "D5", "net2018": 10848.89858412274, "net2023": -14855.54482903158, "delta": -25704.44341315432}, {"d": "D6", "net2018": 35723.99591643907, "net2023": 24047.94799757527, "delta": -11676.0479188638}, {"d": "D7", "net2018": 58589.81510849816, "net2023": 57762.49147149636, "delta": -827.3236370017985}, {"d": "D8", "net2018": 96896.9223739333, "net2023": 99498.61529979069, "delta": 2601.692925857395}, {"d": "D9", "net2018": 161161.548836649, "net2023": 172754.9665641379, "delta": 11593.41772748882}, {"d": "D10", "net2018": 334639.3542713047, "net2023": 425124.685969469, "delta": 90485.33169816434}], "waterfall": {"start": 137.72142, "end": 156.2805314984836, "sectors": {"Jewish non-Haredi": {"pop": 15.05953300473056, "rate": 11.851263483608562, "total": 26.910796488339123}, "Haredi": {"pop": -2.376583861449375, "rate": -4.322860143529452, "total": -6.699444004978827}, "Arab": {"pop": -0.7687543225528791, "rate": -0.8834866623238002, "total": -1.6522409848766793}}}, "demo_all": {"income_m": {"2018": 20818.96311538476, "2023": 23218.79980086509}, "persons": {"2018": 3.224378597338254, "2023": 3.1193053642101285}, "kids": {"2018": 1.0709596400358845, "2023": 1.0191906451617}, "pct65head": {"2018": 19.94491231262005, "2023": 22.372257535034834}, "earners": {"2018": {"0": 19.756496716523273, "1": 30.120367318806206, "2plus": 50.12313596467053}, "2023": {"0": 21.753442968557046, "1": 34.08208400669777, "2plus": 44.164473024745185}}}, "provenance": {"fiscal_source": "net_position_2018_2023.xlsx + net_position_detail_2018_2023.xlsx (read, not recomputed; cross-checked vs Part A — PASS)", "demo_source": "Same pooled Household Expenditure Survey pickles that produced the fiscal numbers (_pooled_2018_withtransfer.pkl = waves 2016-2018; _pooled_2023_withtransfer.pkl = waves 2021-2023). Head-65 from the matching expenditure dataprat files (Y_Kalkali==1 & Age_Group>=15).", "deviation_note": "Part B was computed on the Household Expenditure Survey (the fiscal replication's actual source), NOT the Longitudinal survey named in the brief, so that sector & weight definitions match the fiscal numbers exactly. '2018'=pooled 2016-2018, '2023'=pooled 2021-2023 (same pooling as fiscal).", "weights": "Fiscal totals, #HH, pop-share, HH-share use the GDP-per-capita-adjusted weight 'weight_adj'. Per-HH demographic averages (income, persons, kids, %65+ head, earner split) use the raw survey weight 'weight'.", "sector_def": "Jewish non-Haredi: nationality==1 & ramatdatiyut in {1,2,3} (or nationality==3); Haredi: nationality==1 & ramatdatiyut==4; Arab: nationality==2  (sector field carried in the pooled pickle, identical to the fiscal replication).", "head65_coverage": {"2018": 100.0, "2023": 100.0}, "units": "₪B = national annual NIS billions; net/HH, tax/HH, transfer/HH = annual NIS/household; income = NIS/month (native CBS unit); shares in %."}, "sector_order": ["Jewish non-Haredi", "Haredi", "Arab"]};
+</script>
+<script>
+/* ---- display name maps ---- */
+const SECTOR_NAMES = {
+  "Jewish non-Haredi": "יהודים לא-חרדים",
+  "Haredi": "חרדים",
+  "Arab": "ערבים"
+};
+const ITEM_NAMES = {
+  "Income tax + cap gains":    "מס הכנסה + רווחי הון",
+  "VAT":                       'מע"מ',
+  "NII + health":              "ביטוח לאומי + בריאות",
+  "Corporate tax":             "מס חברות",
+  "Financial+nonprofit VAT":   'מע"מ פיננסי + מלכ"רים',
+  "Other (10 items)":          "אחר (10 סעיפים)",
+  "NII cash transfers":        "קצבאות ביטוח לאומי",
+  "Education K-12":            "חינוך",
+  "Public health":             "בריאות ציבורית",
+  "Welfare in-kind":           "רווחה בעין",
+  "Higher education":          "השכלה גבוהה",
+  "Culture/sport":             "תרבות/ספורט",
+  "Other (6 items)":           "אחר (6 סעיפים)"
+};
+
+/* ---------- formatting ---------- */
+const nf0 = new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
+const fmtNIS = v => '₪' + nf0.format(Math.round(v));
+const fmtSign = v => (v>=0?'+':'−') + nf0.format(Math.abs(Math.round(v)));
+/* per-household annual figures are stored as ₪/year; the dashboard shows them
+   as ₪/household/month (÷12) to match the published paper's units. */
+const fmtNISm  = v => fmtNIS(v/12);
+const fmtSignM = v => fmtSign(v/12);
+const fmtBnPlain = v => (v>=0?'':'−') + '₪' + Math.abs(v).toFixed(1) + 'B';
+/* compact ₪1.2K-style formatter: always one decimal + K/M, no full-number branch */
+const kSuffix = v => {
+  const av = Math.abs(v);
+  if(av>=1000000) return (av/1000000).toFixed(1)+'M';
+  return (av/1000).toFixed(1)+'K';
+};
+const fmtK = v => '₪'+kSuffix(v);
+const fmtSignK = v => (v>=0?'+':'−') + '₪' + kSuffix(v);
+const fmtKm = v => fmtK(v/12);
+const fmtSignKm = v => fmtSignK(v/12);
+const fmtPct = v => (v>=0?'+':'−') + Math.abs(v).toFixed(0) + '%';
+const C = getComputedStyle(document.documentElement);
+const col = n => C.getPropertyValue(n).trim();
+Chart.defaults.font.family = "'Arial','Helvetica Neue',sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = col('--muted');
+
+/* ---------- real-terms (2018 ₪) dataset ---------- */
+/* Cumulative CPI inflation 2018→2023 in Israel ≈ 10.6% (annual-average index
+   chained 2019-2023: 1.008·0.994·1.015·1.044·1.042 ≈ 1.106). 2023 nominal ₪
+   are deflated to 2018 ₪ by dividing by this factor. */
+const CPI = 1.106;
+function buildReal(src, cpi){
+  const d = JSON.parse(JSON.stringify(src));
+  const def = x => (x==null ? x : x/cpi);
+  ['tax_bn','transfer_bn','net_bn','net_hh','tax_hh','transfer_hh'].forEach(k=>{
+    if(d.state && d.state['2023'] && d.state['2023'][k]!=null) d.state['2023'][k]=def(src.state['2023'][k]);
+  });
+  d.sector_order.forEach(s=>{
+    const S=d.sectors[s], O=src.sectors[s];
+    ['net_hh','tax_hh','transfer_hh','total_fisc_bn','tax_bn','transfer_bn'].forEach(k=>{
+      if(S[k] && S[k]['2023']!=null) S[k]['2023']=def(O[k]['2023']);
+    });
+    if(S.demo && S.demo.income_m && S.demo.income_m['2023']!=null)
+      S.demo.income_m['2023']=def(O.demo.income_m['2023']);
+    ['tax_items','transfer_items'].forEach(key=>{
+      (S[key]||[]).forEach((it,i)=>{ it.v2023=def(O[key][i].v2023); it.pct=(it.v2023/it.v2018-1)*100; });
+    });
+  });
+  if(d.decile) d.decile.forEach((row,i)=>{ row.net2023=def(src.decile[i].net2023); row.delta=row.net2023-row.net2018; });
+  /* recompute the waterfall in real terms: population effect uses the
+     unchanged 2018 net/HH; rate effect uses the deflated 2023 net/HH. */
+  const wf=d.waterfall;
+  wf.start = d.state['2018'].net_bn;
+  wf.end   = d.state['2023'].net_bn;
+  d.sector_order.forEach(s=>{
+    const S=d.sectors[s];
+    const nhh18=S.nhh_m['2018'], nhh23=S.nhh_m['2023'];
+    const nh18=S.net_hh['2018'], nh23=S.net_hh['2023'];
+    const pop=(nhh23-nhh18)*nh18/1000;
+    const rate=(nh23-nh18)*nhh23/1000;
+    wf.sectors[s]={pop,rate,total:pop+rate};
+  });
+  return d;
+}
+const DATA_REAL = buildReal(DATA, CPI);
+
+/* one shared sector selection across both dashboard tabs */
+let SECTOR = DATA.sector_order[0];
+const MODES = [
+  {sfx:'',  data:DATA,      note:''},
+  {sfx:'R', data:DATA_REAL, note:`כל ערכי השקל מוצגים ב<b>₪ ריאלי 2018</b>: נתוני 2023 הומרו למחירי 2018 לפי עליית מדד המחירים לצרכן המצטברת של ${((CPI-1)*100).toFixed(1)}%. עמודת 2018 נותרת ללא שינוי, כך שכל שינוי שמוצג כאן הוא שינוי <b>ריאלי</b>.`}
+];
+
+/* ---------- dashboard markup (shared by both tabs) ---------- */
+function dashMarkup(sfx, note, data){
+  return `
+  ${note?`<div class="attrib" style="margin-top:14px">${note}</div>`:''}
+  <section><div class="heroRow">
+    <div class="card">
+      <h2>מאזן פיסקלי נטו למשק בית, לפי מגזר</h2>
+      <p class="cap">₪ למשק בית / לחודש. <b>עמודה מודגשת = 2023</b>, עמודה בהירה = 2018.</p>
+      <div class="chartbox" style="height:280px"><canvas id="hero${sfx}"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>הפער מול יהודים לא-חרדים</h2>
+      <div id="gapBody${sfx}"></div>
+      <p class="cap" style="margin:12px 0 0">₪ למשק בית / לחודש.</p>
+    </div>
+  </div></section>
+  <section>
+    <div class="secbtns-slim" id="secBtns${sfx}"></div>
+    <div class="grid2">
+    <div class="card">
+      <h2 id="ioTitle${sfx}">הרכב מיסים והעברות</h2>
+      <p class="cap">לחודש למשק בית, ₪. <span class="pill io-in">מיסים</span> — מה ששולם למדינה · <span class="pill io-out">העברות</span> — מה שהתקבל מהמדינה.</p>
+      <div id="ioTable${sfx}" class="tblwrap"></div>
+    </div>
+    <div class="card">
+      <h2 id="demoTitle${sfx}">פרופיל המגזר</h2>
+      <p class="cap">מאזן פיסקלי נטו למשק בית, עם הקשר דמוגרפי. <b>גדול = 2023</b>, <span style="color:var(--grey)">קטן אפור = 2018</span>.</p>
+      <div class="headline"><div>
+        <div class="big" id="netBig${sfx}">—</div>
+        <div class="big sub">₪ נטו / משק בית / חודש</div>
+      </div></div>
+      <div class="demo" id="demoGrid${sfx}"></div>
+    </div>
+    </div>
+  </section>
+  <section><div class="card">
+    <h2>איזון לאומי — כיצד תוספת ₪${(data.waterfall.end-data.waterfall.start).toFixed(1)} מיליארד מתחלקת לאפקט אוכלוסייה ואפקט שיעור</h2>
+    <p class="cap">כל מגזר מפורק ל<b>אפקט אוכלוסייה</b> (יותר / פחות משקי בית, לפי השיעור הנטו הישן) ו<b>אפקט שיעור</b> (שינוי ₪ נטו למשק בית, לפי מספר משקי הבית הנוכחי). ₪ מיליארד.</p>
+    <div class="chartbox" style="height:380px"><canvas id="wf${sfx}"></canvas></div>
+  </div></section>`;
+}
+document.getElementById('tab-dash').innerHTML = dashMarkup(MODES[0].sfx, MODES[0].note, MODES[0].data);
+document.getElementById('tab-real').innerHTML = dashMarkup(MODES[1].sfx, MODES[1].note, MODES[1].data);
+
+/* ============ HERO 0 : per-household net balance (diverging) ============ */
+function hexA(hex, a){
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function heroLabelPlugin(){
+  return {
+    id:'heroLabels',
+    afterDatasetsDraw(chart){
+      const {ctx} = chart;
+      chart.data.datasets.forEach((ds,di)=>{
+        const meta = chart.getDatasetMeta(di);
+        const bold = ds.__year==='2023';
+        ctx.save();
+        ctx.font = bold ? '700 13px "Arial","Helvetica Neue",sans-serif' : '600 11px "Arial","Helvetica Neue",sans-serif';
+        ctx.fillStyle = bold ? col('--ink') : col('--muted');
+        meta.data.forEach((bar,i)=>{
+          const val = ds.data[i];
+          const label = fmtSignK(val);
+          const pos = bar.tooltipPosition ? bar.tooltipPosition() : {x:bar.x,y:bar.y};
+          const positive = val>=0;
+          ctx.textAlign = positive ? 'left' : 'right';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, pos.x + (positive?8:-8), pos.y);
+        });
+        ctx.restore();
+      });
+    }
+  };
+}
+function buildHero(data, sfx){
+  const posC = col('--pos'), negC = col('--neg');
+  const sectors = data.sector_order;
+  const v18 = sectors.map(s=> data.sectors[s].net_hh['2018']/12);
+  const v23 = sectors.map(s=> data.sectors[s].net_hh['2023']/12);
+  const maxAbs = Math.max(...v18.map(Math.abs), ...v23.map(Math.abs));
+  const pad = maxAbs*0.6;
+  new Chart(document.getElementById('hero'+sfx),{
+    type:'bar',
+    data:{ labels: sectors.map(s=>SECTOR_NAMES[s]||s),
+      datasets:[
+        {label:'2018', __year:'2018', data:v18,
+          backgroundColor:v18.map(v=>hexA(v>=0?posC:negC,0.35)), borderRadius:3, barThickness:11},
+        {label:'2023', __year:'2023', data:v23,
+          backgroundColor:v23.map(v=>v>=0?posC:negC), borderRadius:4, barThickness:24},
+      ]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      layout:{padding:{left:66,right:66,top:4,bottom:4}},
+      plugins:{ legend:{display:false},
+        tooltip:{callbacks:{ label:it => it.dataset.label+': '+fmtSignK(it.raw)+'/חודש' }}},
+      scales:{
+        x:{ min:-(maxAbs+pad), max:(maxAbs+pad),
+          grid:{ color: c=> c.tick.value===0 ? col('--ink') : col('--line'),
+                 lineWidth: c=> c.tick.value===0 ? 2 : 1 },
+          ticks:{ display:false } },
+        y:{ grid:{display:false}, ticks:{ font:{size:13,weight:'700'}, color:col('--ink') } }
+      }},
+    plugins:[heroLabelPlugin()]
+  });
+}
+
+/* ============ HERO 1 : waterfall ============ */
+function wlabel(sector, eff){ return [(SECTOR_NAMES[sector]||sector), eff]; }
+function buildWaterfall(data, sfx){
+  const wf = data.waterfall;
+  const steps = [];
+  steps.push({label:['2018'],type:'anchor',val:wf.start});
+  data.sector_order.forEach(s=>{
+    const v = wf.sectors[s];
+    steps.push({label:wlabel(s,'משקי בית'),type:'flow',val:v.pop});
+    steps.push({label:wlabel(s,'נטו/משק בית'),type:'flow',val:v.rate});
+  });
+  steps.push({label:['2023'],type:'anchor',val:wf.end});
+  let cum=0; const bars=[], fills=[], bords=[];
+  steps.forEach(st=>{
+    if(st.type==='anchor'){ bars.push([0,st.val]); fills.push(col('--navy')); bords.push(col('--navy')); cum=st.val; }
+    else { const start=cum, end=cum+st.val; bars.push([start,end]); cum=end;
+      const c = st.val>=0?col('--pos'):col('--neg'); fills.push(c); bords.push(c); }
+  });
+  new Chart(document.getElementById('wf'+sfx),{
+    type:'bar',
+    data:{ labels:steps.map(s=>s.label),
+      datasets:[{ data:bars, backgroundColor:fills, borderColor:bords, borderWidth:1, borderRadius:3, barPercentage:.72, categoryPercentage:.84 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{callbacks:{ title:it=>{const s=steps[it[0].dataIndex];return (Array.isArray(s.label)?s.label.join(' · '):s.label);},
+          label:it=>{const s=steps[it.dataIndex]; if(s.type==='anchor')return 'מאזן נטו: '+fmtBnPlain(s.val);
+            return (s.val>=0?'מוסיף ':'מסיר ')+fmtBnPlain(Math.abs(s.val));}}}},
+      scales:{ x:{grid:{display:false},ticks:{maxRotation:0,autoSkip:false,font:{size:10}}},
+        y:{grid:{color:col('--line')},ticks:{callback:v=>'₪'+v+'B'},title:{display:true,text:'מאזן פיסקלי נטו · ₪ מיליארד'}}}}
+  });
+}
+
+/* ============ gap callout : distance vs Jewish non-Haredi ============ */
+function gapBlock(name, g23, g18){
+  return `<div class="gapblock">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+      <div class="nm">${name}</div>
+      <div class="g23" style="color:${col('--neg')}">${fmtK(g23)}</div>
+    </div>
+    <div class="g18">2018: ${fmtK(g18)}</div>
+    <div class="lbl">בהשוואה ליהודים לא-חרדים</div>
+  </div>`;
+}
+function renderGap(data, sfx){
+  const jnh = data.sectors['Jewish non-Haredi'].net_hh;
+  const html = ['Haredi','Arab'].map(s=>{
+    const sec = data.sectors[s].net_hh;
+    const g23 = (jnh['2023'] - sec['2023'])/12;
+    const g18 = (jnh['2018'] - sec['2018'])/12;
+    return gapBlock(SECTOR_NAMES[s]||s, g23, g18);
+  }).join('');
+  document.getElementById('gapBody'+sfx).innerHTML = html;
+}
+
+/* ============ sector buttons (slim pill row) ============ */
+function buildSecBtns(data, sfx){
+  const secBtns = document.getElementById('secBtns'+sfx);
+  data.sector_order.forEach(s=>{
+    const b=document.createElement('button'); b.dataset.sec=s;
+    b.textContent = SECTOR_NAMES[s]||s;
+    b.onclick=()=>{SECTOR=s; syncSec(); renderDrill();};
+    secBtns.appendChild(b);
+  });
+}
+function syncSec(){
+  MODES.forEach(m=>{
+    const c=document.getElementById('secBtns'+m.sfx);
+    [...c.children].forEach(b=>b.classList.toggle('on', b.dataset.sec===SECTOR));
+  });
+}
+
+/* ============ drill-down : financial table ============ */
+function chgCell(p){ const cls = p>=0?'chg-pos':'chg-neg'; return `<td class="${cls}">${fmtPct(p)}</td>`; }
+function rows(items, total23, cls){
+  return items.map(i=>{
+    return `<tr class="${cls}">
+      <td class="rght">${ITEM_NAMES[i.name]||i.name}</td>
+      <td>${fmtKm(i.v2018)}</td>
+      <td>${fmtKm(i.v2023)}</td>
+      ${chgCell(i.pct)}
+    </tr>`;
+  }).join('');
+}
+function totRow(label, t18, t23){
+  const pct = (t23/t18 - 1) * 100;
+  return `<tr class="tot">
+    <td class="rght">${label}</td>
+    <td>${fmtKm(t18)}</td>
+    <td>${fmtKm(t23)}</td>
+    ${chgCell(pct)}
+  </tr>`;
+}
+function netRow(n18, n23){
+  /* net = tax − transfer; % change relative to magnitude (positive = improved fiscal position). */
+  const pct = (n23 - n18) / Math.abs(n18) * 100;
+  const cell = v => `<td style="color:${v>=0?col('--pos'):col('--neg')}">${fmtSignKm(v)}</td>`;
+  return `<tr class="tot" style="background:#f4f6f8">
+    <td class="rght">פיסקלי נטו · מיסים פחות העברות</td>
+    ${cell(n18)}
+    ${cell(n23)}
+    ${chgCell(pct)}
+  </tr>`;
+}
+function renderTable(data, sfx){
+  const sec = data.sectors[SECTOR];
+  const html = `<table class="fintbl">
+    <thead><tr>
+      <th class="rght">סעיף · לחודש למשק בית</th>
+      <th>2018</th><th>2023</th><th>Δ %</th>
+    </tr></thead>
+    <tbody>
+      <tr class="secthead t-in"><td colspan="4">מיסים ששולמו</td></tr>
+      ${rows(sec.tax_items, sec.tax_hh['2023'], 'grp-in')}
+      ${totRow('סך מיסים', sec.tax_hh['2018'], sec.tax_hh['2023'])}
+      <tr class="secthead t-out"><td colspan="4">העברות שהתקבלו</td></tr>
+      ${rows(sec.transfer_items, sec.transfer_hh['2023'], 'grp-out')}
+      ${totRow('סך העברות', sec.transfer_hh['2018'], sec.transfer_hh['2023'])}
+      ${netRow(sec.net_hh['2018'], sec.net_hh['2023'])}
+    </tbody></table>`;
+  document.getElementById('ioTable'+sfx).innerHTML = html;
+}
+
+/* ============ demo card ============ */
+function earnHTML(e){
+  const seg=(w,c)=>`<i style="width:${w}%;background:${c}">${w>=8?`<span>${w.toFixed(0)}%</span>`:''}</i>`;
+  return `<div class="earnbar">${seg(e['0'],col('--grey'))}${seg(e['1'],col('--amber-soft'))}${seg(e['2plus'],col('--blue'))}</div>
+   <div class="earnleg"><span dir="rtl"><span class="dot" style="background:${col('--grey')}"></span>0 מפרנסים</span>
+   <span dir="rtl"><span class="dot" style="background:${col('--amber-soft')}"></span>מפרנס אחד</span>
+   <span dir="rtl"><span class="dot" style="background:${col('--blue')}"></span>2+ מפרנסים</span></div>`;
+}
+function metric(k, big, small, unit){
+  const sm = (small===null||small===undefined)?'n/a':small;
+  return `<div class="metric"><div class="k">${k}</div>
+    <div class="v">${big}<small>${sm}</small></div>
+    <div class="cap" style="margin:2px 0 0;text-align:right">${unit}</div></div>`;
+}
+function renderDemo(data, sfx){
+  const sec=data.sectors[SECTOR], d=sec.demo;
+  document.getElementById('demoTitle'+sfx).textContent = (SECTOR_NAMES[SECTOR]||SECTOR) + ' — פרופיל מגזר';
+  document.getElementById('netBig'+sfx).textContent = fmtSignKm(sec.net_hh['2023']);
+  document.getElementById('netBig'+sfx).style.color = sec.net_hh['2023']>=0?col('--pos'):col('--neg');
+  const p65b = d.pct65head['2023'], p65s=d.pct65head['2018'];
+  const grid=document.getElementById('demoGrid'+sfx);
+  grid.innerHTML =
+     metric('הכנסה נטו / משק בית', fmtK(d.income_m['2023']), fmtK(d.income_m['2018']), 'NIS / חודש')
+   + metric('נפשות / משק בית', d.persons['2023'].toFixed(2), d.persons['2018'].toFixed(2), 'גודל משק בית ממוצע')
+   + metric('ילדים מתחת ל-18 / משק בית', d.kids['2023'].toFixed(2), d.kids['2018'].toFixed(2), 'ילדים מתחת לגיל 18 למשק בית')
+   + metric('ראש משק בית גיל 65+', (p65b===null?'n/a':p65b.toFixed(0)+'%'), (p65s===null?null:p65s.toFixed(0)+'%'), 'שיעור ממשקי הבית')
+   + `<div class="metric" style="grid-column:1/3"><div class="k">מפרנסים למשק בית · 2023</div>${earnHTML(d.earners['2023'])}</div>`;
+}
+
+function renderDrill(){ MODES.forEach(m=>{ renderTable(m.data, m.sfx); renderDemo(m.data, m.sfx); }); }
+
+/* ============ tabs ============ */
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
+  const t=b.dataset.tab;
+  document.getElementById('tab-dash').classList.toggle('hide', t!=='dash');
+  document.getElementById('tab-real').classList.toggle('hide', t!=='real');
+  document.getElementById('tab-method').classList.toggle('hide', t!=='method');
+});
+
+/* ============ methodology ============ */
+const pv=DATA.provenance;
+document.getElementById('methodBody').innerHTML = `
+  <h3>מה זה</h3>
+  <p>תמונת מאזן פיסקלי של שלושת המגזרים הדמוגרפיים של ישראל — יהודים לא-חרדים, חרדים וערבים — שמודדת, ברמת משק הבית, כל שקל מס ששולם למדינה מול כל שקל גמלה ושירות שהתקבל ממנה. <b>המאזן הפיסקלי הנטו</b> = מיסים ששולמו פחות הטבות שהתקבלו. נתוני משק הבית מוצגים כ<b>₪ למשק בית לחודש</b> בהתאם לפרסום המקורי; הסכומים הלאומיים — כמיליארד ₪ שנתי.</p>
+  <p>לשונית <b>הדשבורד</b> היא נומינלית — עמודת 2018 בשקלי 2018, עמודת 2023 בשקלי 2023, כך שהשינוי משקף גם אינפלציה וצמיחה ריאלית (התמ"ג הנומינלי עלה כ-38.5% בתקופה). לשונית <b>ריאלי · ₪ 2018</b> ממירה את נתוני 2023 למחירי 2018 לפי עליית מדד המחירים לצרכן המצטברת של כ-${((CPI-1)*100).toFixed(1)}%, כך שכל שינוי שמוצג שם הוא שינוי ריאלי.</p>
+
+  <div class="attrib">
+    <b>מתודולוגיה וייחוס.</b> מסגרת הניתוח — הקצאת מיסים והוצאה ציבורית למשקי הבית ותיאורם לפי קבוצת אוכלוסייה — מבוססת על המתודולוגיה של:
+    <p style="margin:8px 0 6px">
+      <b>אריאל קרלינסקי, תום שדה, ערן יוגב ומיכאל שראל</b> (2024), ״<a href="https://ieca.org.il/wp-content/uploads/2025/11/taxes_and_wonders.pdf" target="_blank" rel="noopener noreferrer">על המיסים ועל הנפלאות</a>,״ <i>הרבעון לכלכלה</i>, כרך&nbsp;23; גם כנייר דיון בבנק ישראל, כרך&nbsp;231 (2025).
+    </p>
+    דשבורד זה מיישם את הגישה על שנות הכספים 2018 ו-2023; כל הזכות על המתודולוגיה שייכת למחברים.
+  </div>
+
+  <h3>מקורות נתונים</h3>
+  <ul>
+    <li><b>נתוני דמוגרפיה ומשקי בית.</b> הלשכה המרכזית לסטטיסטיקה (הלמ"ס) — <b>סקר הוצאות משק הבית</b>. זהו הסקר שמספק את הגדרות המגזרים, משקלות משקי הבית, ההכנסות והמאפיינים הדמוגרפיים.</li>
+    <li><b>הקצאות מיסים והוצאה ציבורית.</b> מחושבות על בסיס הסקר לפי מודל הנטל הפיסקלי של קרלינסקי, שדה, יוגב ושראל, שממפה הכנסות מיסים והוצאות ממשלה ברמת משק הבית הבודד.</li>
+  </ul>
+
+  <h3>כיצד נבנה</h3>
+  <ul>
+    <li><b>שנות הייחוס.</b> "2018" מאגד גלי סקר 2016–2018 ו-"2023" מאגד גלי 2021–2023, כדי לייצב את האומדנים עבור המגזרים הקטנים יותר. כל עמודה נקובה בשקלים נומינליים של אותה שנה, כך ששינוי 2018←2023 כולל גם אינפלציה וצמיחה ריאלית.</li>
+    <li><b>פירוק תרשים מפל.</b> השינוי בתרומת כל מגזר מפורק ל<b>אפקט אוכלוסייה</b> — שינוי מספר משקי הבית לפי השיעור הנטו הישן — ו<b>אפקט שיעור</b> — שינוי ₪ נטו למשק בית לפי מספר משקי הבית הנוכחי. שני האפקטים מסתכמים בדיוק לשינוי הכולל של המגזר, ושלושת המגזרים ביחד מסבירים את השינוי הלאומי הכולל (נומינלי, 2018→2023: +₪${(DATA.waterfall.end-DATA.waterfall.start).toFixed(1)} מיליארד).</li>
+    <li><b>הגדרות מגזרים.</b> יהודים לא-חרדים, חרדים וערבים מזוהים לפי סיווגי לאום ורמת דתיות בסקר, בהגדרות זהות לאורך כל הנתונים הפיסקליים והדמוגרפיים.</li>
+    <li><b>שקלול.</b> סכומים לאומיים, מספרי משקי בית ונתחי אוכלוסייה — משקלות ניפוח של הסקר (מתואמות לחשבונות לאומיים); ממוצעי משק הבית הדמוגרפיים — משקלות הסקר הרגילות.</li>
+    <li><b>ראש משק בית מעל גיל 65.</b> מבוסס על גיל ה"ראש הכלכלי" של משק הבית כפי שנרשם בסקר.</li>
+  </ul>
+
+  <h3>נקודות לתשומת לב</h3>
+  <div class="flag">הנתונים הדמוגרפיים והפיסקליים שאובים מאותו סקר, כך שהמגזרים, המשקלות והגדרות משקי הבית תואמים. עם זאת, ממוצעי משק בית וסכומים לאומיים מחושבים במשקלות שונות, ולכן לא ניתן לגזור אחד מהשני בחישוב ישיר.</div>
+  <div class="flag">איגוד שלושה גלי סקר משפר את יציבות התוצאות תמורת עדכניות נמוכה יותר; קריאה של שנה בודדת תתן תוצאה שונה, בעיקר עבור סעיפי הוצאה קטנים או נדירים.</div>
+  <div class="flag">נטל מיסים ושירותים ציבוריים מושתת על הנחות ההקצאה של מודל קרלינסקי, שדה, יוגב ושראל (למשל, מי נושא בסופו של דבר במס חברות ובמע"מ). אלו הנחות סטנדרטיות לניתוח מסוג זה, אך הן הנחות — לא מדידות ישירות.</div>
+  <div class="flag"><b>רווחה בעין, 2023.</b> הלמ"ס הפסיק לכלול את משתנה שירותי הרווחה בעין (STIK) בגלי 2021–2023, ולכן תקציב הרווחה ל-2023 מחולק לפי <b>פרופיל העשירוני של STIK מ-2018</b>: נתחים קבועים לעשירון מוחלים על עשירוני ההכנסה של 2023, בחלוקה שווה בין משקי הבית באותו עשירון. זה משחזר את התפלגות הרווחה בעין של 2018, אך מניח שהתפלגות הנטל לא השתנתה עד 2023, ואינו מייצג מיקוד מגזרי תוך-עשירוני.</div>
+  <div class="flag"><b>בריאות וחינוך בעין — מפתחות 2018, תקציבי 2023.</b> <b>חינוך</b> (א'–י"ב) מחולק לפי עלות-תלמיד לפי מגזר ושלב לימוד של 2018 כמפתחות יחסיים קבועים, ואז מוכפל בגורם יחיד כך שהסך תואם את תקציב 2023 (פקטור כ-1.6). <b>בריאות ציבורית</b> משתמשת באותם משקלות קפיטציה של קופות החולים מ-2018 (לפי גיל, מין ופריפריה), מוכפלות לתקציב 2023. בשני המקרים, רק <i>הצורה</i> של 2018 בין משקי הבית נשמרת ורמת הסכום מתעדכנת ל-2023.</div>
+  <div class="flag">נתוני 2018 למשק הבית נבדקו שורה אחר שורה מול הפרסום (ראה בדיקת השוואה למטה). מגזר יהודים לא-חרדים וערבים תואמים בטווח ±1%; מגזר חרדים נמוך מעט במיסים מבוססי ההון (מס חברות, רכיב פיננסי של מע"מ) — בתוך טווח רעש הדגימה ואי-דיוקי הקריאה מגרפי הפרסום. פערים אלו אינם משנים את המסקנות הכוללות.</div>
+  <div class="flag"><b>הון כולל שכר דירה זקוף.</b> בכל מקום שבו מיסים מחולקים שליש לצרכנים, שליש לעובדים ושליש לבעלי הון — חלק ההון נמדד לפי הכנסת הון כוללת, הכוללת שכר דירה זקוף של בעלים המתגוררים בנכסם, ולכן מייצגת בעלי בתים בהיקף רחב ולא רק מחזיקי נכסים פיננסיים.</div>
+
+  <h3>בדיקת השוואה מול הפרסום (2018)</h3>
+  <p>הסעיפים המוקצים — נטל מיסים עקיפים ושירותים ציבוריים בעין — מוקצים למשקי הבית לפי מפתחות קרלינסקי, שדה, יוגב ושראל; קצבאות מזומן נלקחות ישירות מהסקר. להלן ממוצעינו למשק בית לחודש (דשבורד זה, 2018) לעומת נתוני המגזר המעוגלים בפרסום. <b>נתונים אלה הם שכפול ויש לאמתם עם המחברים.</b></p>
+  <div class="tblwrap"><table class="fintbl" style="margin-top:6px">
+    <thead><tr>
+      <th class="rght">מגזר · 2018, ₪/משק בית/חודש</th>
+      <th>דשבורד זה</th><th>מאמר (≈)</th><th>Δ %</th><th>Δ ₪/חודש</th>
+    </tr></thead>
+    <tbody>
+      <tr class="secthead t-in"><td colspan="5">סך מיסים ששולמו</td></tr>
+      <tr class="grp-in"><td class="rght">יהודים לא-חרדים</td><td>₪14.1K</td><td>₪14.0K</td><td class="chg-pos">+0.4%</td><td class="chg-pos">+₪0.1K</td></tr>
+      <tr class="grp-in"><td class="rght">חרדים</td><td>₪8.5K</td><td>₪8.8K</td><td class="chg-neg">−3.8%</td><td class="chg-neg">−₪0.3K</td></tr>
+      <tr class="grp-in"><td class="rght">ערבים</td><td>₪9.0K</td><td>₪9.0K</td><td class="chg-neg">−0.3%</td><td class="chg-neg">−₪0.0K</td></tr>
+      <tr class="secthead t-out"><td colspan="5">סך העברות שהתקבלו</td></tr>
+      <tr class="grp-out"><td class="rght">יהודים לא-חרדים</td><td>₪8.0K</td><td>₪7.9K</td><td class="chg-pos">+0.7%</td><td class="chg-pos">+₪0.1K</td></tr>
+      <tr class="grp-out"><td class="rght">חרדים</td><td>₪12.6K</td><td>₪12.9K</td><td class="chg-neg">−2.4%</td><td class="chg-neg">−₪0.3K</td></tr>
+      <tr class="grp-out"><td class="rght">ערבים</td><td>₪10.0K</td><td>₪10.1K</td><td class="chg-neg">−0.8%</td><td class="chg-neg">−₪0.1K</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">סך המיסים הלאומי של ₪405 מיליארד תואם את הפרסום בדיוק. הפערים לפי מגזר לעיל נמצאים בתוך טווח רעש העיגול ודגימת הגלים המאוגדים, מלבד המיסים מבוססי ההון של המגזר החרדי, שסמנו לבדיקת המחברים.</p>
+
+  <h3>מקורות ואמינות</h3>
+  <p class="small"><b>מיקרו-נתונים ראשוניים:</b> הלשכה המרכזית לסטטיסטיקה — סקר הוצאות משק הבית. <b>מתודולוגיה:</b> בעקבות קרלינסקי, שדה, יוגב ושראל, מאזן פיסקלי של קבוצות האוכלוסייה בישראל.</p>
+  <p class="small"><b>יחידות.</b> ${pv.units}</p>
+  <p class="small">הנתונים הם שכפול ברמת מחקר ויש לבדוק אותם לפני כל שימוש חיצוני.</p>
+`;
+
+/* ============ footer ============ */
+document.getElementById('prov').innerHTML =
+  `<b>מקורות.</b> הלשכה המרכזית לסטטיסטיקה — סקר הוצאות משק הבית; ניתוח נטל פיסקלי בעקבות קרלינסקי, שדה, יוגב ושראל, <a href="https://ieca.org.il/wp-content/uploads/2025/11/taxes_and_wonders.pdf" target="_blank" rel="noopener noreferrer">״על המיסים ועל הנפלאות״</a> (<i>הרבעון לכלכלה</i>, כרך&nbsp;23). לפירוט ראה לשונית <b>מתודולוגיה ומקורות</b>. יחידות: ${pv.units}`;
+
+/* init */
+MODES.forEach(m=>{ buildHero(m.data, m.sfx); buildWaterfall(m.data, m.sfx); renderGap(m.data, m.sfx); buildSecBtns(m.data, m.sfx); });
+syncSec(); renderDrill();
+</script>
+<a href="../index.html" aria-label="חזרה לדף הבית" style="position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px">🏠 דף הבית</a>
+</body>
+</html>

@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מאזן משק הבית הישראלי — הלמ״ס, סקר ארוך טווח 2012–2023</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117; --panel:#11161d; --panel2:#0f141b; --line:#222b36;
+  --txt:#e6edf3; --muted:#8b97a6; --dim:#5d6875;
+  --gold:#c9a84c; --gold-dim:#9c8438;
+  --pos:#5fb88a; --neg:#d97b6c;
+  --g-haredi:#3987e5; --g-dati:#199e70; --g-masdati:#c98500; --g-mastrad:#008300;
+  --g-hiloni:#9085e9; --g-arab:#e66767; --g-other:#d55181; --g-jewna:#d95926;
+  --a-re:#3987e5; --a-fin:#199e70; --a-pen:#c98500;
+}
+*{box-sizing:border-box;}
+html,body{background:var(--bg);color:var(--txt);font-family:'IBM Plex Mono',monospace;margin:0;padding:0;}
+body{padding-bottom:60px;}
+::selection{background:var(--gold);color:#0d1117;}
+a{color:var(--gold);}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+
+header.masthead{border-bottom:2px solid var(--gold);padding:22px 0 16px;position:relative;}
+header.masthead h1{font-family:'Playfair Display',serif;font-weight:700;font-size:30px;color:#fff;margin:0 0 4px;line-height:1.15;}
+header.masthead .sub{color:var(--muted);font-size:12.5px;letter-spacing:.3px;}
+header.masthead .aiflag{color:var(--gold-dim);font-size:10.5px;margin-top:6px;letter-spacing:.5px;}
+
+nav.topnav{position:sticky;top:0;z-index:50;background:rgba(13,17,23,.96);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);}
+nav.topnav .wrap{display:flex;gap:2px;overflow-x:auto;padding:0 24px;}
+nav.topnav button{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);
+  font-family:inherit;font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;padding:13px 14px;
+  cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;}
+nav.topnav button:hover{color:var(--txt);}
+nav.topnav button.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+section.pagesec{padding:38px 0 14px;border-bottom:1px solid var(--line);}
+section.pagesec:last-of-type{border-bottom:none;}
+.sec-kicker{color:var(--gold-dim);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.sec-head{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:#fff;margin:0 0 6px;}
+.sec-intro{color:#c7d0db;font-size:14.5px;line-height:1.7;max-width:820px;margin-bottom:22px;}
+
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.kpi-tile{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;}
+.kpi-tile .lab{font-size:11.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.kpi-tile .val{font-family:'IBM Plex Mono',monospace;font-size:29px;font-weight:600;color:#fff;line-height:1;}
+.kpi-tile .val .unit{font-size:15px;color:var(--gold);}
+.kpi-tile .note{font-size:11.5px;color:var(--dim);margin-top:7px;line-height:1.5;}
+
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start;}
+.grid2b{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px 16px;margin-bottom:18px;}
+.card h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:#fff;margin:0 0 2px;
+  padding-left:11px;border-left:3px solid var(--gold);}
+.card .csrc{font-size:11.5px;color:var(--dim);margin:6px 0 12px 14px;}
+.chart-body{margin-top:6px;}
+
+.legend{display:flex;flex-wrap:wrap;gap:5px 16px;margin:8px 0 10px 14px;font-size:13px;color:var(--muted);}
+.legend .lk{display:inline-flex;align-items:center;gap:6px;}
+.legend .sw{width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;}
+.legend .ln{width:14px;height:0;border-top:2px solid;display:inline-block;flex-shrink:0;}
+
+svg.viz{width:100%;height:auto;display:block;overflow:visible;font-family:'IBM Plex Mono',monospace;}
+svg.viz text{fill:var(--muted);}
+svg.viz .axis-line{stroke:var(--line);stroke-width:1;}
+svg.viz .grid{stroke:var(--line);stroke-width:1;}
+svg.viz .cat-label{fill:#c7d0db;font-size:16px;}
+svg.viz .val-label{fill:#fff;font-size:15px;font-weight:500;}
+svg.viz .val-label.gold{fill:var(--gold);}
+svg.viz .seg-label{fill:#0d1117;font-size:13px;font-weight:600;}
+svg.viz .axis-tick{fill:var(--dim);font-size:13px;}
+svg.viz rect.mark{cursor:pointer;}
+svg.viz rect.mark:hover{filter:brightness(1.18);}
+svg.viz circle.mark:hover{filter:brightness(1.2);}
+
+#tooltip{position:fixed;pointer-events:none;background:#0b0f14;border:1px solid var(--gold-dim);
+  border-radius:5px;padding:8px 11px;font-size:11.3px;color:var(--txt);z-index:1000;display:none;
+  box-shadow:0 6px 18px rgba(0,0,0,.45);max-width:260px;line-height:1.6;}
+#tooltip .tt-title{color:var(--gold);font-weight:600;margin-bottom:3px;}
+#tooltip .tt-row{display:flex;justify-content:space-between;gap:14px;}
+#tooltip .tt-row .k{color:var(--muted);}
+#tooltip .tt-row .v{color:#fff;font-weight:600;}
+#tooltip .tt-row .v.keyed::before{content:'';display:inline-block;width:9px;height:9px;border-radius:2px;
+  margin-right:5px;vertical-align:middle;background:var(--sw,var(--gold));}
+
+.selector-row{margin:0 0 14px 14px;display:flex;align-items:center;gap:10px;}
+.selector-row label{font-size:11.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-dim);}
+.selector-row select{background:#0b0f14;color:var(--txt);border:1px solid var(--line);border-radius:4px;
+  padding:6px 10px;font-family:inherit;font-size:13px;cursor:pointer;}
+.selector-row select:hover,.selector-row select:focus{border-color:var(--gold);outline:none;}
+
+table.stmt{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px;}
+table.stmt td{padding:5px 4px;border-bottom:1px solid var(--line);}
+table.stmt td.amt{text-align:right;font-variant-numeric:tabular-nums;color:#fff;}
+.stmt .amt, .datatable td, svg text{unicode-bidi:plaintext;}
+table.stmt tr.seg td{padding-top:14px;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;
+  color:var(--gold);font-weight:600;border-bottom:1px solid var(--gold-dim);padding-bottom:5px;}
+table.stmt tr.subtotal td{border-top:1px solid var(--dim);font-weight:600;color:#fff;padding-top:7px;}
+table.stmt tr.total td{border-top:2px solid var(--gold-dim);border-bottom:2px solid var(--gold-dim);
+  font-size:14px;font-weight:600;color:#fff;padding:9px 4px;}
+table.stmt tr.networth td:first-child{font-family:'Playfair Display',serif;color:#fff;font-size:14px;}
+table.stmt tr.networth td.amt{color:var(--gold);font-size:20px;}
+table.stmt .modeled-flag{color:var(--gold-dim);margin-left:4px;}
+
+.small-multiples{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.small-multiples .card{margin-bottom:0;}
+
+.datatable{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px;}
+.datatable th{text-align:right;color:var(--gold-dim);font-weight:600;font-size:11.5px;letter-spacing:.6px;
+  text-transform:uppercase;border-bottom:1px solid var(--line);padding:6px 7px;}
+.datatable th:first-child,.datatable td:first-child{text-align:left;}
+.datatable td{text-align:right;padding:5px 7px;border-bottom:1px solid var(--line);color:#c7d0db;
+  font-variant-numeric:tabular-nums;}
+
+.caveat{background:#1a1108;border:1px solid var(--gold-dim);border-radius:5px;padding:12px 16px;
+  font-size:12px;color:#e3d3ad;line-height:1.6;margin:14px 0;}
+.caveat b{color:var(--gold);}
+
+.methodology p, .methodology li{font-size:14.5px;line-height:1.75;color:#c7d0db;max-width:860px;}
+.methodology h4{font-family:'Playfair Display',serif;color:var(--gold);font-size:16.5px;margin:22px 0 6px;}
+.methodology code{background:#0b0f14;border:1px solid var(--line);border-radius:3px;padding:1px 6px;
+  color:var(--gold);font-size:13px;}
+.methodology .stat-row{display:flex;gap:22px;flex-wrap:wrap;margin:10px 0 4px;}
+.methodology .stat-row div{background:var(--panel2);border:1px solid var(--line);border-radius:4px;
+  padding:8px 14px;font-size:13px;}
+.methodology .stat-row b{display:block;color:#fff;font-size:16px;}
+
+footer.pagefoot{max-width:1180px;margin:30px auto 0;padding:18px 24px 0;border-top:1px solid var(--line);
+  font-size:10.7px;color:var(--dim);line-height:1.7;}
+footer.pagefoot b{color:var(--gold-dim);}
+
+@media (max-width:900px){
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .grid2,.grid2b,.small-multiples{grid-template-columns:1fr;}
+}
+@media (max-width:560px){
+  .kpi-row{grid-template-columns:1fr;}
+  header.masthead h1{font-size:23px;}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead"><div class="wrap">
+  <h1>מאזן משק הבית הישראלי</h1>
+  <div class="sub">הלשכה המרכזית לסטטיסטיקה &middot; סקר ארוך טווח &middot; 2012&ndash;2023 &middot; כל הנתונים מחושבים ומשוקללים ברמת משק הבית</div>
+  <div class="aiflag">לוח מחוונים שנוצר בעזרת בינה מלאכותית &mdash; יש לבדוק לפני שימוש חיצוני.</div>
+</div></header>
+
+<nav class="topnav"><div class="wrap">
+  <button data-sec="s1" class="active">1&nbsp;&middot;&nbsp;תמונה ארצית</button>
+  <button data-sec="s2">2&nbsp;&middot;&nbsp;פערים בין קבוצות</button>
+  <button data-sec="s3">3&nbsp;&middot;&nbsp;פיזור בתוך הקבוצות</button>
+  <button data-sec="s4">4&nbsp;&middot;&nbsp;הכנסה והון</button>
+  <button data-sec="s6">5&nbsp;&middot;&nbsp;מתודולוגיה</button>
+</div></nav>
+
+<div class="wrap">
+
+<section class="pagesec" id="sec-s1">
+  <div class="sec-kicker">פרק 1</div>
+  <h2 class="sec-head">התמונה הארצית, 2023</h2>
+  <p class="sec-intro">המאזן של משק בית ישראלי ממוצע &mdash; מה ברשותו, מה הוא חייב, וכמה נשאר בסוף. כל מספר כאן הוא ממוצע או שיעור משוקלל על פני כלל מדגם הסקר.</p>
+
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>המאזן של משק בית ממוצע</h3>
+      <div class="csrc">מקור: fig_national_balance_sheet.csv &middot; ◇ = מודלי (ראו פרק 5)</div>
+      <table class="stmt" id="bs-statement"></table>
+    </div>
+    <div class="card">
+      <h3>הרכב הנכסים הארצי</h3>
+      <div class="csrc">מקור: fig_national_balance_sheet.csv (שורות נדל״ן / פיננסי ללא פנסיה / פנסיה מקובצות)</div>
+      <div class="chart-body" id="donut-national"></div>
+    </div>
+  </div>
+</section>
+
+<section class="pagesec" id="sec-s2">
+  <div class="sec-kicker">פרק 2</div>
+  <h2 class="sec-head">פערים בין קבוצות חברתיות</h2>
+  <p class="sec-intro">הממוצע הארצי מסתיר מאזנים שונים מאוד בין הקבוצות החברתיות &mdash; בכמה שווה משק הבית, במה מוחזק ההון, ובאילו מוצרים פיננסיים משתמשים.</p>
+
+  <div class="card">
+    <h3>שווי נטו לפי קבוצה חברתית, 2023 (₪)</h3>
+    <div class="csrc">מקור: fig_networth_by_group.csv</div>
+    <div class="chart-body" id="chart-networth-group"></div>
+  </div>
+
+  <div class="card">
+    <h3>הרכב הנכסים לפי קבוצה חברתית, 2023</h3>
+    <div class="csrc">מקור: fig_composition_by_group.csv</div>
+    <div class="chart-body" id="chart-composition-group"></div>
+  </div>
+
+  <div class="card">
+    <h3>שווי נטו לפי חתך חברתי-דמוגרפי, 2023 (₪)</h3>
+    <div class="csrc">מקור: fig_networth_by_dimension.csv</div>
+    <div class="selector-row">
+      <label for="dim-select">מימד</label>
+      <select id="dim-select"></select>
+    </div>
+    <div class="chart-body" id="chart-dimension"></div>
+  </div>
+
+  <div class="card">
+    <h3>שיעורי החזקה לפי קבוצה חברתית, 2023</h3>
+    <div class="csrc">מקור: fig_participation.csv</div>
+    <div class="small-multiples" id="chart-participation"></div>
+  </div>
+</section>
+
+<section class="pagesec" id="sec-s3">
+  <div class="sec-kicker">פרק 3</div>
+  <h2 class="sec-head">פיזור בתוך הקבוצות</h2>
+  <p class="sec-intro">ממוצעים מסתירים את הפיזור. בכל קבוצה יש משקי בית עם שווי נטו נמוך או שלילי לצד משקי בית אמידים מאוד &mdash; ורוחב הפיזור הזה משתנה גם הוא בין הקבוצות.</p>
+
+  <div class="card">
+    <h3>פיזור אחוזוני של שווי נטו לפי קבוצה חברתית, 2023 (₪)</h3>
+    <div class="csrc">מקור: fig_networth_distribution.csv</div>
+    <div class="chart-body" id="chart-percentile-spread"></div>
+  </div>
+
+  <div class="caveat">
+    <b>הסתייגות.</b> לפני חישוב הנתונים הסכומים נחתכים (winsorization) סביב האחוזון ה-99&ndash;99.5, כדי לצמצם את השפעתם של ערכים קיצוניים שדווחו (ראו fig_meta.json, ״winsorization״). בנוסף, ידוע היטב שסקרי משקי בית כמו זה מדגמים ומדווחים בחסר את החזקותיהם של העשירים מאוד &mdash; נדירים בכל מדגם אוכלוסייה ופחות נוטים לחשוף את מלוא נכסיהם. שתי ההשפעות פועלות באותו כיוון: סביר יותר שהאחוזונים ומקדם הג׳יני המוצגים כאן <b>ממעיטים</b> בריכוזיות ההון האמיתית בישראל מאשר מפריזים בה.
+  </div>
+
+  <div class="card">
+    <h3>יחסים פיננסיים לפי קבוצה חברתית, 2023</h3>
+    <div class="csrc">מקור: fig_ratios_by_group.csv</div>
+    <table class="datatable" id="table-ratios"></table>
+  </div>
+</section>
+
+<section class="pagesec" id="sec-s4">
+  <div class="sec-kicker">פרק 4</div>
+  <h2 class="sec-head">הכנסה, דמוגרפיה והון</h2>
+  <p class="sec-intro">הון והכנסה קשורים אך שונים זה מזה. הפרק מסדר את משקי הבית לפי עשירוני הכנסה כדי לראות כיצד השווי נטו, תמהיל הנכסים והכנסות ההון גדלים יחד עם ההכנסה.</p>
+
+  <div class="card">
+    <h3>שווי נטו ממוצע לפי עשירון הכנסה, 2023 (₪)</h3>
+    <div class="csrc">מקור: fig_income_wealth.csv</div>
+    <div class="chart-body" id="chart-income-decile-networth"></div>
+  </div>
+
+  <div class="card">
+    <h3>הרכב הנכסים לפי עשירון הכנסה, 2023</h3>
+    <div class="csrc">מקור: fig_income_wealth.csv</div>
+    <div class="chart-body" id="chart-income-decile-composition"></div>
+  </div>
+
+  <div class="card">
+    <h3>שיעור הכנסות ההון לפי עשירון הכנסה, 2023</h3>
+    <div class="csrc">מקור: fig_income_wealth.csv</div>
+    <div class="chart-body" id="chart-capital-share"></div>
+  </div>
+
+  <div class="card">
+    <h3>הרכב ההכנסה החודשית לפי קבוצה חברתית, 2023 (₪ לחודש)</h3>
+    <div class="csrc">מקור: fig_income_composition_by_group.csv</div>
+    <div class="chart-body" id="chart-income-composition"></div>
+  </div>
+</section>
+
+<section class="pagesec methodology" id="sec-s6">
+  <div class="sec-kicker">פרק 5</div>
+  <h2 class="sec-head">מתודולוגיה והסתייגויות</h2>
+  <p class="sec-intro">הסברים בשפה פשוטה על אופן בניית הנתונים בלוח, והיכן כדאי לקרוא אותם בזהירות. הפירוט המלא נמצא ב-fig_meta.json.</p>
+
+  <h4>הנתונים</h4>
+  <p>סקר ארוך טווח של הלמ״ס, 10 גלים, 2012&ndash;2023, העוקב אחר אותם משקי בית לאורך זמן. כל הנתונים משוקללים לפי <code>weight_hh</code> לייצוג אוכלוסיית משקי הבית ולא המדגם הגולמי.</p>
+
+  <h4>מודל שווי הדירה</h4>
+  <p>כרבע מבעלי הדירות מדווחים ישירות על שווי סובייקטיבי לדירתם; היתר מושלמים &mdash; אם באמצעות אומדן של הלמ״ס, ואם, כשאין אף אחד מהשניים, באמצעות מודל הֶדוני (רגרסיה על מאפייני הדירה ומשק הבית) שחוזה את השווי. המודל מסביר חלק צנוע מהשונות במחירי הדירות, ולכן שוויים מודליים של דירות (ואיתם השווי נטו של אותם משקי בית) נושאים אי-ודאות ממשית.</p>
+  <div class="stat-row">
+    <div><b id="m-r2held">&mdash;</b>R&sup2; על מדגם בקרה</div>
+    <div><b id="m-r2in">&mdash;</b>R&sup2; על מדגם האימון</div>
+    <div><b id="m-nself">&mdash;</b>דיווח עצמי</div>
+    <div><b id="m-ncbs">&mdash;</b>השלמה מאומדן הלמ״ס</div>
+    <div><b id="m-nmodel">&mdash;</b>זקיפה במודל</div>
+  </div>
+
+  <h4>מודל הפנסיה</h4>
+  <p>עושר פנסיוני אינו נצפה ישירות בסקר; הוא מחושב על ידי היוון היסטוריית ההפקדות של כל משק בית בתשואה ריאלית מונחת, והמרתה לערך הוני באמצעות מקדם קצבה. מקדם זה כויל מחדש כך שהממוצע (לפני החיתוך) יתאים לעוגן מאקרו חיצוני (כ-₪980,000 למשק בית &mdash; אמצע הטווח של סדרת נכסי החיסכון לטווח ארוך של בנק ישראל, סוף 2023, מחולק במספר משקי הבית) במקום מספר קודם שלא היה מתועד. ערכי הפנסיה מסומנים ב-◇ בכל מקום שבו הם מוצגים כשורה מודלית.</p>
+  <div class="stat-row">
+    <div><b id="m-mean2023">&mdash;</b>ממוצע מודלי, 2023 (אחרי חיתוך)</div>
+    <div><b id="m-meanpre">&mdash;</b>ממוצע מודלי, 2023 (לפני חיתוך)</div>
+    <div><b id="m-macro">&mdash;</b>יעד עוגן המאקרו</div>
+  </div>
+
+  <h4>חיתוך ערכים (Winsorization) ותרשימי הפיזור</h4>
+  <p>כל הסכומים נחתכים באחוזון ה-99 (הכנסה באחוזון ה-99.5), עם רצפה של אפס, כדי לצמצם את השפעתם של מעט ערכים קיצוניים על כל ממוצע בלוח &mdash; פרט לתרשימי הפיזור בפרק 3 (אחוזונים, ג׳יני, חלק העשירון העליון), הנבנים מחיתוך מתון יותר באחוזון ה-99.5. זו בחירה מכוונת: חיתוך אגרסיבי מדי של הזנב העליון היה ממעיט דווקא באי-השוויון שאותן סטטיסטיקות אמורות למדוד.</p>
+
+  <h4>רוטציית הגלים האי-זוגיים</h4>
+  <p>נכסים והתחייבויות פיננסיים (פיקדונות, השקעות, משכנתה, הלוואות צרכניות, נכס נוסף, קרקע) אינם נאספים בגלים האי-זוגיים (2012, 2014, 2017, 2019, 2021). בשנים אלו השווי נטו אינו מוגדר (לא אפס); הנתונים בלוח זה נלקחים מגל 10 (2023), גל זוגי שבו נאסף מלוא המידע הפיננסי.</p>
+
+  <h4>מדגם</h4>
+  <p><b id="m-nrows">&mdash;</b> תצפיות משק-בית-גל על פני כל 10 הגלים; הגל האחרון = גל <b id="m-latest">&mdash;</b>
+    (2023).</p>
+
+  <h4>מגבלות</h4>
+  <ul>
+    <li>שורות מודליות (פנסיה ושוויי דירות זקופים) נושאות אי-ודאות מודל מעבר לטעות הדגימה הרגילה.</li>
+    <li>חיתוך הערכים מגביל את השפעת קצה הפיזור העליון, מה שכנראה ממעיט בריכוזיות ההון (ראו ההסתייגות בפרק 3).</li>
+    <li>גודל המדגם משתנה מאוד בין הקבוצות (לחרדים ולמסורתיים יש רק כ-170&ndash;530 משקי בית בגל 10, לעומת כ-2,000 לחילונים); אומדנים מבוססי-מדגם קטן רועשים יותר מכפי שנראה מהמספרים הראשיים.</li>
+  </ul>
+
+  <h4>רשימת קובצי הנתונים</h4>
+  <table class="datatable" id="table-manifest"></table>
+</section>
+
+</div>
+
+<footer class="pagefoot">
+  <b>ארכיטקטורה:</b> pipeline.py קורא את קובץ הפאנל הגולמי ומיישם את כל המודלים, המשקלים והאגרגציות, וכותב טבלאות מחושבות מראש לתיקיית figures/. build_dashboard.py קורא את קובצי ה-CSV ואת fig_meta.json בזמן הבנייה ומטמיע את התוצאה כ-JSON בדף זה. קוד ה-JavaScript אינו מבצע ממוצעים משוקללים, חישובי אחוזונים, חישוב ג׳יני או מידול &mdash; הוא רק מעצב מספרים, ממיין שורות מחושבות מראש, ומצייר תרשימים מהמערכים המוטמעים.<br>
+  <b>מקור:</b> סקר ארוך טווח של הלמ״ס, 2012&ndash;2023. נוצר בעזרת בינה מלאכותית &mdash; יש לבדוק לפני שימוש חיצוני.
+</footer>
+
+<div id="tooltip"></div>
+
+<script id="figures-data" type="application/json">{"fig_national_balance_sheet": [{"item": "Primary Residence", "category": "asset_re", "value_nis": "1612194", "is_modeled": "False"}, {"item": "Additional Properties", "category": "asset_re", "value_nis": "162602", "is_modeled": "False"}, {"item": "Land & Other Real Estate", "category": "asset_re", "value_nis": "134291", "is_modeled": "False"}, {"item": "Total Real Estate", "category": "subtotal", "value_nis": "1909086", "is_modeled": "False"}, {"item": "Bank Deposits & Savings", "category": "asset_fin", "value_nis": "92709", "is_modeled": "False"}, {"item": "Investment Portfolio", "category": "asset_fin", "value_nis": "59282", "is_modeled": "False"}, {"item": "Pension & Retirement Savings", "category": "asset_fin", "value_nis": "905213", "is_modeled": "True"}, {"item": "Total Financial Assets", "category": "subtotal", "value_nis": "1057204", "is_modeled": "False"}, {"item": "Total Assets", "category": "total", "value_nis": "2966290", "is_modeled": "False"}, {"item": "Mortgage", "category": "liability", "value_nis": "171317", "is_modeled": "False"}, {"item": "Consumer Loans", "category": "liability", "value_nis": "23045", "is_modeled": "False"}, {"item": "Total Liabilities", "category": "total", "value_nis": "194362", "is_modeled": "False"}, {"item": "Net Worth", "category": "networth", "value_nis": "2771928", "is_modeled": "False"}], "fig_networth_by_group": [{"group": "Haredi", "n_households": "170", "mean_networth": "1229161", "median_networth": "776300", "mean_total_assets": "1598437", "mean_total_liabilities": "369275", "mean_income_annual": "221164"}, {"group": "Dati (Religious)", "n_households": "206", "mean_networth": "2826833", "median_networth": "2016622", "mean_total_assets": "3080663", "mean_total_liabilities": "253830", "mean_income_annual": "298035"}, {"group": "Masorti", "n_households": "533", "mean_networth": "2542741", "median_networth": "1758404", "mean_total_assets": "2699327", "mean_total_liabilities": "156585", "mean_income_annual": "233068"}, {"group": "Hiloni (Secular)", "n_households": "1992", "mean_networth": "3262234", "median_networth": "2197583", "mean_total_assets": "3476142", "mean_total_liabilities": "213830", "mean_income_annual": "322316"}, {"group": "Arab", "n_households": "674", "mean_networth": "1530782", "median_networth": "1348580", "mean_total_assets": "1581693", "mean_total_liabilities": "50911", "mean_income_annual": "163637"}], "fig_composition_by_group": [{"group": "Haredi", "asset_class": "Real Estate", "share_of_assets": "0.8262", "mean_value_nis": "1320603"}, {"group": "Haredi", "asset_class": "Financial ex-pension", "share_of_assets": "0.0237", "mean_value_nis": "37848"}, {"group": "Haredi", "asset_class": "Pension", "share_of_assets": "0.1501", "mean_value_nis": "239985"}, {"group": "Dati (Religious)", "asset_class": "Real Estate", "share_of_assets": "0.6921", "mean_value_nis": "2132030"}, {"group": "Dati (Religious)", "asset_class": "Financial ex-pension", "share_of_assets": "0.0453", "mean_value_nis": "139592"}, {"group": "Dati (Religious)", "asset_class": "Pension", "share_of_assets": "0.2626", "mean_value_nis": "809040"}, {"group": "Masorti", "asset_class": "Real Estate", "share_of_assets": "0.6329", "mean_value_nis": "1708527"}, {"group": "Masorti", "asset_class": "Financial ex-pension", "share_of_assets": "0.0417", "mean_value_nis": "112556"}, {"group": "Masorti", "asset_class": "Pension", "share_of_assets": "0.3254", "mean_value_nis": "878243"}, {"group": "Hiloni (Secular)", "asset_class": "Real Estate", "share_of_assets": "0.616", "mean_value_nis": "2140724"}, {"group": "Hiloni (Secular)", "asset_class": "Financial ex-pension", "share_of_assets": "0.0594", "mean_value_nis": "206315"}, {"group": "Hiloni (Secular)", "asset_class": "Pension", "share_of_assets": "0.3247", "mean_value_nis": "1128257"}, {"group": "Arab", "asset_class": "Real Estate", "share_of_assets": "0.808", "mean_value_nis": "1277950"}, {"group": "Arab", "asset_class": "Financial ex-pension", "share_of_assets": "0.0107", "mean_value_nis": "16907"}, {"group": "Arab", "asset_class": "Pension", "share_of_assets": "0.1813", "mean_value_nis": "286836"}], "fig_networth_by_dimension": [{"dimension": "Education", "category": "No diploma", "n_households": "335", "median_networth": "1397587", "mean_networth": "1870338"}, {"dimension": "Education", "category": "Secondary / Matriculation", "n_households": "1093", "median_networth": "1418146", "mean_networth": "2119085"}, {"dimension": "Education", "category": "Post-secondary (non-academic)", "n_households": "574", "median_networth": "1662886", "mean_networth": "2419841"}, {"dimension": "Education", "category": "Academic degree", "n_households": "1444", "median_networth": "2631860", "mean_networth": "3717901"}, {"dimension": "Age band", "category": "Under 35", "n_households": "832", "median_networth": "111706", "mean_networth": "804306"}, {"dimension": "Age band", "category": "35-44", "n_households": "736", "median_networth": "1420225", "mean_networth": "1768520"}, {"dimension": "Age band", "category": "45-54", "n_households": "626", "median_networth": "2136188", "mean_networth": "2811037"}, {"dimension": "Age band", "category": "55-64", "n_households": "470", "median_networth": "2765551", "mean_networth": "3662302"}, {"dimension": "Age band", "category": "65-74", "n_households": "490", "median_networth": "3600968", "mean_networth": "4796698"}, {"dimension": "Age band", "category": "75+", "n_households": "420", "median_networth": "3161817", "mean_networth": "4369894"}, {"dimension": "Tenure", "category": "Owner", "n_households": "2235", "median_networth": "3019963", "mean_networth": "4152722"}, {"dimension": "Tenure", "category": "Renter", "n_households": "1124", "median_networth": "103693", "mean_networth": "391864"}, {"dimension": "Tenure", "category": "Other", "n_households": "175", "median_networth": "119535", "mean_networth": "684347"}, {"dimension": "Household size", "category": "1", "n_households": "713", "median_networth": "1089623", "mean_networth": "2033191"}, {"dimension": "Household size", "category": "2", "n_households": "974", "median_networth": "2303225", "mean_networth": "3869962"}, {"dimension": "Household size", "category": "3", "n_households": "475", "median_networth": "1537412", "mean_networth": "2389138"}, {"dimension": "Household size", "category": "4", "n_households": "572", "median_networth": "1780641", "mean_networth": "2337631"}, {"dimension": "Household size", "category": "5+", "n_households": "841", "median_networth": "2025622", "mean_networth": "2631682"}, {"dimension": "Occupation", "category": "Managers & Professionals", "n_households": "1114", "median_networth": "2367897", "mean_networth": "3338674"}, {"dimension": "Occupation", "category": "Technicians & Clerical", "n_households": "550", "median_networth": "1716435", "mean_networth": "2332322"}, {"dimension": "Occupation", "category": "Sales & Service", "n_households": "424", "median_networth": "1236522", "mean_networth": "1805007"}, {"dimension": "Occupation", "category": "Skilled Manual & Agriculture", "n_households": "244", "median_networth": "1768252", "mean_networth": "2210081"}, {"dimension": "Occupation", "category": "Operators & Unskilled", "n_households": "237", "median_networth": "1258546", "mean_networth": "1645669"}, {"dimension": "Locality SES", "category": "Low cluster (1-3)", "n_households": "946", "median_networth": "1299780", "mean_networth": "1811421"}, {"dimension": "Locality SES", "category": "Mid cluster (4-7)", "n_households": "1679", "median_networth": "1800458", "mean_networth": "2558493"}, {"dimension": "Locality SES", "category": "High cluster (8-10)", "n_households": "949", "median_networth": "3182661", "mean_networth": "4114224"}], "fig_networth_distribution": [{"scope": "All", "p10": "0", "p25": "257578", "p50": "1764841", "p75": "3869850", "p90": "7150699", "mean": "2834903", "top10_share": "0.3973", "gini": "0.6027"}, {"scope": "Haredi", "p10": "-126544", "p25": "13494", "p50": "729244", "p75": "2042138", "p90": "3129594", "mean": "1212975", "top10_share": "0.3866", "gini": "0.6961"}, {"scope": "Dati (Religious)", "p10": "0", "p25": "247239", "p50": "2030169", "p75": "4181360", "p90": "6605800", "mean": "2854122", "top10_share": "0.3627", "gini": "0.5697"}, {"scope": "Masorti", "p10": "0", "p25": "197901", "p50": "1758861", "p75": "3582181", "p90": "6531092", "mean": "2572158", "top10_share": "0.3815", "gini": "0.5881"}, {"scope": "Hiloni (Secular)", "p10": "0", "p25": "290069", "p50": "2209297", "p75": "4881500", "p90": "8471102", "mean": "3357199", "top10_share": "0.3822", "gini": "0.5935"}, {"scope": "Arab", "p10": "0", "p25": "665767", "p50": "1357697", "p75": "1966147", "p90": "3251918", "mean": "1543955", "top10_share": "0.3091", "gini": "0.4676"}], "fig_income_wealth": [{"income_decile": "1", "n_households": "342", "mean_income_annual": "32224", "mean_networth": "891564", "mean_total_assets": "944159", "real_estate_share": "0.9635", "financial_share": "0.0124", "pension_share": "0.0241", "capital_income_share": "0.002"}, {"income_decile": "2", "n_households": "331", "mean_income_annual": "72793", "mean_networth": "1226218", "mean_total_assets": "1282199", "real_estate_share": "0.8073", "financial_share": "0.0315", "pension_share": "0.1612", "capital_income_share": "0.0197"}, {"income_decile": "3", "n_households": "379", "mean_income_annual": "106999", "mean_networth": "1736749", "mean_total_assets": "1819480", "real_estate_share": "0.721", "financial_share": "0.025", "pension_share": "0.254", "capital_income_share": "0.0307"}, {"income_decile": "4", "n_households": "373", "mean_income_annual": "142724", "mean_networth": "2079424", "mean_total_assets": "2213042", "real_estate_share": "0.6386", "financial_share": "0.0408", "pension_share": "0.3206", "capital_income_share": "0.0312"}, {"income_decile": "5", "n_households": "355", "mean_income_annual": "184027", "mean_networth": "2286483", "mean_total_assets": "2421280", "real_estate_share": "0.6162", "financial_share": "0.0252", "pension_share": "0.3586", "capital_income_share": "0.036"}, {"income_decile": "6", "n_households": "361", "mean_income_annual": "233739", "mean_networth": "2807492", "mean_total_assets": "3015955", "real_estate_share": "0.5985", "financial_share": "0.0413", "pension_share": "0.3589", "capital_income_share": "0.0426"}, {"income_decile": "7", "n_households": "354", "mean_income_annual": "293557", "mean_networth": "3448664", "mean_total_assets": "3678215", "real_estate_share": "0.5872", "financial_share": "0.0372", "pension_share": "0.3756", "capital_income_share": "0.042"}, {"income_decile": "8", "n_households": "364", "mean_income_annual": "373930", "mean_networth": "3300384", "mean_total_assets": "3586997", "real_estate_share": "0.6205", "financial_share": "0.0393", "pension_share": "0.3402", "capital_income_share": "0.0427"}, {"income_decile": "9", "n_households": "350", "mean_income_annual": "495079", "mean_networth": "4040117", "mean_total_assets": "4374399", "real_estate_share": "0.6277", "financial_share": "0.0777", "pension_share": "0.2946", "capital_income_share": "0.0432"}, {"income_decile": "10", "n_households": "366", "mean_income_annual": "858348", "mean_networth": "5909267", "mean_total_assets": "6334575", "real_estate_share": "0.6304", "financial_share": "0.0834", "pension_share": "0.2861", "capital_income_share": "0.0639"}], "fig_trajectory": [{"year": "2012", "scope": "All", "mean_networth": "", "median_networth": "", "income_per_capita": "57895", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2012", "scope": "Haredi", "mean_networth": "", "median_networth": "", "income_per_capita": "", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2012", "scope": "Dati (Religious)", "mean_networth": "", "median_networth": "", "income_per_capita": "", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2012", "scope": "Masorti", "mean_networth": "", "median_networth": "", "income_per_capita": "", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2012", "scope": "Hiloni (Secular)", "mean_networth": "", "median_networth": "", "income_per_capita": "57895", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2012", "scope": "Arab", "mean_networth": "", "median_networth": "", "income_per_capita": "", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2013", "scope": "All", "mean_networth": "1581967", "median_networth": "999094", "income_per_capita": "62381", "note": ""}, {"year": "2013", "scope": "Haredi", "mean_networth": "", "median_networth": "", "income_per_capita": "", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2013", "scope": "Dati (Religious)", "mean_networth": "", "median_networth": "", "income_per_capita": "", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2013", "scope": "Masorti", "mean_networth": "", "median_networth": "", "income_per_capita": "", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2013", "scope": "Hiloni (Secular)", "mean_networth": "1581967", "median_networth": "999094", "income_per_capita": "62381", "note": ""}, {"year": "2013", "scope": "Arab", "mean_networth": "", "median_networth": "", "income_per_capita": "", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2014", "scope": "All", "mean_networth": "", "median_networth": "", "income_per_capita": "64514", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2014", "scope": "Haredi", "mean_networth": "", "median_networth": "", "income_per_capita": "28081", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2014", "scope": "Dati (Religious)", "mean_networth": "", "median_networth": "", "income_per_capita": "58614", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2014", "scope": "Masorti", "mean_networth": "", "median_networth": "", "income_per_capita": "61299", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2014", "scope": "Hiloni (Secular)", "mean_networth": "", "median_networth": "", "income_per_capita": "76365", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2014", "scope": "Arab", "mean_networth": "", "median_networth": "", "income_per_capita": "27324", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2016", "scope": "All", "mean_networth": "1635407", "median_networth": "1098891", "income_per_capita": "68299", "note": ""}, {"year": "2016", "scope": "Haredi", "mean_networth": "1219473", "median_networth": "1126065", "income_per_capita": "32911", "note": ""}, {"year": "2016", "scope": "Dati (Religious)", "mean_networth": "1817421", "median_networth": "1359398", "income_per_capita": "63292", "note": ""}, {"year": "2016", "scope": "Masorti", "mean_networth": "1407365", "median_networth": "1060676", "income_per_capita": "64546", "note": ""}, {"year": "2016", "scope": "Hiloni (Secular)", "mean_networth": "1856081", "median_networth": "1259104", "income_per_capita": "81222", "note": ""}, {"year": "2016", "scope": "Arab", "mean_networth": "934694", "median_networth": "851056", "income_per_capita": "26973", "note": ""}, {"year": "2017", "scope": "All", "mean_networth": "", "median_networth": "", "income_per_capita": "75143", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2017", "scope": "Haredi", "mean_networth": "", "median_networth": "", "income_per_capita": "32934", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2017", "scope": "Dati (Religious)", "mean_networth": "", "median_networth": "", "income_per_capita": "73846", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2017", "scope": "Masorti", "mean_networth": "", "median_networth": "", "income_per_capita": "71318", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2017", "scope": "Hiloni (Secular)", "mean_networth": "", "median_networth": "", "income_per_capita": "91421", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2017", "scope": "Arab", "mean_networth": "", "median_networth": "", "income_per_capita": "30369", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2018", "scope": "All", "mean_networth": "2092008", "median_networth": "1271454", "income_per_capita": "78033", "note": ""}, {"year": "2018", "scope": "Haredi", "mean_networth": "1155976", "median_networth": "1115305", "income_per_capita": "41010", "note": ""}, {"year": "2018", "scope": "Dati (Religious)", "mean_networth": "2188967", "median_networth": "1443912", "income_per_capita": "73414", "note": ""}, {"year": "2018", "scope": "Masorti", "mean_networth": "1966967", "median_networth": "1416096", "income_per_capita": "79304", "note": ""}, {"year": "2018", "scope": "Hiloni (Secular)", "mean_networth": "2413859", "median_networth": "1457850", "income_per_capita": "92928", "note": ""}, {"year": "2018", "scope": "Arab", "mean_networth": "1145655", "median_networth": "906268", "income_per_capita": "28205", "note": ""}, {"year": "2019", "scope": "All", "mean_networth": "", "median_networth": "", "income_per_capita": "88992", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2019", "scope": "Haredi", "mean_networth": "", "median_networth": "", "income_per_capita": "41830", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2019", "scope": "Dati (Religious)", "mean_networth": "", "median_networth": "", "income_per_capita": "89977", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2019", "scope": "Masorti", "mean_networth": "", "median_networth": "", "income_per_capita": "89778", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2019", "scope": "Hiloni (Secular)", "mean_networth": "", "median_networth": "", "income_per_capita": "112455", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2019", "scope": "Arab", "mean_networth": "", "median_networth": "", "income_per_capita": "35302", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2020", "scope": "All", "mean_networth": "2223486", "median_networth": "1366424", "income_per_capita": "87579", "note": ""}, {"year": "2020", "scope": "Haredi", "mean_networth": "1202473", "median_networth": "586297", "income_per_capita": "46530", "note": ""}, {"year": "2020", "scope": "Dati (Religious)", "mean_networth": "2490564", "median_networth": "1737146", "income_per_capita": "83473", "note": ""}, {"year": "2020", "scope": "Masorti", "mean_networth": "2330294", "median_networth": "1549047", "income_per_capita": "84985", "note": ""}, {"year": "2020", "scope": "Hiloni (Secular)", "mean_networth": "2595648", "median_networth": "1610288", "income_per_capita": "111275", "note": ""}, {"year": "2020", "scope": "Arab", "mean_networth": "1240037", "median_networth": "1084589", "income_per_capita": "37306", "note": ""}, {"year": "2021", "scope": "All", "mean_networth": "", "median_networth": "", "income_per_capita": "93801", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2021", "scope": "Haredi", "mean_networth": "", "median_networth": "", "income_per_capita": "47146", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2021", "scope": "Dati (Religious)", "mean_networth": "", "median_networth": "", "income_per_capita": "84461", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2021", "scope": "Masorti", "mean_networth": "", "median_networth": "", "income_per_capita": "96940", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2021", "scope": "Hiloni (Secular)", "mean_networth": "", "median_networth": "", "income_per_capita": "111710", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2021", "scope": "Arab", "mean_networth": "", "median_networth": "", "income_per_capita": "41468", "note": "financial assets/liabilities not collected this wave (odd-year rotation) -- net worth undefined"}, {"year": "2023", "scope": "All", "mean_networth": "2772318", "median_networth": "1762837", "income_per_capita": "108029", "note": ""}, {"year": "2023", "scope": "Haredi", "mean_networth": "1229161", "median_networth": "776300", "income_per_capita": "58488", "note": ""}, {"year": "2023", "scope": "Dati (Religious)", "mean_networth": "2826833", "median_networth": "2016622", "income_per_capita": "100239", "note": ""}, {"year": "2023", "scope": "Masorti", "mean_networth": "2542741", "median_networth": "1758404", "income_per_capita": "101775", "note": ""}, {"year": "2023", "scope": "Hiloni (Secular)", "mean_networth": "3262234", "median_networth": "2197583", "income_per_capita": "130028", "note": ""}, {"year": "2023", "scope": "Arab", "mean_networth": "1530782", "median_networth": "1348580", "income_per_capita": "43807", "note": ""}], "fig_participation": [{"group": "Haredi", "pct_with_mortgage": "0.5061", "pct_with_pension": "0.5824", "pct_owns_additional_property": "0.0418", "pct_with_investment": "0.0356"}, {"group": "Dati (Religious)", "pct_with_mortgage": "0.3644", "pct_with_pension": "0.6612", "pct_owns_additional_property": "0.1781", "pct_with_investment": "0.089"}, {"group": "Masorti", "pct_with_mortgage": "0.2415", "pct_with_pension": "0.5806", "pct_owns_additional_property": "0.1319", "pct_with_investment": "0.0954"}, {"group": "Hiloni (Secular)", "pct_with_mortgage": "0.2863", "pct_with_pension": "0.7268", "pct_owns_additional_property": "0.1655", "pct_with_investment": "0.1747"}, {"group": "Arab", "pct_with_mortgage": "0.0489", "pct_with_pension": "0.4352", "pct_owns_additional_property": "0.0043", "pct_with_investment": "0.0035"}], "fig_ratios_by_group": [{"group": "Haredi", "leverage_ratio": "0.291", "equity_ratio": "0.7942", "debt_to_income_ratio": "1.67"}, {"group": "Dati (Religious)", "leverage_ratio": "0.137", "equity_ratio": "1.0098", "debt_to_income_ratio": "0.852"}, {"group": "Masorti", "leverage_ratio": "0.106", "equity_ratio": "1.0309", "debt_to_income_ratio": "0.672"}, {"group": "Hiloni (Secular)", "leverage_ratio": "0.121", "equity_ratio": "1.051", "debt_to_income_ratio": "0.663"}, {"group": "Arab", "leverage_ratio": "0.046", "equity_ratio": "1.0785", "debt_to_income_ratio": "0.311"}], "fig_income_composition_by_group": [{"group": "All", "mean_work": "10056", "mean_pension": "1841", "mean_govt_transfers": "3440", "mean_rental": "535", "mean_interest": "39", "mean_capital_gains": "142", "mean_total_monthly": "16054"}, {"group": "Haredi", "mean_work": "7239", "mean_pension": "403", "mean_govt_transfers": "5254", "mean_rental": "212", "mean_interest": "16", "mean_capital_gains": "79", "mean_total_monthly": "13203"}, {"group": "Dati (Religious)", "mean_work": "11885", "mean_pension": "1609", "mean_govt_transfers": "3265", "mean_rental": "442", "mean_interest": "29", "mean_capital_gains": "93", "mean_total_monthly": "17323"}, {"group": "Masorti", "mean_work": "7942", "mean_pension": "1893", "mean_govt_transfers": "3263", "mean_rental": "539", "mean_interest": "35", "mean_capital_gains": "89", "mean_total_monthly": "13761"}, {"group": "Hiloni (Secular)", "mean_work": "11788", "mean_pension": "2309", "mean_govt_transfers": "3246", "mean_rental": "685", "mean_interest": "52", "mean_capital_gains": "201", "mean_total_monthly": "18281"}, {"group": "Arab", "mean_work": "5360", "mean_pension": "434", "mean_govt_transfers": "3835", "mean_rental": "54", "mean_interest": "5", "mean_capital_gains": "0", "mean_total_monthly": "9688"}]}</script>
+<script id="meta-data" type="application/json">{"source": "cbs_longitudinal_panel_full.csv", "unit": "household-wave, weighted by weight_hh", "n_rows": 42569, "latest_wave": 10, "wave_year": {"1": 2012, "2": 2013, "3": 2014, "4": 2016, "5": 2017, "6": 2018, "7": 2019, "8": 2020, "9": 2021, "10": 2023}, "even_waves": [2, 4, 6, 8, 10], "weighted_quantile_method": "Hazen/midpoint plotting position: sort by value, cumulative weight minus half its own weight normalized to [0,1], linear interpolation of the target quantile against value.", "winsorization": "Amounts winsorized at the 99th percentile (income at 99.5th), floored at 0, for all figures EXCEPT fig_networth_distribution.csv, which is built from a separate p=99.5th-percentile household frame to avoid double-suppressing the top tail that Gini/top10_share are measuring (see that figure's docstring).", "odd_wave_caveat": "Financial assets & liabilities (deposits, investments, mortgage, consumer loans, additional property, land) are not collected in odd waves (2012, 2014, 2017, 2019, 2021); those aggregates are null in odd waves, not zero.", "home_model": {"held_out_r2": 0.366, "in_sample_r2": 0.365, "n_subjective_reported": 10803, "n_cbs_estimate_fill": 2436, "n_model_imputed": 10014}, "pension_model": {"contribution_rate_c": 0.115, "real_return_r": 0.035, "annuity_factor_M": 350.9107259881943, "annuity_factor_M_original": 300.0, "mean_2023": 905213, "mean_2023_before_p99_winsorization": 979789, "macro_benchmark_2023": 980000, "macro_benchmark_note": "NIS 980,000/household = midpoint of Israel total long-term-savings assets (pension+gemel+hishtalmut+managers-insurance), ~NIS 2.5-3.0T (Bank of Israel institutional-assets series, end-2023), over ~2.7-2.9M households. Recalibrated 2026-07-18 from a prior hardcoded 860,000 that had no documented derivation. M is solved so the PRE-winsorization mean hits this anchor almost exactly (mean_2023_before_p99_winsorization); the headline mean_2023 is lower because it (like every other displayed amount) is still capped at the 99th percentile -- capping the top 1% of a right-skewed capitalized-pension distribution pulls the mean down by ~8%, which is expected and consistent with the winsorization caveat documented at the top level."}, "group_labels": {"1": "Haredi", "2": "Dati (Religious)", "3": "Masorti", "4": "Hiloni (Secular)", "5": "Arab"}, "tenure_labels": {"1": "Owner", "2": "Renter", "3": "Other"}, "size_labels": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5+"}, "marital_labels": {"1": "Married", "2": "Single", "3": "Divorced/Separated", "4": "Widowed"}, "kids_labels": {"0": "No children", "1": "With children"}, "edu_labels": {"1": "No diploma", "2": "Secondary / Matriculation", "3": "Post-secondary (non-academic)", "4": "Academic degree"}, "occ_labels": {"1": "Managers & Professionals", "2": "Technicians & Clerical", "3": "Sales & Service", "4": "Skilled Manual & Agriculture", "5": "Operators & Unskilled"}, "ses_labels": {"1": "Low cluster (1-3)", "2": "Mid cluster (4-7)", "3": "High cluster (8-10)"}, "currency": "NIS"}</script>
+<script id="manifest-data" type="application/json">[{"file": "fig_national_balance_sheet.csv", "description": "National weighted-average household balance sheet, wave 10 (2023). is_modeled=True only for Pension (matches dashboard's original modelled/◇ flag); home value also uses hedonic imputation for non-reporting owners but was not flagged in the original UI, so that convention is preserved here."}, {"file": "fig_networth_by_group.csv", "description": "Net worth & balance sheet aggregates by social group, wave 10 (2023). Weighted by weight_hh; median_networth uses the weighted-quantile helper. n_households is the unweighted sample count."}, {"file": "fig_composition_by_group.csv", "description": "Asset composition shares by social group, wave 10 (2023): Real Estate / Financial ex-pension (deposits+savings+investments) / Pension, as shares of (RE+Fin ex-pension+Pension)."}, {"file": "fig_networth_by_dimension.csv", "description": "Net worth by socio-demographic cut, wave 10 (2023). Weighted mean & weighted-quantile median."}, {"file": "fig_networth_distribution.csv", "description": "Net-worth distribution, wave 10 (2023): weighted percentiles (Hazen/midpoint method), weighted mean, top10_share (weighted share of total net worth held by top decile by net worth), and a weighted Gini coefficient computed on net worth (can be unusual since some households have negative net worth -- reported as-is, not clipped). Built from a p=0.995 winsorization cap (vs p=0.99 for every other figure) to avoid double-suppressing the top tail that these specific inequality statistics are trying to measure -- see function docstring."}, {"file": "fig_income_wealth.csv", "description": "Income-wealth relationship, wave 10 (2023): weighted deciles of income_total_annual (decile 10 = highest income), each decile's mean income/net worth/assets, asset-composition shares, and the share of monthly income coming from capital (rental+interest+capital gains)."}, {"file": "fig_trajectory.csv", "description": "Net worth & income per capita over all 10 waves (2012-2023), All + each social group. mean_networth/median_networth are null (not fabricated) in odd waves where financial assets & liabilities were not collected -- see the note column."}, {"file": "fig_participation.csv", "description": "Participation rates by social group, wave 10 (2023): weighted share of households holding each item (share of ==1 among non-null responses)."}, {"file": "fig_ratios_by_group.csv", "description": "ADDED beyond the figure contract: reproduces the dashboard's Leverage/Equity/DTI ratio panel (previously computed client-side) as weighted-mean-based ratios by group, wave 10."}, {"file": "fig_income_composition_by_group.csv", "description": "ADDED beyond the figure contract: reproduces the dashboard's monthly income-by-source bar chart (All + each group), wave 10 (2023), all NIS/month."}, {"file": "fig_meta.json", "description": "Methodology facts for footnotes: sample size, wave-year map, model diagnostics, winsorization, odd-wave caveat, and label dictionaries."}]</script>
+<script>
+// ---------------------------------------------------------------------------
+// All data below is pre-aggregated by pipeline.py and parsed from figures/*.csv
+// at build time by build_dashboard.py. Everything in this script is display
+// formatting, sorting of already-complete rows, or SVG rendering -- no weighted
+// means, no percentiles, no Gini, no modelling, and no per-household loops (the
+// embedded arrays only ever contain already-aggregated rows, never raw households).
+// ---------------------------------------------------------------------------
+const FIGURES = JSON.parse(document.getElementById('figures-data').textContent);
+const META = JSON.parse(document.getElementById('meta-data').textContent);
+const MANIFEST = JSON.parse(document.getElementById('manifest-data').textContent);
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+// Single primary accent used for EVERY single-series magnitude bar (net worth,
+// participation rates, income-decile bars, box-plot fill, etc). Chosen once and
+// reused everywhere a "how much" bar needs a color -- never re-picked per chart.
+const PRIMARY_ACCENT = '#c9a84c'; // gold -- matches --gold in the CSS theme
+
+// Fixed categorical color assignment -- one social group = one color everywhere
+// this dashboard genuinely needs group *identity* (the over-time trajectories are
+// the only remaining case; every other chart that used to color-by-group now uses
+// PRIMARY_ACCENT instead, since a per-category color on an axis-labeled bar is
+// decorative, not identity). Palette + order = the dataviz skill's validated
+// 8-hue dark-mode categorical set (references/palette.md), reordered so no two
+// adjacent slots collide (old palette had two greens: Dati #1baf7a vs Masorti
+// (Traditional) #3fbf3f -- fixed below by giving them non-adjacent hue families).
+const GROUP_ORDER = ['Haredi','Dati (Religious)','Masorti','Hiloni (Secular)','Arab'];
+const GROUP_PALETTE = ['#3987e5','#199e70','#c98500','#9085e9','#e66767'];
+const GROUP_COLORS = {};
+GROUP_ORDER.forEach((g,i)=>{ GROUP_COLORS[g] = GROUP_PALETTE[i]; });
+const GROUP_ALL_COLOR = '#8b97a6'; // neutral reference for "All"
+const ASSET_COLORS = { 'Real Estate':'#3987e5', 'Financial ex-pension':'#199e70', 'Pension':'#c98500' };
+
+// ---------------------------------------------------------------------------
+// Hebrew translation dictionary for data-derived labels (English key -> Hebrew).
+// Everything else in this script is unchanged from the English build; this is
+// the only display-layer addition for the Hebrew version.
+// ---------------------------------------------------------------------------
+const TR = {
+  // Groups / scopes
+  'All':'כלל האוכלוסייה', 'Haredi':'חרדים', 'Dati (Religious)':'דתיים', 'Masorti':'מסורתיים',
+  'Hiloni (Secular)':'חילונים', 'Arab':'ערבים',
+  // Balance-sheet items
+  'Primary Residence':'דירת מגורים', 'Additional Properties':'נכסי נדל״ן נוספים',
+  'Land & Other Real Estate':'קרקע ונדל״ן אחר', 'Total Real Estate':'סך הנדל״ן',
+  'Bank Deposits & Savings':'פיקדונות וחיסכון בבנק', 'Investment Portfolio':'תיק השקעות',
+  'Pension & Retirement Savings':'פנסיה וחיסכון לטווח ארוך', 'Total Financial Assets':'סך הנכסים הפיננסיים',
+  'Total Assets':'סך הנכסים', 'Mortgage':'משכנתה', 'Consumer Loans':'הלוואות צרכניות',
+  'Total Liabilities':'סך ההתחייבויות', 'Net Worth':'שווי נטו',
+  // segStarts section headers
+  'Assets — Real Estate':'נכסים — נדל״ן', 'Assets — Financial':'נכסים — פיננסיים', 'Liabilities':'התחייבויות',
+  // Asset classes (donut + stacked)
+  'Real Estate':'נדל״ן', 'Financial ex-pension':'פיננסי (ללא פנסיה)', 'Pension':'פנסיה', 'Pension ◇':'פנסיה ◇',
+  // Donut + tooltip keys
+  'Total assets':'סך הנכסים', 'Share of assets':'חלק מסך הנכסים', 'Mean value':'ערך ממוצע', 'Total / month':'סה״כ לחודש',
+  // Box-plot tooltip keys
+  'p50 (median)':'p50 (חציון)', 'Mean':'ממוצע', 'Median':'חציון',
+  // Legend
+  'Bar = mean':'עמודה = ממוצע', 'Tick = median':'קו = חציון',
+  'Box = p25–p75':'קופסה = p25–p75', 'Line = median (p50)':'קו = חציון (p50)', 'Whiskers = p10–p90':'שפמים = p10–p90',
+  // Dimension names (in the <select>)
+  'Education':'השכלה', 'Age band':'קבוצת גיל', 'Tenure':'צורת מגורים', 'Household size':'גודל משק הבית',
+  'Occupation':'משלח יד', 'Locality SES':'אשכול חברתי-כלכלי (יישוב)',
+  // Dimension categories
+  'No diploma':'ללא תעודה', 'Secondary / Matriculation':'תיכונית / בגרות',
+  'Post-secondary (non-academic)':'על-תיכונית (לא אקדמית)', 'Academic degree':'תואר אקדמי',
+  'Under 35':'עד 35', '35-44':'35–44', '45-54':'45–54', '55-64':'55–64', '65-74':'65–74', '75+':'75+',
+  'Owner':'בעלות', 'Renter':'שכירות', 'Other':'אחר',
+  'Managers & Professionals':'מנהלים ובעלי מקצועות חופשיים', 'Technicians & Clerical':'טכנאים ופקידות',
+  'Sales & Service':'מכירות ושירותים', 'Skilled Manual & Agriculture':'עבודה מקצועית וחקלאות',
+  'Operators & Unskilled':'מפעילים ובלתי-מקצועיים',
+  'Low cluster (1-3)':'אשכול נמוך (1–3)', 'Mid cluster (4-7)':'אשכול בינוני (4–7)', 'High cluster (8-10)':'אשכול גבוה (8–10)',
+  // Participation metric labels
+  'With a mortgage':'עם משכנתה', 'With a pension':'עם פנסיה', 'Owns additional property':'בעלות על נכס נוסף',
+  'With an investment portfolio':'עם תיק השקעות',
+  // Income sources (stacked bar legend)
+  'Work':'עבודה', 'Govt transfers':'קצבאות והעברות', 'Rental':'שכר דירה', 'Interest':'ריבית', 'Capital gains':'רווחי הון',
+  // Chart valueLabels
+  'Mean net worth':'שווי נטו ממוצע', 'Capital-income share':'שיעור הכנסות ההון',
+  // Ratios table headers
+  'Group':'קבוצה', 'Leverage ratio':'יחס מינוף', 'Equity ratio':'יחס הון עצמי', 'Debt / income':'חוב להכנסה',
+  // Manifest table headers
+  'File':'קובץ', 'Description':'תיאור',
+  // Manifest per-file descriptions (by filename, applied separately -- see renderMethodology)
+};
+function tr(s){ return (TR[s]!==undefined) ? TR[s] : s; }
+const MANIFEST_DESC_HE = {
+  'fig_national_balance_sheet.csv':'מאזן ארצי, גל 10 (2023)',
+  'fig_networth_by_group.csv':'אגרגט שווי נטו ומאזן לפי קבוצה חברתית',
+  'fig_composition_by_group.csv':'חלקי הרכב הנכסים לפי קבוצה',
+  'fig_networth_by_dimension.csv':'שווי נטו לפי חתכים חברתיים-דמוגרפיים',
+  'fig_networth_distribution.csv':'אחוזונים, ממוצע, חלק העשירון העליון ומקדם ג׳יני',
+  'fig_income_wealth.csv':'הקשר בין עשירון הכנסה לעושר',
+  'fig_trajectory.csv':'סדרת זמן על פני 10 גלים, כלל האוכלוסייה והקבוצות',
+  'fig_participation.csv':'שיעורי החזקה לפי קבוצה',
+  'fig_ratios_by_group.csv':'מינוף / הון עצמי / חוב-להכנסה לפי קבוצה',
+  'fig_income_composition_by_group.csv':'הרכב ההכנסה לפי מקור ולפי קבוצה',
+  'fig_meta.json':'מטא-נתונים: מתודולוגיה, תוויות ועוגני כיול',
+};
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function num(v){ if(v===null||v===undefined||v==='') return null; const n = Number(v); return isNaN(n) ? null : n; }
+
+function fmtNIS(v){
+  const n = num(v);
+  if(n===null) return '—';
+  const r = Math.round(n);
+  return (r<0?'-₪':'₪') + Math.abs(r).toLocaleString('en-US');
+}
+function fmtNISCompact(v){
+  const n = num(v); if(n===null) return '—';
+  const abs = Math.abs(n);
+  let s;
+  if(abs>=1e6) s = (n/1e6).toFixed(2)+'M';
+  else if(abs>=1e3) s = (n/1e3).toFixed(0)+'K';
+  else s = Math.round(n).toString();
+  return '₪'+s;
+}
+function fmtPct(v, digits){
+  const n = num(v);
+  if(n===null) return '—';
+  return (n*100).toFixed(digits===undefined?1:digits)+'%';
+}
+function fmtNum(v, digits){
+  const n = num(v);
+  if(n===null) return '—';
+  return n.toFixed(digits===undefined?3:digits);
+}
+
+// ---------------------------------------------------------------------------
+// Tooltip (shared across all charts)
+// ---------------------------------------------------------------------------
+const ttEl = document.getElementById('tooltip');
+function showTooltip(evt, title, rows){
+  let h = `<div class="tt-title">${esc(title)}</div>`;
+  rows.forEach(r=>{
+    const swatch = r.color ? ` style="--sw:${r.color}"` : '';
+    h += `<div class="tt-row"><span class="k">${esc(r.k)}</span><span class="v${r.color?' keyed':''}"${swatch}>${esc(r.v)}</span></div>`;
+  });
+  ttEl.innerHTML = h;
+  ttEl.style.display = 'block';
+  moveTooltip(evt);
+}
+function moveTooltip(evt){
+  const pad = 16;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  if(x + 270 > vw) x = evt.clientX - 270 - pad;
+  if(y + 140 > vh) y = evt.clientY - 140;
+  ttEl.style.left = x+'px'; ttEl.style.top = y+'px';
+}
+function hideTooltip(){ ttEl.style.display = 'none'; }
+
+// ---------------------------------------------------------------------------
+// SVG helpers
+// ---------------------------------------------------------------------------
+function sv(tag, attrs){
+  const e = document.createElementNS(SVGNS, tag);
+  for(const k in (attrs||{})) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function svText(x, y, content, cls, attrs){
+  const e = sv('text', Object.assign({x, y}, attrs||{}));
+  if(cls) e.setAttribute('class', cls);
+  e.textContent = content;
+  return e;
+}
+function niceMax(v){
+  if(v<=0) return 1;
+  const mag = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v/mag;
+  let step;
+  if(n<=1) step=1; else if(n<=2) step=2; else if(n<=5) step=5; else step=10;
+  return step*mag;
+}
+function legendHtml(items){ // items: [{label,color,isLine}]
+  return '<div class="legend">' + items.map(it=>{
+    const sw = it.isLine ? `<span class="ln" style="border-color:${it.color}"></span>` : `<span class="sw" style="background:${it.color}"></span>`;
+    return `<span class="lk">${sw}${esc(it.label)}</span>`;
+  }).join('') + '</div>';
+}
+
+// ---------------------------------------------------------------------------
+// Chart: horizontal grouped bars (e.g. mean+median net worth by group)
+// ---------------------------------------------------------------------------
+function chartHBarGrouped(containerId, rows, labelKey, series, opts){
+  opts = opts||{};
+  const container = document.getElementById(containerId);
+  const rowH = 54, barH = 17, gap = 4, leftPad = opts.leftPad||210, rightPad = 85, topPad = 8;
+  const width = 860;
+  const height = rows.length*rowH + topPad + 6;
+  const maxVal = Math.max(...rows.flatMap(r=>series.map(s=>num(r[s.key])||0))) * 1.08;
+  const scaleW = width - leftPad - rightPad;
+  const x = v => (v/maxVal)*scaleW;
+  // RTL mirror: the LTR geometry above is computed as usual (leftPad = gutter
+  // size, x() = bar length from that gutter); MX() flips every x-coordinate
+  // across the viewBox so the label gutter lands on the right and bars grow
+  // leftward from it, without touching any of the length/scale math.
+  const MX = xv => width - xv;
+
+  if(opts.legend!==false){
+    container.insertAdjacentHTML('beforeend', legendHtml(series.map(s=>({label:tr(s.label),color:s.color}))));
+  }
+  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
+  rows.forEach((r,i)=>{
+    const cy = topPad + i*rowH;
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH+2, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    series.forEach((s,si)=>{
+      const v = num(r[s.key])||0;
+      const by = cy + si*(barH+gap);
+      const w = Math.max(x(v),1.5);
+      const rect = sv('rect',{class:'mark', x:MX(leftPad+w), y:by, width:w, height:barH, rx:4, fill:s.color});
+      svgEl.appendChild(rect);
+      const lbl = fmtNISCompact(v);
+      const labelX = MX(leftPad+w+6);
+      svgEl.appendChild(svText(labelX, by+barH-3.5, lbl, 'val-label', {'text-anchor':'start'}));
+      rect.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]), series.map(s2=>({k:tr(s2.label), v:fmtNIS(r[s2.key]), color:s2.color}))));
+      rect.addEventListener('pointerleave', hideTooltip);
+    });
+  });
+  container.appendChild(svgEl);
+}
+
+// ---------------------------------------------------------------------------
+// Chart: single-hue bar (mean) with a median tick overlaid on the same bar.
+// Replaces the old two-hue grouped-bar (gold mean bar + blue median bar) --
+// one color family only; the median is a thin ink-colored tick, not a second
+// series hue, so group identity still lives on the axis label alone.
+// ---------------------------------------------------------------------------
+function chartBarWithMedianTick(containerId, rows, labelKey, meanKey, medianKey, opts){
+  opts = opts||{};
+  const container = document.getElementById(containerId);
+  const rowH = opts.rowH||40, barH = opts.barH||20, leftPad = opts.leftPad||210, rightPad = 85, topPad = 8;
+  const width = opts.width||860;
+  const height = rows.length*rowH + topPad + 6;
+  const maxVal = Math.max(...rows.flatMap(r=>[num(r[meanKey])||0, num(r[medianKey])||0])) * 1.1;
+  const scaleW = width - leftPad - rightPad;
+  const x = v => (v/maxVal)*scaleW;
+  const MX = xv => width - xv; // RTL mirror -- see chartHBarGrouped for the pattern
+
+  container.insertAdjacentHTML('beforeend',
+    `<div class="legend">
+       <span class="lk"><span class="sw" style="background:${PRIMARY_ACCENT}"></span>${tr('Bar = mean')}</span>
+       <span class="lk"><span class="ln" style="border-color:#fff"></span>${tr('Tick = median')}</span>
+     </div>`);
+
+  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
+  rows.forEach((r,i)=>{
+    const cy = topPad + i*rowH;
+    const meanV = num(r[meanKey])||0, medV = num(r[medianKey])||0;
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    const w = Math.max(x(meanV),1.5);
+    const rect = sv('rect',{class:'mark', x:MX(leftPad+w), y:cy, width:w, height:barH, rx:4, fill:PRIMARY_ACCENT});
+    svgEl.appendChild(rect);
+    const tx = leftPad + x(medV);
+    const mtx = MX(tx);
+    svgEl.appendChild(sv('line',{x1:mtx, x2:mtx, y1:cy-3, y2:cy+barH+3, stroke:'#fff', 'stroke-width':2, 'stroke-linecap':'round'}));
+    const lbl = fmtNISCompact(meanV);
+    const labelX = Math.min(MX(leftPad + w + 6), MX(tx + 8));
+    // anchor 'start' under the page's ambient direction:rtl pins the label's
+    // RIGHT edge at labelX and extends it further LEFT (away from the bar,
+    // into open margin) -- 'end' would pin the left edge and run the text
+    // back over the bar, which is what the pre-fix version did.
+    svgEl.appendChild(svText(labelX, cy+barH-3.5, lbl, 'val-label', {'text-anchor':'start'}));
+    rect.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]), [
+      {k:tr('Mean'), v:fmtNIS(meanV), color:PRIMARY_ACCENT}, {k:tr('Median'), v:fmtNIS(medV)},
+    ]));
+    rect.addEventListener('pointerleave', hideTooltip);
+  });
+  container.appendChild(svgEl);
+}
+
+// ---------------------------------------------------------------------------
+// Chart: 100%-stacked horizontal bars (asset composition)
+// ---------------------------------------------------------------------------
+function chartStacked100(containerId, groups, segmentGetter, segments, opts){
+  // groups: array of group labels (already in desired display order)
+  // segmentGetter(groupLabel, segKey) -> share (0..1)
+  opts = opts||{};
+  const container = document.getElementById(containerId);
+  const rowH = 40, barH = 22, leftPad = opts.leftPad||210, rightPad = 14, topPad = 6;
+  const width = 860;
+  const height = groups.length*rowH + topPad + 6;
+  const scaleW = width - leftPad - rightPad;
+  const gapPx = 2;
+  const MX = xv => width - xv; // RTL mirror
+
+  container.insertAdjacentHTML('beforeend', legendHtml(segments.map(s=>({label:tr(s.label),color:s.color}))));
+  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
+  groups.forEach((g,i)=>{
+    const cy = topPad + i*rowH;
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-5, tr(g), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    let cx = leftPad;
+    segments.forEach((s,si)=>{
+      const share = segmentGetter(g, s.key) || 0;
+      let w = share*scaleW;
+      if(si>0) { cx += gapPx; w = Math.max(w-gapPx,0); }
+      w = Math.max(w, share>0?1:0);
+      const rect = sv('rect',{class:'mark', x:MX(cx+w), y:cy, width:w, height:barH, rx: si===0||si===segments.length-1?4:0, fill:s.color});
+      svgEl.appendChild(rect);
+      if(share>=0.15){
+        const tx = cx + w/2;
+        const t = svText(MX(tx), cy+barH/2+4, fmtPct(share,0), 'seg-label', {'text-anchor':'middle'});
+        svgEl.appendChild(t);
+      }
+      rect.addEventListener('pointermove', e=>showTooltip(e, tr(g), [{k:tr(s.label), v:fmtPct(share), color:s.color}]));
+      rect.addEventListener('pointerleave', hideTooltip);
+      cx += w;
+    });
+  });
+  container.appendChild(svgEl);
+}
+
+// ---------------------------------------------------------------------------
+// Chart: absolute stacked horizontal bars -- segments sum to each row's total,
+// shared scale so bar LENGTH is comparable across rows (e.g. monthly income by
+// source, where the whole bar = total household income).
+// ---------------------------------------------------------------------------
+function chartStackedAbs(containerId, rows, labelKey, segments, opts){
+  opts = opts||{};
+  const container = document.getElementById(containerId);
+  const rowH = 46, barH = 24, leftPad = opts.leftPad||210, rightPad = 88, topPad = 6;
+  const width = 860;
+  const height = rows.length*rowH + topPad + 6;
+  const scaleW = width - leftPad - rightPad;
+  const totals = rows.map(r=>segments.reduce((a,s)=>a+(num(r[s.key])||0),0));
+  const maxTotal = Math.max(...totals, 1)*1.02;
+  const x = v => (v/maxTotal)*scaleW;
+  const MX = xv => width - xv; // RTL mirror
+
+  container.insertAdjacentHTML('beforeend', legendHtml(segments.map(s=>({label:tr(s.label),color:s.color}))));
+  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
+  rows.forEach((r,i)=>{
+    const cy = topPad + i*rowH + (rowH-barH)/2 - 3;
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-7, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    const total = totals[i];
+    let cx = leftPad;
+    segments.forEach((s,si)=>{
+      const v = num(r[s.key])||0;
+      const w = x(v);
+      const ww = Math.max(w, v>0?1:0);
+      const rect = sv('rect',{class:'mark', x:MX(cx+ww), y:cy, width:ww, height:barH,
+        rx: si===0||si===segments.length-1?4:0, fill:s.color});
+      svgEl.appendChild(rect);
+      if(w>=40){
+        svgEl.appendChild(svText(MX(cx+w/2), cy+barH/2+3.5, fmtNISCompact(v), 'seg-label', {'text-anchor':'middle'}));
+      }
+      rect.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]),
+        segments.map(s2=>({k:tr(s2.label), v:fmtNIS(num(r[s2.key])||0), color:s2.color}))
+                .concat([{k:tr('Total / month'), v:fmtNIS(total)}])));
+      rect.addEventListener('pointerleave', hideTooltip);
+      cx += w;
+    });
+    svgEl.appendChild(svText(MX(cx+6), cy+barH-7, fmtNISCompact(total), 'val-label', {'text-anchor':'start'}));
+  });
+  container.appendChild(svgEl);
+}
+
+// ---------------------------------------------------------------------------
+// Chart: donut
+// ---------------------------------------------------------------------------
+function chartDonut(containerId, segs){ // segs: [{label,value,color}]
+  const container = document.getElementById(containerId);
+  const total = segs.reduce((a,s)=>a+s.value,0);
+  // Legend sits on the LEFT (natural reading position on an RTL page) and is
+  // widened so the longest segment label ("פיננסי (ללא פנסיה)") fits fully;
+  // the donut itself is shifted right by the legend width to make room.
+  const size = 240, legendW = 250, cy = size/2, rOuter = 96, rInner = 58;
+  const width = size + legendW;
+  const cx = legendW + size/2;
+  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${size}`});
+  let angle = -Math.PI/2;
+  segs.forEach(s=>{
+    const frac = s.value/total;
+    const a0 = angle, a1 = angle + frac*2*Math.PI;
+    angle = a1;
+    const gapA = 0.012;
+    const ga0 = a0+gapA/2, ga1 = a1-gapA/2;
+    const large = (ga1-ga0) > Math.PI ? 1 : 0;
+    const p = (r,a)=>[cx+r*Math.cos(a), cy+r*Math.sin(a)];
+    const [x0,y0]=p(rOuter,ga0),[x1,y1]=p(rOuter,ga1),[x2,y2]=p(rInner,ga1),[x3,y3]=p(rInner,ga0);
+    const d = `M${x0},${y0} A${rOuter},${rOuter} 0 ${large} 1 ${x1},${y1} L${x2},${y2} A${rInner},${rInner} 0 ${large} 0 ${x3},${y3} Z`;
+    const path = sv('path',{class:'mark', d, fill:s.color});
+    svgEl.appendChild(path);
+    path.addEventListener('pointermove', e=>showTooltip(e, tr(s.label), [{k:tr('Share of assets'), v:fmtPct(frac)},{k:tr('Mean value'), v:fmtNIS(s.value)}]));
+    path.addEventListener('pointerleave', hideTooltip);
+  });
+  svgEl.appendChild(svText(cx, cy-5, tr('Total assets'), null, {'text-anchor':'middle','font-size':15}));
+  const t2 = svText(cx, cy+16, fmtNISCompact(total), null, {'text-anchor':'middle','font-size':21,'font-weight':600});
+  t2.setAttribute('fill','#fff');
+  svgEl.appendChild(t2);
+  // side legend with values -- right-aligned toward the donut so the color
+  // swatch sits closest to the chart it labels; full strings never clipped
+  // because legendW (250) comfortably exceeds the longest label's rendered width.
+  let ly = 38;
+  segs.forEach(s=>{
+    const swX = legendW - 22;
+    const sw = sv('rect',{x:swX, y:ly-12, width:13, height:13, rx:2, fill:s.color});
+    svgEl.appendChild(sw);
+    svgEl.appendChild(svText(swX-9, ly, tr(s.label), 'cat-label', {'font-size':16,'text-anchor':'start'}));
+    const t = svText(swX-9, ly+18, `${fmtPct(s.value/total)}  ·  ${fmtNIS(s.value)}`, null, {'font-size':15,'text-anchor':'start'});
+    t.setAttribute('fill','var(--dim)');
+    svgEl.appendChild(t);
+    ly += 56;
+  });
+  container.appendChild(svgEl);
+}
+
+// ---------------------------------------------------------------------------
+// Chart: single-series horizontal bar (sortable, optional sequential ramp)
+// ---------------------------------------------------------------------------
+function chartHBarSingle(containerId, rows, labelKey, valueKey, opts){
+  opts = opts||{};
+  const container = document.getElementById(containerId);
+  const rowH = opts.rowH||34, barH = opts.barH||18, leftPad = opts.leftPad||170, rightPad = 70, topPad = 6;
+  const width = opts.width||860;
+  const vals = rows.map(r=>num(r[valueKey])||0);
+  const minV = Math.min(0,...vals), maxV = Math.max(...vals)*1.12;
+  const height = rows.length*rowH + topPad + 6;
+  const scaleW = width - leftPad - rightPad;
+  const range = (maxV-minV)||1;
+  const x0 = leftPad + (0-minV)/range*scaleW;
+  const xOf = v => leftPad + (v-minV)/range*scaleW;
+  const MX = xv => width - xv; // RTL mirror
+
+  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
+  if(minV<0){ const mx0 = MX(x0); svgEl.appendChild(sv('line',{class:'axis-line', x1:mx0, x2:mx0, y1:topPad-2, y2:height-2})); }
+  rows.forEach((r,i)=>{
+    const cy = topPad + i*rowH;
+    const v = num(r[valueKey])||0;
+    const color = opts.colorFn ? opts.colorFn(r) : (opts.color||'#3987e5');
+    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', direction:'rtl'}));
+    const bx = Math.min(x0, xOf(v)), bw = Math.max(Math.abs(xOf(v)-x0),1.5);
+    const rect = sv('rect',{class:'mark', x:MX(bx+bw), y:cy, width:bw, height:barH, rx:4, fill:color});
+    svgEl.appendChild(rect);
+    const lbl = opts.fmt ? opts.fmt(v) : fmtNISCompact(v);
+    const labelX = v>=0 ? MX(xOf(v))-6 : MX(xOf(v))+6;
+    // anchor 'start' (ambient direction:rtl) pins the right edge at labelX and
+    // extends left, away from a positive (leftward-growing) bar; 'end' does
+    // the mirror-image for a negative bar that grows rightward from x0.
+    const t = svText(labelX, cy+barH-3.5, lbl, 'val-label', {'text-anchor': v>=0?'start':'end'});
+    svgEl.appendChild(t);
+    rect.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]), [{k:tr(opts.valueLabel||'Value'), v: opts.fmt?opts.fmt(v):fmtNIS(v), color}]));
+    rect.addEventListener('pointerleave', hideTooltip);
+  });
+  container.appendChild(svgEl);
+}
+
+// ---------------------------------------------------------------------------
+// Chart: box-and-whisker (p10-p90 whiskers, p25-p75 box, p50 median line)
+// One fill color for every box (the primary accent); "All" drawn in the
+// neutral grey reference color, not colored by group -- the group label is
+// already on the axis, so per-group color here would just be decoration.
+// ---------------------------------------------------------------------------
+function chartBoxPlot(containerId, rows, labelKey, opts){
+  opts = opts||{};
+  const container = document.getElementById(containerId);
+  const rowH = 46, leftPad = opts.leftPad||210, rightPad = 20, topPad = 8;
+  const width = 900;
+  const boxH = 16, capH = 9;
+  const vals = rows.flatMap(r=>[num(r.p10),num(r.p90)]).filter(v=>v!==null);
+  const minV = Math.min(0,...vals)*1.05, maxV = Math.max(...vals)*1.08;
+  const height = rows.length*rowH + topPad + 6;
+  const scaleW = width - leftPad - rightPad;
+  const range = (maxV-minV)||1;
+  const xOf = v => leftPad + (v-minV)/range*scaleW;
+  const x0 = xOf(0);
+  const MX = xv => width - xv; // RTL mirror
+
+  container.insertAdjacentHTML('beforeend',
+    `<div class="legend">
+       <span class="lk"><span class="sw" style="background:${PRIMARY_ACCENT}"></span>${tr('Box = p25–p75')}</span>
+       <span class="lk"><span class="ln" style="border-color:#fff"></span>${tr('Line = median (p50)')}</span>
+       <span class="lk"><span class="ln" style="border-color:var(--dim)"></span>${tr('Whiskers = p10–p90')}</span>
+     </div>`);
+
+  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
+  const mx0 = MX(x0);
+  svgEl.appendChild(sv('line',{class:'axis-line', x1:mx0, x2:mx0, y1:topPad-2, y2:height-2}));
+  rows.forEach((r,i)=>{
+    const cy = topPad + i*rowH + 18;
+    const isAll = r[labelKey]==='All';
+    const boxColor = isAll ? GROUP_ALL_COLOR : PRIMARY_ACCENT;
+    svgEl.appendChild(svText(MX(leftPad-10), cy+4, tr(r[labelKey]), 'cat-label', {'text-anchor':'start', 'font-style': isAll?'italic':'normal', direction:'rtl'}));
+    const p10=num(r.p10), p25=num(r.p25), p50=num(r.p50), p75=num(r.p75), p90=num(r.p90);
+    const mP10 = MX(xOf(p10)), mP90 = MX(xOf(p90)), mP25 = MX(xOf(p25)), mP75 = MX(xOf(p75)), mP50 = MX(xOf(p50));
+
+    // whisker: full p10-p90 line + end caps
+    svgEl.appendChild(sv('line',{x1:mP10, x2:mP90, y1:cy, y2:cy, stroke:'var(--dim)', 'stroke-width':1.5}));
+    [mP10,mP90].forEach(v=>{
+      svgEl.appendChild(sv('line',{x1:v, x2:v, y1:cy-capH/2, y2:cy+capH/2, stroke:'var(--dim)', 'stroke-width':1.5}));
+    });
+
+    // box: p25-p75
+    const bx = Math.min(mP25,mP75), bw = Math.max(Math.abs(mP75-mP25),2);
+    const rect = sv('rect',{class:'mark', x:bx, y:cy-boxH/2, width:bw, height:boxH, rx:3,
+      fill:boxColor, 'fill-opacity':isAll?0.45:0.6, stroke:boxColor, 'stroke-width':1.3});
+    svgEl.appendChild(rect);
+
+    // median line inside the box
+    svgEl.appendChild(sv('line',{x1:mP50, x2:mP50, y1:cy-boxH/2, y2:cy+boxH/2, stroke:'#fff', 'stroke-width':2}));
+
+    // hover hit-area across the whole whisker span
+    const hitX = Math.min(mP10,mP90)-4;
+    const hit = sv('rect',{x:hitX, y:cy-capH/2-6, width:Math.abs(mP90-mP10)+8, height:capH+12, fill:'transparent', class:'mark'});
+    svgEl.appendChild(hit);
+    hit.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]), [
+      {k:'p10', v:fmtNIS(p10)}, {k:'p25', v:fmtNIS(p25)}, {k:tr('p50 (median)'), v:fmtNIS(p50)},
+      {k:'p75', v:fmtNIS(p75)}, {k:'p90', v:fmtNIS(p90)}, {k:tr('Mean'), v:fmtNIS(r.mean)},
+    ]));
+    hit.addEventListener('pointerleave', hideTooltip);
+    if(p10<0){
+      const t = svText(mP10+8, cy-capH/2-11, fmtNISCompact(p10), 'val-label', {'text-anchor':'start'});
+      svgEl.appendChild(t);
+    }
+  });
+  container.appendChild(svgEl);
+}
+
+// ---------------------------------------------------------------------------
+// Chart: multi-series line, with gaps (nulls skipped, not interpolated).
+// Legitimately multi-color (genuinely simultaneous series, not a magnitude
+// ramp). Hovering a legend item OR a line highlights that series and dims the
+// rest, so an 8-series tangle stays readable.
+// ---------------------------------------------------------------------------
+function chartLines(containerId, seriesList, opts){
+  // seriesList: [{label, color, points:[{x,y}] (y may be null), dashed}]
+  opts = opts||{};
+  const container = document.getElementById(containerId);
+  const width = 900, height = 320, leftPad = 80, rightPad = 20, topPad = 16, botPad = 36;
+  const allX = [...new Set(seriesList.flatMap(s=>s.points.map(p=>p.x)))].sort((a,b)=>a-b);
+  const allY = seriesList.flatMap(s=>s.points.map(p=>p.y)).filter(v=>v!==null && v!==undefined);
+  const minY = Math.min(0,...allY), maxY = niceMax(Math.max(...allY));
+  const xMin = allX[0], xMax = allX[allX.length-1];
+  const scaleW = width-leftPad-rightPad, scaleH = height-topPad-botPad;
+  const xOf = x => leftPad + (x-xMin)/(xMax-xMin)*scaleW;
+  const yOf = y => topPad + scaleH - (y-minY)/(maxY-minY)*scaleH;
+
+  const groupEls = []; // one <g> per series -- target of the hover highlight/dim
+  function highlight(idx){
+    groupEls.forEach((g,i)=>{ g.style.opacity = (i===idx) ? '1' : '0.14'; });
+  }
+  function resetHighlight(){
+    groupEls.forEach(g=>{ g.style.opacity = '1'; });
+  }
+
+  if(opts.legend!==false){
+    const legendDiv = document.createElement('div');
+    legendDiv.className = 'legend';
+    legendDiv.innerHTML = seriesList.map((s,i)=>
+      `<span class="lk" data-idx="${i}" style="cursor:pointer;"><span class="ln" style="border-color:${s.color}"></span>${esc(s.label)}</span>`
+    ).join('');
+    container.appendChild(legendDiv);
+    legendDiv.querySelectorAll('.lk').forEach(el=>{
+      const idx = Number(el.dataset.idx);
+      el.addEventListener('pointerenter', ()=>highlight(idx));
+      el.addEventListener('pointerleave', resetHighlight);
+    });
+  }
+  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
+  // gridlines + y ticks
+  const ticks = 4;
+  for(let i=0;i<=ticks;i++){
+    const yv = minY + (maxY-minY)*i/ticks;
+    const gy = yOf(yv);
+    svgEl.appendChild(sv('line',{class:'grid', x1:leftPad, x2:width-rightPad, y1:gy, y2:gy}));
+    svgEl.appendChild(svText(leftPad-8, gy+3, fmtNISCompact(yv), 'axis-tick', {'text-anchor':'end'}));
+  }
+  allX.forEach(xv=>{
+    svgEl.appendChild(svText(xOf(xv), height-8, String(xv), 'axis-tick', {'text-anchor':'middle'}));
+  });
+  seriesList.forEach((s,idx)=>{
+    const g = sv('g', {});
+    g.style.transition = 'opacity .15s';
+    g.addEventListener('pointerenter', ()=>highlight(idx));
+    g.addEventListener('pointerleave', resetHighlight);
+    const segs = [];
+    let cur = [];
+    s.points.forEach(p=>{
+      if(p.y===null||p.y===undefined){ if(cur.length){segs.push(cur); cur=[];} }
+      else cur.push(p);
+    });
+    if(cur.length) segs.push(cur);
+    segs.forEach(seg=>{
+      if(seg.length<2){
+        // single point: draw a dot only
+        const p = seg[0];
+        const c = sv('circle',{cx:xOf(p.x), cy:yOf(p.y), r:5, fill:s.color, stroke:'#0d1117','stroke-width':2});
+        g.appendChild(c);
+        return;
+      }
+      const d = seg.map((p,i)=>`${i===0?'M':'L'}${xOf(p.x)},${yOf(p.y)}`).join(' ');
+      const path = sv('path',{d, fill:'none', stroke:s.color, 'stroke-width':2, 'stroke-linecap':'round', 'stroke-linejoin':'round'});
+      if(s.dashed) path.setAttribute('stroke-dasharray','5,4');
+      g.appendChild(path);
+      seg.forEach(p=>{
+        const c = sv('circle',{class:'mark', cx:xOf(p.x), cy:yOf(p.y), r:4.5, fill:s.color, stroke:'#0d1117','stroke-width':1.5});
+        g.appendChild(c);
+        const hit = sv('circle',{cx:xOf(p.x), cy:yOf(p.y), r:12, fill:'transparent', class:'mark'});
+        g.appendChild(hit);
+        hit.addEventListener('pointermove', e=>showTooltip(e, `${s.label} — ${p.x}`, [{k:opts.yLabel||'Value', v:fmtNIS(p.y), color:s.color}]));
+        hit.addEventListener('pointerleave', hideTooltip);
+      });
+    });
+    svgEl.appendChild(g);
+    groupEls.push(g);
+  });
+  container.appendChild(svgEl);
+}
+
+// ---------------------------------------------------------------------------
+// KPI tiles (Section 1)
+// ---------------------------------------------------------------------------
+(function renderKPIs(){
+  const dist = FIGURES.fig_networth_distribution.find(r=>r.scope==='All');
+  const bs = FIGURES.fig_national_balance_sheet;
+  const reRow = bs.find(r=>r.item==='Total Real Estate');
+  const assetsRow = bs.find(r=>r.item==='Total Assets');
+  const reShare = num(reRow.value_nis) / num(assetsRow.value_nis); // ratio of two totals already in one figure table
+  const tiles = [
+    {label:'שווי נטו ממוצע, 2023', value:fmtNIS(dist.mean), note:'כלל משקי הבית, משוקלל.'},
+    {label:'שווי נטו חציוני, 2023', value:fmtNIS(dist.p50), note:'משק הבית האופייני — למחצית יש יותר, למחצית פחות.'},
+    {label:'שיעור הנדל״ן מסך הנכסים', value:fmtPct(reShare,0), note:'סך הנדל״ן ÷ סך הנכסים, מאזן ארצי.'},
+    {label:'מקדם ג׳יני, שווי נטו', value:fmtNum(dist.gini,3), note:'0 = שוויון, 1 = ריכוזיות מלאה. ראו הסתייגות בפרק 3.'},
+  ];
+  const row = document.getElementById('kpi-row');
+  row.innerHTML = tiles.map(t=>`<div class="kpi-tile"><div class="lab">${esc(t.label)}</div><div class="val">${t.value}</div><div class="note">${esc(t.note)}</div></div>`).join('');
+})();
+
+// ---------------------------------------------------------------------------
+// Section 1: balance sheet statement + donut
+// ---------------------------------------------------------------------------
+(function renderBalanceSheet(){
+  const rows = FIGURES.fig_national_balance_sheet;
+  const segStarts = {'Primary Residence':'Assets — Real Estate', 'Bank Deposits & Savings':'Assets — Financial', 'Mortgage':'Liabilities'};
+  let html = '';
+  rows.forEach(r=>{
+    if(segStarts[r.item]) html += `<tr class="seg"><td colspan="2">${esc(tr(segStarts[r.item]))}</td></tr>`;
+    let cls = '';
+    if(r.category==='subtotal') cls='subtotal';
+    if(r.category==='total') cls='subtotal';
+    if(r.category==='networth') cls='networth total';
+    const flag = r.is_modeled==='True' ? '<span class="modeled-flag">◇</span>' : '';
+    html += `<tr class="${cls}"><td>${esc(tr(r.item))}${flag}</td><td class="amt">${fmtNIS(r.value_nis)}</td></tr>`;
+  });
+  document.getElementById('bs-statement').innerHTML = html;
+
+  const reV = num(rows.find(r=>r.item==='Total Real Estate').value_nis);
+  const depV = num(rows.find(r=>r.item==='Bank Deposits & Savings').value_nis);
+  const invV = num(rows.find(r=>r.item==='Investment Portfolio').value_nis);
+  const penV = num(rows.find(r=>r.item==='Pension & Retirement Savings').value_nis);
+  chartDonut('donut-national', [
+    {label:'Real Estate', value:reV, color:ASSET_COLORS['Real Estate']},
+    {label:'Financial ex-pension', value:depV+invV, color:ASSET_COLORS['Financial ex-pension']},
+    {label:'Pension ◇', value:penV, color:ASSET_COLORS['Pension']},
+  ]);
+})();
+
+// ---------------------------------------------------------------------------
+// Section 2: net worth by group (sorted by median desc -- sort only, no math)
+// ---------------------------------------------------------------------------
+(function renderNetworthByGroup(){
+  const rows = [...FIGURES.fig_networth_by_group].sort((a,b)=>num(b.median_networth)-num(a.median_networth));
+  chartBarWithMedianTick('chart-networth-group', rows, 'group', 'mean_networth', 'median_networth');
+})();
+
+// ---------------------------------------------------------------------------
+// Section 2: asset composition by group (100% stacked), sorted by RE share desc
+// ---------------------------------------------------------------------------
+(function renderCompositionByGroup(){
+  const rows = FIGURES.fig_composition_by_group;
+  const byGroup = {};
+  rows.forEach(r=>{ (byGroup[r.group]=byGroup[r.group]||{})[r.asset_class] = num(r.share_of_assets); });
+  const groups = Object.keys(byGroup).sort((a,b)=>(byGroup[b]['Real Estate']||0)-(byGroup[a]['Real Estate']||0));
+  chartStacked100('chart-composition-group', groups, (g,k)=>byGroup[g][k], [
+    {key:'Real Estate', label:'Real Estate', color:ASSET_COLORS['Real Estate']},
+    {key:'Financial ex-pension', label:'Financial ex-pension', color:ASSET_COLORS['Financial ex-pension']},
+    {key:'Pension', label:'Pension ◇', color:ASSET_COLORS['Pension']},
+  ]);
+})();
+
+// ---------------------------------------------------------------------------
+// Section 2: dimension selector
+// ---------------------------------------------------------------------------
+(function renderDimensionSelector(){
+  const rows = FIGURES.fig_networth_by_dimension;
+  const dims = [...new Set(rows.map(r=>r.dimension))];
+  const sel = document.getElementById('dim-select');
+  sel.innerHTML = dims.map(d=>`<option value="${esc(d)}">${esc(tr(d))}</option>`).join('');
+  function render(dim){
+    document.getElementById('chart-dimension').innerHTML = '';
+    const sub = rows.filter(r=>r.dimension===dim).sort((a,b)=>num(b.median_networth)-num(a.median_networth));
+    chartBarWithMedianTick('chart-dimension', sub, 'category', 'mean_networth', 'median_networth', {leftPad:320});
+  }
+  sel.addEventListener('change', ()=>render(sel.value));
+  render(dims[0]);
+})();
+
+// ---------------------------------------------------------------------------
+// Section 2: participation rates, small multiples
+// ---------------------------------------------------------------------------
+(function renderParticipation(){
+  const rows = FIGURES.fig_participation;
+  const metrics = [
+    {key:'pct_with_mortgage', label:'With a mortgage'},
+    {key:'pct_with_pension', label:'With a pension'},
+    {key:'pct_owns_additional_property', label:'Owns additional property'},
+    {key:'pct_with_investment', label:'With an investment portfolio'},
+  ];
+  const container = document.getElementById('chart-participation');
+  metrics.forEach(m=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<h3 style="font-size:15px;">${esc(tr(m.label))}</h3><div class="chart-body" id="pp-${m.key}"></div>`;
+    container.appendChild(card);
+  });
+  metrics.forEach(m=>{
+    const sub = [...rows].sort((a,b)=>num(b[m.key])-num(a[m.key]));
+    chartHBarSingle(`pp-${m.key}`, sub, 'group', m.key, {
+      width:560, rowH:30, barH:16, leftPad:170,
+      color:PRIMARY_ACCENT, fmt:v=>fmtPct(v,0), valueLabel:m.label,
+    });
+  });
+})();
+
+// ---------------------------------------------------------------------------
+// Section 3: percentile spread (All + groups, sorted by median desc, All pinned first)
+// ---------------------------------------------------------------------------
+(function renderPercentileSpread(){
+  const rows = FIGURES.fig_networth_distribution;
+  const all = rows.find(r=>r.scope==='All');
+  const groups = rows.filter(r=>r.scope!=='All').sort((a,b)=>num(b.p50)-num(a.p50));
+  chartBoxPlot('chart-percentile-spread', [all, ...groups].map(r=>({...r, [ 'group']: r.scope})), 'group');
+})();
+
+// ---------------------------------------------------------------------------
+// Section 3: ratios table
+// ---------------------------------------------------------------------------
+(function renderRatiosTable(){
+  const rows = FIGURES.fig_ratios_by_group;
+  let h = `<tr><th>${tr('Group')}</th><th>${tr('Leverage ratio')}</th><th>${tr('Equity ratio')}</th><th>${tr('Debt / income')}</th></tr>`;
+  rows.forEach(r=>{
+    h += `<tr><td>${esc(tr(r.group))}</td><td>${fmtNum(r.leverage_ratio,3)}</td><td>${fmtPct(r.equity_ratio,1)}</td><td>${fmtNum(r.debt_to_income_ratio,3)}</td></tr>`;
+  });
+  document.getElementById('table-ratios').innerHTML = h;
+})();
+
+// ---------------------------------------------------------------------------
+// Section 4: income decile charts
+// ---------------------------------------------------------------------------
+(function renderIncomeDecile(){
+  const rows = [...FIGURES.fig_income_wealth].sort((a,b)=>Number(a.income_decile)-Number(b.income_decile));
+  // One color for all deciles: decile order + bar length already encode
+  // magnitude, so a sequential ramp on top of that would be a redundant
+  // double-encoding of the same information.
+  chartHBarSingle('chart-income-decile-networth', rows, 'income_decile', 'mean_networth', {
+    width:860, rowH:30, barH:18, leftPad:66,
+    color:PRIMARY_ACCENT, valueLabel:'Mean net worth',
+  });
+
+  const groups2 = rows.map(r=>r.income_decile);
+  const byDec = {};
+  rows.forEach(r=>{ byDec[r.income_decile] = {'Real Estate':num(r.real_estate_share),'Financial ex-pension':num(r.financial_share),'Pension':num(r.pension_share)}; });
+  chartStacked100('chart-income-decile-composition', groups2, (g,k)=>byDec[g][k], [
+    {key:'Real Estate', label:'Real Estate', color:ASSET_COLORS['Real Estate']},
+    {key:'Financial ex-pension', label:'Financial ex-pension', color:ASSET_COLORS['Financial ex-pension']},
+    {key:'Pension', label:'Pension', color:ASSET_COLORS['Pension']},
+  ], {leftPad:76});
+
+  chartHBarSingle('chart-capital-share', rows, 'income_decile', 'capital_income_share', {
+    width:860, rowH:30, barH:18, leftPad:66,
+    color:PRIMARY_ACCENT, fmt:v=>fmtPct(v,1), valueLabel:'Capital-income share',
+  });
+})();
+
+// ---------------------------------------------------------------------------
+// Section 4: monthly income composition by group (stacked, absolute NIS)
+// ---------------------------------------------------------------------------
+(function renderIncomeComposition(){
+  const rows = FIGURES.fig_income_composition_by_group.filter(r=>r.group!=='All');
+  const sorted = [...rows].sort((a,b)=>num(b.mean_total_monthly)-num(a.mean_total_monthly));
+  // dark-mode-consistent categorical steps (validated set, see GROUP_PALETTE) --
+  // previously mixed light-mode hexes (#eda100, #1baf7a) with dark ones, and used
+  // a low-chroma grey for "Govt transfers" which fails the categorical chroma
+  // floor (grey reads as "no category," not identity #4) -- swapped for green.
+  // Order chosen so the two green-family hues (Govt transfers #008300 and
+  // Rental #199e70) are never adjacent in the stack.
+  const segs = [
+    {key:'mean_work', label:'Work', color:'#3987e5'},
+    {key:'mean_govt_transfers', label:'Govt transfers', color:'#008300'},
+    {key:'mean_pension', label:'Pension', color:'#c98500'},
+    {key:'mean_rental', label:'Rental', color:'#199e70'},
+    {key:'mean_interest', label:'Interest', color:'#9085e9'},
+    {key:'mean_capital_gains', label:'Capital gains', color:'#e66767'},
+  ];
+  chartStackedAbs('chart-income-composition', sorted, 'group', segs, {legend:true, leftPad:190});
+})();
+
+// ---------------------------------------------------------------------------
+// Section 6: methodology stat fill-ins + manifest table
+// ---------------------------------------------------------------------------
+(function renderMethodology(){
+  const hm = META.home_model, pm = META.pension_model;
+  document.getElementById('m-r2held').textContent = hm.held_out_r2.toFixed(3);
+  document.getElementById('m-r2in').textContent = hm.in_sample_r2.toFixed(3);
+  document.getElementById('m-nself').textContent = hm.n_subjective_reported.toLocaleString('en-US');
+  document.getElementById('m-ncbs').textContent = hm.n_cbs_estimate_fill.toLocaleString('en-US');
+  document.getElementById('m-nmodel').textContent = hm.n_model_imputed.toLocaleString('en-US');
+  document.getElementById('m-mean2023').textContent = fmtNIS(pm.mean_2023);
+  document.getElementById('m-meanpre').textContent = fmtNIS(pm.mean_2023_before_p99_winsorization);
+  document.getElementById('m-macro').textContent = fmtNIS(pm.macro_benchmark_2023);
+  document.getElementById('m-nrows').textContent = META.n_rows.toLocaleString('en-US');
+  document.getElementById('m-latest').textContent = META.latest_wave;
+
+  let h = `<tr><th>${tr('File')}</th><th>${tr('Description')}</th></tr>`;
+  MANIFEST.forEach(r=>{
+    const desc = MANIFEST_DESC_HE[r.file] !== undefined ? MANIFEST_DESC_HE[r.file] : r.description;
+    h += `<tr><td>${esc(r.file)}</td><td style="text-align:left;">${esc(desc)}</td></tr>`;
+  });
+  document.getElementById('table-manifest').innerHTML = h;
+})();
+
+// ---------------------------------------------------------------------------
+// Top nav: scrollspy + click-to-scroll
+// ---------------------------------------------------------------------------
+(function nav(){
+  const buttons = [...document.querySelectorAll('nav.topnav button')];
+  const sections = buttons.map(b=>document.getElementById('sec-'+b.dataset.sec));
+  buttons.forEach((b,i)=>b.addEventListener('click', ()=>{
+    sections[i].scrollIntoView({behavior:'smooth', block:'start'});
+  }));
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        const idx = sections.indexOf(en.target);
+        buttons.forEach(b=>b.classList.remove('active'));
+        if(idx>=0) buttons[idx].classList.add('active');
+      }
+    });
+  }, {rootMargin:'-30% 0px -60% 0px', threshold:0});
+  sections.forEach(s=>io.observe(s));
+})();
+
+document.addEventListener('pointermove', moveTooltip);
+</script>
+<a href="../index.html" aria-label="חזרה לדף הבית" style="position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px">🏠 דף הבית</a>
+</body>
+</html>

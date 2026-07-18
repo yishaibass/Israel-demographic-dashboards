@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>לוחות מחוונים — ישראל</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--card:#ffffff;--ink:#0f172a;--muted:#64748b;--a1:#2563eb;--a2:#7c3aed;--a3:#0d9488}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Heebo',system-ui,sans-serif;min-height:100vh;background:linear-gradient(160deg,#0f172a 0%,#1e293b 45%,#334155 100%);color:#e2e8f0;display:flex;flex-direction:column;align-items:center;padding:64px 20px}
+.hero{text-align:center;max-width:760px;margin-bottom:56px}
+.hero h1{font-size:clamp(30px,5vw,48px);font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:16px}
+.hero p{font-size:clamp(16px,2.4vw,20px);color:#94a3b8;font-weight:300;line-height:1.6}
+.grid{display:grid;gap:24px;width:100%;max-width:1080px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.card{background:var(--card);border-radius:20px;padding:32px 28px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);transition:transform .25s ease,box-shadow .25s ease;border-top:5px solid var(--c)}
+.card:hover{transform:translateY(-6px);box-shadow:0 20px 45px rgba(0,0,0,.35)}
+.card .icon{font-size:38px}
+.card h2{font-size:22px;font-weight:700;line-height:1.3}
+.card p{font-size:15px;color:var(--muted);font-weight:400;line-height:1.6;flex:1}
+.card .go{font-size:14px;font-weight:600;color:var(--c)}
+.c1{--c:var(--a1)}.c2{--c:var(--a2)}.c3{--c:var(--a3)}
+footer{margin-top:56px;color:#64748b;font-size:13px;font-weight:300;text-align:center}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>לוחות מחוונים — ישראל</h1>
+<p>שלושה כלים אינטראקטיביים לניתוח נתוני משקי בית, בחירות ומיסוי בישראל</p>
+</div>
+<div class="grid">
+<a class="card c1" href="balance-sheet/index.html">
+<div class="icon">🏦</div>
+<h2>מאזן משק הבית הישראלי</h2>
+<p>עושר, נכסים והתחייבויות של משקי בית לפי קבוצות אוכלוסייה — סקר ארוך טווח של הלמ״ס, 2012–2023</p>
+<span class="go">כניסה ללוח →</span>
+</a>
+<a class="card c2" href="voting-simulator/index.html">
+<div class="icon">🗳️</div>
+<h2>סימולטור מנדטים</h2>
+<p>חיזוי חלוקת המנדטים בכנסת לפי תרחישים דמוגרפיים והתפתחות שיעורי ההצבעה</p>
+<span class="go">כניסה ללוח →</span>
+</a>
+<a class="card c3" href="fiscal-position/index.html">
+<div class="icon">⚖️</div>
+<h2>החשבון הפיסקלי של שלושת המגזרים</h2>
+<p>מיסים ששולמו מול תשלומי העברה שהתקבלו, לפי מגזר, 2018 ← 2023</p>
+<span class="go">כניסה ללוח →</span>
+</a>
+</div>
+<footer>נבנה עם Claude · נתוני הלמ״ס ומקורות ציבוריים</footer>
+</body>
+</html>

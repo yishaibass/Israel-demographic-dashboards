@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>סימולטור מנדטים – בחירות לכנסת</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --coalition:      #2a78d6;
+    --coalition-soft: #cde2fb;
+    --opposition:     #898781;
+    --opposition-soft:#e9e8e4;
+    --turnout-line:   #1baf7a;
+    --good:           #0ca30c;
+    --guidance:       #a8631f;
+    --guidance-soft:  #fbeedc;
+  }
+  * { box-sizing: border-box; }
+  html { direction: rtl; }
+  body {
+    font-family: "Segoe UI", "Arial Hebrew", Arial, sans-serif;
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    line-height: 1.45;
+    direction: rtl;
+    text-align: right;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+  header.page-head { margin-bottom: 18px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-secondary); font-size: 12.5px; max-width: 760px; }
+  .subtitle2 { color: var(--text-secondary); font-size: 12px; max-width: 760px; margin-top: 6px; }
+
+  h3.section-title { font-size: 14.5px; font-weight: 700; margin: 16px 0 4px; }
+  p.hint { font-size: 12px; color: var(--text-muted); margin: 0 0 10px; max-width: 720px; }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+
+  /* Tabs */
+  .tabs-bar { display: flex; gap: 6px; margin: 4px 0 16px; border-bottom: 1px solid var(--grid); }
+  button.tab-btn {
+    font-size: 13px; font-weight: 700; padding: 9px 16px; border: none; background: none;
+    color: var(--text-muted); cursor: pointer; border-bottom: 2.5px solid transparent; margin-bottom: -1px;
+  }
+  button.tab-btn:hover { color: var(--text-primary); }
+  button.tab-btn.active { color: var(--coalition); border-bottom-color: var(--coalition); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .hero-section { background: #ffffff; border: 1px solid var(--border); border-radius: 14px; padding: 4px 4px 2px; }
+  .hero-section .card { border: none; box-shadow: none; }
+  .reference-section .card { background: #f5f5f2; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 12.8px; }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--grid); vertical-align: middle; }
+  th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; text-align: right; }
+  th:first-child, td:first-child { text-align: right; }
+  tbody tr:last-child td { border-bottom: none; }
+  .num { font-variant-numeric: tabular-nums; }
+  .cell-stack { display: inline-flex; flex-direction: column; align-items: flex-end; line-height: 1.25; }
+  .cell-stack .v-bibi { color: var(--coalition); font-weight: 600; }
+  .cell-stack .v-turnout { color: var(--turnout-line); font-size: 11px; }
+  .legend-line { font-size: 11.5px; color: var(--text-muted); margin: 6px 0 12px; }
+  .legend-line .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-left: 4px; vertical-align: -1px; }
+
+  /* Group monogram badge — tasteful abstract initials, no caricature */
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 10.5px;
+    font-weight: 700; flex: none; margin-left: 8px; letter-spacing: -0.02em;
+  }
+
+  /* Light horizontal share bar (used for eligible-voter share) */
+  .share-bar-wrap { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+  .share-bar-track { flex: 1; height: 5px; border-radius: 3px; background: var(--opposition-soft); overflow: hidden; max-width: 130px; }
+  .share-bar-fill { height: 100%; border-radius: 3px; background: var(--baseline); }
+  .share-bar-val { font-size: 10.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 30px; }
+
+  /* Group scenario row */
+  .group-row {
+    display: grid; grid-template-columns: 168px 1fr 1fr; gap: 18px; align-items: center;
+    padding: 12px 4px; border-bottom: 1px solid var(--grid);
+  }
+  .group-row:last-child { border-bottom: none; }
+  .group-id { display: flex; align-items: center; }
+  .group-name { font-weight: 600; font-size: 13px; }
+
+  .control-block { min-width: 0; }
+  .control-label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; margin-bottom: 4px; }
+  .sd-buttons { display: inline-flex; border: 1px solid var(--baseline); border-radius: 20px; overflow: hidden; }
+  button.sd-btn {
+    font-size: 11px; font-weight: 600; padding: 5px 9px; border: none; background: var(--surface-1);
+    color: var(--text-secondary); cursor: pointer; border-left: 1px solid var(--baseline);
+  }
+  button.sd-btn:last-child { border-left: none; }
+  button.sd-btn:hover { background: var(--opposition-soft); }
+  button.sd-btn.active { background: var(--coalition); color: #fff; }
+  .control-readout { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .control-readout .val { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 42px; }
+  .control-readout .val.turnout-val { color: var(--turnout-line); }
+  .control-readout .val.coal-val { color: var(--coalition); }
+  .value-bar-track { flex: 1; height: 7px; border-radius: 4px; background: var(--opposition-soft); overflow: hidden; max-width: 150px; }
+  .value-bar-fill { height: 100%; border-radius: 4px; }
+  .guidance-mini { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+  .load-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 14px; }
+  .load-row span.lbl { font-size: 12px; color: var(--text-secondary); margin-left: 2px; font-weight: 600; }
+  button.load-btn, button.clear-btn {
+    font-size: 12px; padding: 6px 13px; border-radius: 20px; border: 1px solid var(--baseline);
+    background: var(--surface-1); color: var(--text-primary); cursor: pointer; font-weight: 600;
+  }
+  button.load-btn:hover, button.clear-btn:hover { border-color: var(--coalition); color: var(--coalition); }
+  button.load-btn.active { background: var(--coalition); color: #fff; border-color: var(--coalition); }
+  button.clear-btn { color: var(--text-secondary); font-weight: 500; }
+
+  .electorate-toggle-row {
+    display: flex; align-items: center; gap: 10px; margin: 0 0 14px;
+    padding: 8px 12px; background: var(--opposition-soft); border-radius: 8px;
+  }
+  .electorate-toggle-row span.lbl { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+  .toggle-group { display: inline-flex; border: 1px solid var(--baseline); border-radius: 20px; overflow: hidden; }
+  button.toggle-btn {
+    font-size: 12px; padding: 5px 12px; border: none; background: var(--surface-1);
+    color: var(--text-secondary); cursor: pointer; font-weight: 600;
+  }
+  button.toggle-btn.active { background: var(--coalition); color: #fff; }
+  .electorate-note { font-size: 11px; color: var(--text-muted); }
+
+  /* Threshold sub-block — folded into the same input card, no big header */
+  .threshold-block {
+    margin-top: 10px; padding: 12px 14px; background: var(--page); border: 1px solid var(--grid); border-radius: 8px;
+  }
+  .threshold-block .block-lbl { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .threshold-row { display: flex; gap: 24px; flex-wrap: wrap; }
+  .threshold-field { max-width: 260px; }
+  .threshold-field label { display: block; font-size: 11.5px; font-weight: 600; margin-bottom: 5px; }
+  input[type=number] {
+    width: 72px; font-size: 13px; padding: 5px 7px; border: 1px solid var(--baseline);
+    border-radius: 6px; background: var(--surface-1); color: var(--text-primary);
+    font-variant-numeric: tabular-nums; direction: ltr; text-align: center;
+  }
+  input[type=number]:focus { outline: 2px solid var(--coalition); outline-offset: 1px; }
+  .guidance-line {
+    display: inline-block; font-size: 10.5px; color: var(--guidance); margin-top: 4px; font-weight: 600;
+    background: var(--guidance-soft); border-radius: 5px; padding: 2px 6px; white-space: nowrap;
+  }
+
+  /* Output panel — the hero */
+  .result-hero {
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    border: 1.5px solid var(--coalition-soft);
+  }
+  .output-grid { display: flex; gap: 28px; flex-wrap: wrap; align-items: stretch; }
+  .headline { display: flex; gap: 34px; align-items: baseline; }
+  .headline .stat { text-align: right; }
+  .headline .stat .n { font-size: 52px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; direction: ltr; }
+  .headline .stat.coalition .n { color: var(--coalition); }
+  .headline .stat.opposition .n { color: var(--opposition); }
+  .headline .stat .lbl { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; }
+  .majority-badge {
+    display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 20px;
+    font-size: 13.5px; font-weight: 700; border: 1px solid var(--border);
+  }
+  .majority-badge.yes { background: var(--coalition-soft); color: #184f95; }
+  .majority-badge.no  { background: var(--opposition-soft); color: var(--text-secondary); }
+  .sub-stats { display: flex; gap: 26px; margin-top: 16px; flex-wrap: wrap; }
+  .sub-stats .stat2 .n { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; direction: ltr; }
+  .sub-stats .stat2 .lbl { font-size: 11px; color: var(--text-muted); max-width: 220px; }
+  .sub-stats .stat2 .lbl small { display: block; font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+  .seat-bar-wrap { margin-top: 20px; }
+  .seat-bar-caption { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .empty-state { color: var(--text-muted); font-size: 13.5px; padding: 30px 6px; text-align: center; }
+
+  /* Party assignments tab */
+  .party-select-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .party-select-row label { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+  select#partyElection {
+    font-size: 13px; padding: 6px 10px; border: 1px solid var(--baseline); border-radius: 6px;
+    background: var(--surface-1); color: var(--text-primary);
+  }
+  .bloc-chip {
+    display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 10px;
+  }
+  .bloc-chip.coalition { background: var(--coalition-soft); color: #184f95; }
+  .bloc-chip.opposition { background: var(--opposition-soft); color: var(--text-secondary); }
+
+  footer.foot { margin-top: 32px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--grid); padding-top: 14px; }
+
+  /* Standalone LTR tokens (percentages, year ranges, seat counts) that must
+     not be visually reversed when embedded in RTL flow. */
+  .ltr-token { direction: ltr; unicode-bidi: embed; display: inline-block; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 18px 12px 40px; }
+    .card { padding: 14px 14px; }
+    table { font-size: 11.5px; }
+    th, td { padding: 6px 6px; }
+    .headline { gap: 18px; flex-wrap: wrap; }
+    .headline .stat .n { font-size: 36px; }
+    .group-row { grid-template-columns: 1fr; gap: 8px; }
+    .electorate-toggle-row { flex-wrap: wrap; row-gap: 8px; }
+    .sd-buttons { flex-wrap: wrap; }
+    .party-select-row { flex-wrap: wrap; row-gap: 6px; }
+    .threshold-field { max-width: 100%; }
+    .value-bar-track, .share-bar-track { max-width: 110px; }
+  }
+
+  @media (max-width: 400px) {
+    .headline .stat .n { font-size: 30px; }
+    .badge { width: 22px; height: 22px; font-size: 9.5px; }
+    button.sd-btn { padding: 5px 7px; font-size: 10.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page-head">
+  <h1>סימולטור מנדטים &ndash; בחירות לכנסת</h1>
+  <div class="subtitle">
+    קבעו לכל קבוצה באוכלוסייה את אחוז ההצבעה ואת שיעור התמיכה בקואליציה, וראו כמה מנדטים מניב כל תרחיש.
+    כל הנתונים נלקחים ישירות מנתוני המודל; החישוב היחיד שנעשה בעמוד הוא נוסחת המנדטים &ndash; ללא כל גורם תיקון.
+  </div>
+  <div class="subtitle2">
+    קואליציה = הגוש בראשות נתניהו (ליכוד, ש"ס, יהדות התורה, הציונות הדתית). אופוזיציה = כל שאר המפלגות.
+    האחוזים מחושבים מתוך בעלי זכות הבחירה (לא מכלל האוכלוסייה).
+  </div>
+</header>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" data-tab="scenario">בניית תרחיש</button>
+  <button class="tab-btn" data-tab="history">דפוסי הצבעה <span class="ltr-token">2019&ndash;2022</span></button>
+  <button class="tab-btn" data-tab="parties">שיוך מפלגות</button>
+</div>
+
+<section class="tab-panel active" id="tab-scenario">
+
+<div class="hero-section">
+<div class="card">
+  <div class="electorate-toggle-row">
+    <span class="lbl">הרכב הבוחרים:</span>
+    <div class="toggle-group">
+      <button class="toggle-btn" id="baseBtn2022" data-base="2022">2022 (בפועל)</button>
+      <button class="toggle-btn active" id="baseBtn2026" data-base="2026">2026 (תחזית)</button>
+    </div>
+    <span class="electorate-note" id="baseNote"></span>
+  </div>
+
+  <div class="load-row">
+    <span class="lbl">טען תוצאות בחירות:</span>
+    <button class="load-btn" data-election="K25">2022</button>
+    <button class="load-btn" data-election="K24">2021</button>
+    <button class="load-btn" data-election="K23">2020</button>
+    <button class="load-btn" data-election="K22">ספטמבר 2019</button>
+    <button class="load-btn" data-election="K21">אפריל 2019</button>
+    <button class="clear-btn" id="clearBtn">איפוס לממוצע</button>
+  </div>
+
+  <div id="groupRows"></div>
+
+  <div class="threshold-block">
+    <div class="block-lbl">אחוז החסימה &middot; קולות שאבדו</div>
+    <div class="threshold-row">
+      <div class="threshold-field">
+        <label for="wc">קולות הקואליציה שאבדו מתחת לאחוז החסימה (<span class="ltr-token">3.25%</span>)</label>
+        <input type="number" id="wc" step="0.01">
+        <span class="guidance-line" id="wcGuidance"></span>
+      </div>
+      <div class="threshold-field">
+        <label for="wo">קולות האופוזיציה שאבדו מתחת לאחוז החסימה</label>
+        <input type="number" id="wo" step="0.01">
+        <span class="guidance-line" id="woGuidance"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3 class="section-title" style="margin: 20px 20px 4px;">תוצאה</h3>
+<div class="card result-hero" id="outputCard">
+  <p class="hint" id="resultCaption" style="margin:0 0 10px;font-weight:600;"></p>
+  <div id="emptyState" class="empty-state">קבעו הנחות למעלה, או טענו תוצאות בחירות, כדי לראות תוצאה.</div>
+  <div id="resultBody" style="display:none;">
+    <div class="output-grid">
+      <div>
+        <div class="headline">
+          <div class="stat coalition">
+            <div class="n" id="outCoalSeats">&mdash;</div>
+            <div class="lbl">מנדטים לקואליציה</div>
+          </div>
+          <div class="stat opposition">
+            <div class="n" id="outOppSeats">&mdash;</div>
+            <div class="lbl">מנדטים לאופוזיציה</div>
+          </div>
+        </div>
+        <div class="majority-badge" id="outMajority">&mdash;</div>
+        <div class="sub-stats">
+          <div class="stat2"><div class="n" id="outS">&mdash;</div><div class="lbl">חלק הקואליציה מכלל הקולות הכשרים</div></div>
+          <div class="stat2"><div class="n" id="outR">&mdash;</div><div class="lbl">חלק הקואליציה מהקולות שנספרים למנדטים<small>אחרי אחוז החסימה</small></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="seat-bar-wrap">
+      <svg id="seatBar" width="100%" height="34" viewBox="0 0 600 34" preserveAspectRatio="none"></svg>
+      <div class="seat-bar-caption"><span>0</span><span>61 (רוב)</span><span>120</span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+</section>
+
+<section class="tab-panel" id="tab-history">
+<p class="hint">נתונים היסטוריים &ndash; לצפייה בלבד, לא לעריכה.</p>
+<div class="reference-section">
+<h3 class="section-title">דפוסי הצבעה לפי קבוצה, <span class="ltr-token">2019&ndash;2022</span></h3>
+<div class="legend-line"><span class="sw" style="background:var(--coalition)"></span>תמיכה בקואליציה &nbsp;&nbsp;<span class="sw" style="background:var(--turnout-line)"></span>אחוז הצבעה</div>
+<div class="card">
+<div class="table-scroll">
+<table id="groupsHistTable">
+  <thead>
+    <tr id="groupsHistHeadRow"><th>קבוצה</th><th>חלק מבעלי זכות הבחירה</th><th>מגמה</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+
+<h3 class="section-title">תוצאות ארציות לפי מערכת בחירות</h3>
+<div class="card">
+<div class="table-scroll">
+<table id="actualsTable">
+  <thead>
+    <tr><th>בחירות</th><th>חלק הקואליציה מהקולות הכשרים</th><th>אחוז הצבעה</th><th>מנדטים בפועל לקואליציה</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+
+<h3 class="section-title">בדיקת מודל: תחזית מול תוצאה בפועל</h3>
+<p class="hint">אותה נוסחת מנדטים כמו בבניית התרחיש, מיושמת על הנתונים שנרשמו בפועל בכל מערכת בחירות.</p>
+<div class="card">
+<div class="table-scroll">
+<table id="validationTable">
+  <thead>
+    <tr><th>בחירות</th><th>חלק הקואליציה מהקולות הכשרים</th><th>חלק מהקולות שנספרים</th><th>מנדטים חזויים</th><th>מנדטים בפועל</th><th>פער</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+
+<section class="tab-panel" id="tab-parties">
+<div class="party-select-row">
+  <label for="partyElection">בחירות:</label>
+  <select id="partyElection"></select>
+  <span class="hint" style="margin:0;">מפלגות קואליציה ואופוזיציה בלבד (מפלגות שוליות אינן מוצגות).</span>
+</div>
+<div class="card">
+<div class="table-scroll">
+<table id="partiesTable">
+  <thead>
+    <tr><th>מפלגה</th><th>גוש</th><th>אחוז קולות</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+  איך זה עובד: אחוז ההצבעה ושיעור התמיכה של כל קבוצה נאמדים מתוצאות הקלפיות בחמש מערכות הבחירות שבין 2019 ל-2022, בשילוב נתוני מפקד האוכלוסין 2022.
+  מספר המנדטים נגזר ישירות מהנתונים לאחר הסרת מפלגות שלא עברו את אחוז החסימה (<span class="ltr-token">3.25%</span>) &ndash; ללא גורמי תיקון.
+  גדלי הקבוצות בתרחיש מוקרנים לשנת 2026.
+</footer>
+
+</div>
+
+<script>
+const DATA = {
+  "groups": {
+    "haredi": {
+      "label": "חרדים",
+      "eligible_share": 0.1002239702849948,
+      "eligible_share_2026": 0.1057661389027475,
+      "theta_bibi_mean": 0.9999999999999992,
+      "theta_bibi_sd": 1.1780925919142425e-15,
+      "theta_vote_mean": 0.7178894949904515,
+      "theta_vote_sd": 0.0159068100797883,
+      "theta_bibi_by_election": {
+        "K21": 0.9999999999999968,
+        "K22": 1.0,
+        "K23": 1.0,
+        "K24": 0.9999999999999996,
+        "K25": 1.0
+      },
+      "theta_vote_by_election": {
+        "K21": 0.729291161089751,
+        "K22": 0.7292155849905972,
+        "K23": 0.7213865841043406,
+        "K24": 0.6867388650928863,
+        "K25": 0.7228152796746824
+      }
+    },
+    "dati": {
+      "label": "דתי-לאומי",
+      "eligible_share": 0.1266073206688994,
+      "eligible_share_2026": 0.1291231701897964,
+      "theta_bibi_mean": 0.8777847382606498,
+      "theta_bibi_sd": 0.1015743972700008,
+      "theta_vote_mean": 0.7265612634106189,
+      "theta_vote_sd": 0.0158907965351216,
+      "theta_bibi_by_election": {
+        "K21": 0.9531268983745296,
+        "K22": 0.9359517640924576,
+        "K23": 0.9526583637522268,
+        "K24": 0.6863890061769402,
+        "K25": 0.8607976589070954
+      },
+      "theta_vote_by_election": {
+        "K21": 0.7497053181514912,
+        "K22": 0.7291372280793122,
+        "K23": 0.7334039126659655,
+        "K24": 0.7018147455403356,
+        "K25": 0.7187451126159898
+      }
+    },
+    "masorti": {
+      "label": "מסורתי",
+      "eligible_share": 0.2141300605916428,
+      "eligible_share_2026": 0.2131844186465337,
+      "theta_bibi_mean": 0.7779631707546273,
+      "theta_bibi_sd": 0.0433091323779721,
+      "theta_vote_mean": 0.555762903550975,
+      "theta_vote_sd": 0.027202380625579,
+      "theta_bibi_by_election": {
+        "K21": 0.8096792527571379,
+        "K22": 0.7160120441418578,
+        "K23": 0.789436590302252,
+        "K24": 0.7413716321013951,
+        "K25": 0.8333163344704928
+      },
+      "theta_vote_by_election": {
+        "K21": 0.5447921433263972,
+        "K22": 0.5590656776578207,
+        "K23": 0.5802463322037137,
+        "K24": 0.5097535611124997,
+        "K25": 0.5849568034544435
+      }
+    },
+    "hiloni": {
+      "label": "חילוני",
+      "eligible_share": 0.4063768481198171,
+      "eligible_share_2026": 0.3976358942261687,
+      "theta_bibi_mean": 0.1997888935545598,
+      "theta_bibi_sd": 0.0318237622377397,
+      "theta_vote_mean": 0.6881180279430703,
+      "theta_vote_sd": 0.0151257916418041,
+      "theta_bibi_by_election": {
+        "K21": 0.2366068841016927,
+        "K22": 0.1982009060219273,
+        "K23": 0.2247335208356433,
+        "K24": 0.1444731659845491,
+        "K25": 0.1949299908289866
+      },
+      "theta_vote_by_election": {
+        "K21": 0.7135531244489086,
+        "K22": 0.6919827994761506,
+        "K23": 0.6823615859238616,
+        "K24": 0.685614113798072,
+        "K25": 0.667078516068359
+      }
+    },
+    "arab": {
+      "label": "ערבים",
+      "eligible_share": 0.1330653632840706,
+      "eligible_share_2026": 0.1347804828400884,
+      "theta_bibi_mean": 0.0070723931861084,
+      "theta_bibi_sd": 0.0086622449815369,
+      "theta_vote_mean": 0.5349389649941096,
+      "theta_vote_sd": 0.0811080694789284,
+      "theta_bibi_by_election": {
+        "K21": 0.0175543757531126,
+        "K22": 2.860493667651859e-10,
+        "K23": 7.849138962469036e-12,
+        "K24": 0.0178075843228069,
+        "K25": 5.5607243714220794e-09
+      },
+      "theta_vote_by_election": {
+        "K21": 0.4763165271198704,
+        "K22": 0.5905922847425209,
+        "K23": 0.6552810795404393,
+        "K24": 0.4263111123077838,
+        "K25": 0.5261938212599334
+      }
+    },
+    "druze": {
+      "label": "דרוזים",
+      "eligible_share": 0.0195964370505751,
+      "eligible_share_2026": 0.0195098951946651,
+      "theta_bibi_mean": 0.1381314514500208,
+      "theta_bibi_sd": 0.0366625940051916,
+      "theta_vote_mean": 0.5272110122277713,
+      "theta_vote_sd": 0.043272011165454,
+      "theta_bibi_by_election": {
+        "K21": 0.184852663192501,
+        "K22": 0.1086893143058809,
+        "K23": 0.1272887216889656,
+        "K24": 0.1769414830945075,
+        "K25": 0.0928850749682491
+      },
+      "theta_vote_by_election": {
+        "K21": 0.5371505024008392,
+        "K22": 0.5516287727013856,
+        "K23": 0.5866348187385863,
+        "K24": 0.4611022353021397,
+        "K25": 0.4995387319959053
+      }
+    }
+  },
+  "group_order": [
+    "haredi",
+    "dati",
+    "masorti",
+    "hiloni",
+    "arab",
+    "druze"
+  ],
+  "group_monogram": {
+    "haredi": "חר",
+    "dati": "דל",
+    "masorti": "מס",
+    "hiloni": "חי",
+    "arab": "ער",
+    "druze": "דר"
+  },
+  "group_color": {
+    "haredi": "#6b7fd7",
+    "dati": "#8a6fb0",
+    "masorti": "#4fa3a3",
+    "hiloni": "#8fa876",
+    "arab": "#d68c45",
+    "druze": "#b56576"
+  },
+  "elections": [
+    "K21",
+    "K22",
+    "K23",
+    "K24",
+    "K25"
+  ],
+  "election_labels": {
+    "K21": "אפריל 2019",
+    "K22": "ספטמבר 2019",
+    "K23": "2020",
+    "K24": "2021",
+    "K25": "2022"
+  },
+  "thresholds": {
+    "K21": {
+      "w_c": 0.0596,
+      "w_o": 0.0255999999999999
+    },
+    "K22": {
+      "w_c": 0.0188,
+      "w_o": 0.0094999999999999
+    },
+    "K23": {
+      "w_c": 0.0042,
+      "w_o": 0.0036
+    },
+    "K24": {
+      "w_c": 0.0,
+      "w_o": 0.0148
+    },
+    "K25": {
+      "w_c": 0.0,
+      "w_o": 0.0876
+    }
+  },
+  "threshold_stats": {
+    "w_c": {
+      "mean": 0.01652,
+      "sd": 0.0226216179792693,
+      "min": 0.0,
+      "max": 0.0596
+    },
+    "w_o": {
+      "mean": 0.02822,
+      "sd": 0.0305598691096673,
+      "min": 0.0036,
+      "max": 0.0876
+    }
+  },
+  "actuals": {
+    "K21": {
+      "coalition_share_valid": 0.5143671665966626,
+      "turnout": 0.6846117554867093,
+      "actual_coalition_seats": 60
+    },
+    "K22": {
+      "coalition_share_valid": 0.4635891224452906,
+      "turnout": 0.6986539808952834,
+      "actual_coalition_seats": 55
+    },
+    "K23": {
+      "coalition_share_valid": 0.4879738007896189,
+      "turnout": 0.7151638979088848,
+      "actual_coalition_seats": 58
+    },
+    "K24": {
+      "coalition_share_valid": 0.421068050898266,
+      "turnout": 0.674415984958538,
+      "actual_coalition_seats": 52
+    },
+    "K25": {
+      "coalition_share_valid": 0.4837542095668559,
+      "turnout": 0.7062500257777364,
+      "actual_coalition_seats": 64
+    }
+  },
+  "validation": [
+    {
+      "election": "K21",
+      "implied_S": 0.5083424558267094,
+      "implied_R": 0.4905361344848157,
+      "implied_seats": 59,
+      "actual_seats": 60,
+      "gap": -1
+    },
+    {
+      "election": "K22",
+      "implied_S": 0.4607374271068828,
+      "implied_R": 0.4548085078798835,
+      "implied_seats": 55,
+      "actual_seats": 55,
+      "gap": 0
+    },
+    {
+      "election": "K23",
+      "implied_S": 0.4848672213581453,
+      "implied_R": 0.4844458993732567,
+      "implied_seats": 58,
+      "actual_seats": 58,
+      "gap": 0
+    },
+    {
+      "election": "K24",
+      "implied_S": 0.4149129334416515,
+      "implied_R": 0.4211458926529146,
+      "implied_seats": 51,
+      "actual_seats": 52,
+      "gap": -1
+    },
+    {
+      "election": "K25",
+      "implied_S": 0.4829726789395863,
+      "implied_R": 0.5293431378119096,
+      "implied_seats": 64,
+      "actual_seats": 64,
+      "gap": 0
+    }
+  ],
+  "parties": {
+    "K21": [
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.2646
+      },
+      {
+        "name": "כחול לבן",
+        "bloc": "Opposition",
+        "share": 0.2613
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.0599
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.0578
+      },
+      {
+        "name": "חדש-תע\"ל",
+        "bloc": "Opposition",
+        "share": 0.0449
+      },
+      {
+        "name": "עבודה-גשר",
+        "bloc": "Opposition",
+        "share": 0.0443
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.0401
+      },
+      {
+        "name": "האיחוד הלאומי",
+        "bloc": "Coalition",
+        "share": 0.03700000000000001
+      },
+      {
+        "name": "מרצ",
+        "bloc": "Opposition",
+        "share": 0.0363
+      },
+      {
+        "name": "כולנו",
+        "bloc": "Coalition",
+        "share": 0.0354
+      },
+      {
+        "name": "רע\"מ-בל\"ד",
+        "bloc": "Opposition",
+        "share": 0.0333
+      },
+      {
+        "name": "הימין החדש",
+        "bloc": "Coalition",
+        "share": 0.0322
+      },
+      {
+        "name": "זהות",
+        "bloc": "Coalition",
+        "share": 0.0274
+      },
+      {
+        "name": "גשר",
+        "bloc": "Opposition",
+        "share": 0.0173
+      }
+    ],
+    "K22": [
+      {
+        "name": "כחול לבן",
+        "bloc": "Opposition",
+        "share": 0.2595
+      },
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.251
+      },
+      {
+        "name": "הרשימה המשותפת",
+        "bloc": "Opposition",
+        "share": 0.106
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.07440000000000001
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.0699
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.06059999999999999
+      },
+      {
+        "name": "ימינה",
+        "bloc": "Coalition",
+        "share": 0.0587
+      },
+      {
+        "name": "עבודה-גשר",
+        "bloc": "Opposition",
+        "share": 0.048
+      },
+      {
+        "name": "מרצ",
+        "bloc": "Opposition",
+        "share": 0.0434
+      },
+      {
+        "name": "עוצמה יהודית",
+        "bloc": "Coalition",
+        "share": 0.0188
+      }
+    ],
+    "K23": [
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.2946
+      },
+      {
+        "name": "כחול לבן",
+        "bloc": "Opposition",
+        "share": 0.2659
+      },
+      {
+        "name": "הרשימה המשותפת",
+        "bloc": "Opposition",
+        "share": 0.1267
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.07690000000000001
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.05980000000000001
+      },
+      {
+        "name": "עבודה-גשר-מרצ",
+        "bloc": "Opposition",
+        "share": 0.0583
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.0574
+      },
+      {
+        "name": "ימינה",
+        "bloc": "Coalition",
+        "share": 0.0524
+      },
+      {
+        "name": "עוצמה יהודית",
+        "bloc": "Coalition",
+        "share": 0.0042
+      }
+    ],
+    "K24": [
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.2419
+      },
+      {
+        "name": "יש עתיד",
+        "bloc": "Opposition",
+        "share": 0.1393
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.0717
+      },
+      {
+        "name": "כחול לבן",
+        "bloc": "Opposition",
+        "share": 0.0663
+      },
+      {
+        "name": "ימינה",
+        "bloc": "Opposition",
+        "share": 0.0621
+      },
+      {
+        "name": "עבודה",
+        "bloc": "Opposition",
+        "share": 0.0609
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.0563
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.0563
+      },
+      {
+        "name": "הציונות הדתית",
+        "bloc": "Coalition",
+        "share": 0.0512
+      },
+      {
+        "name": "חדש-תע\"ל",
+        "bloc": "Opposition",
+        "share": 0.0482
+      },
+      {
+        "name": "תקווה חדשה",
+        "bloc": "Opposition",
+        "share": 0.0474
+      },
+      {
+        "name": "מרצ",
+        "bloc": "Opposition",
+        "share": 0.0459
+      },
+      {
+        "name": "רע\"מ",
+        "bloc": "Opposition",
+        "share": 0.0379
+      }
+    ],
+    "K25": [
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.2341
+      },
+      {
+        "name": "יש עתיד",
+        "bloc": "Opposition",
+        "share": 0.1779
+      },
+      {
+        "name": "הציונות הדתית",
+        "bloc": "Coalition",
+        "share": 0.1084
+      },
+      {
+        "name": "המחנה הממלכתי",
+        "bloc": "Opposition",
+        "share": 0.0908
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.0825
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.0588
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.04480000000000001
+      },
+      {
+        "name": "רע\"מ",
+        "bloc": "Opposition",
+        "share": 0.0407
+      },
+      {
+        "name": "חדש-תע\"ל",
+        "bloc": "Opposition",
+        "share": 0.0375
+      },
+      {
+        "name": "עבודה",
+        "bloc": "Opposition",
+        "share": 0.0369
+      },
+      {
+        "name": "מרצ",
+        "bloc": "Opposition",
+        "share": 0.0316
+      },
+      {
+        "name": "בל\"ד",
+        "bloc": "Opposition",
+        "share": 0.0291
+      },
+      {
+        "name": "הבית היהודי",
+        "bloc": "Opposition",
+        "share": 0.0119
+      }
+    ]
+  },
+  "config": {
+    "threshold_pct": 3.25,
+    "total_seats": 120,
+    "w_c_default": 0.01652,
+    "w_o_default": 0.028220000000000002,
+    "projection_years": 3.5,
+    "cagr": {
+      "haredi": 0.03,
+      "dati": 0.02,
+      "masorti": 0.013,
+      "hiloni": 0.008,
+      "arab": 0.018,
+      "druze": 0.013
+    },
+    "model_method": "Constrained weighted least-squares ecological inference (scipy lsq_linear), locality level, weighted by eligible voters, bounds [0,1] for theta_bibi and [0.20,0.95] for theta_vote, 200-resample bootstrap for CIs. Demographic basis: CONTINUOUS fractional PUF-derived share_ columns (share_haredi..share_druze from data/clean/model_input_v2.csv, rova-level granularity, see docs/session_census_microdata.md) merged onto fresh party_mapping.xlsx-derived vote columns from model_input.csv; superseded the old binary modal pct_ columns. Rows with is_envelope==True, demog_source=='none', or null share_ are excluded from the regression only (national actuals still use all votes incl. envelopes). Seat logic: Stage1 V=sum(E*t), CV=sum(E*t*k), S=CV/V; Stage2 S_c=S-w_c, S_o=(1-S)-w_o, R=S_c/(S_c+S_o); Stage3 seats=round(120*R). No calibration constant. 2026 projection (eligible_share_2026): raw_2026_g = eligible_share_g (2022 census) * (1 + cagr_g)^projection_years, then renormalized to sum to 1.0. projection_years=3.5 (2022 census / K25 Nov-2022 -> mid-2026 election). CAGR per group (annual, source: IDI/CBS reference values): haredi 3.0%, dati 2.0%, masorti 1.3%, hiloni 0.8%, arab 1.8%, druze 1.3%. The Stage 1-3 seat regression/validation above is unchanged and still uses the 2022 eligible_share only; eligible_share_2026 is used only by the scenario simulator when the 2026-projected electorate base is selected."
+  }
+};
+
+function pct(x, d) {
+  if (d === undefined) d = 1;
+  return '<span class="ltr-token">' + (x * 100).toFixed(d) + '%' + '</span>';
+}
+function elecLabel(e) { return DATA.election_labels[e] || e; }
+
+// Guidance-range helper — purely formatting of numbers already computed in
+// analysis.py and passed through in DATA. No new arithmetic beyond
+// mean +/- 2*SD and clamping to a valid percent range.
+function guidanceMeanSd(meanFrac, sdFrac) {
+  const mean = meanFrac * 100;
+  const sd = sdFrac * 100;
+  let lo = mean - 2 * sd;
+  let hi = mean + 2 * sd;
+  lo = Math.max(0, lo);
+  hi = Math.min(100, hi);
+  return 'ממוצע ' + '<span class="ltr-token">' + mean.toFixed(0) + '%' + '</span>' +
+    ' · טווח אופייני ' + '<span class="ltr-token">' + lo.toFixed(0) + '–' + hi.toFixed(0) + '%' + '</span>';
+}
+function guidanceMinMax(meanFrac, minFrac, maxFrac) {
+  const mean = meanFrac * 100;
+  const lo = Math.max(0, minFrac * 100);
+  const hi = Math.max(0, maxFrac * 100);
+  return 'ממוצע ' + '<span class="ltr-token">' + mean.toFixed(2) + '%' + '</span>' +
+    ' · טווח שנצפה ' + '<span class="ltr-token">' + lo.toFixed(2) + '–' + hi.toFixed(2) + '%' + '</span>';
+}
+function clampPct(x) { return Math.max(0, Math.min(100, x)); }
+
+// ---------------------------------------------------------------------
+// Tabs
+// ---------------------------------------------------------------------
+document.querySelectorAll('.tab-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.getAttribute('data-tab')).classList.add('active');
+  });
+});
+
+// ---------------------------------------------------------------------
+// History tab — purely descriptive tables, no calculation beyond formatting.
+// ---------------------------------------------------------------------
+function sparkline(bibiVals, turnoutVals) {
+  const w = 120, h = 34, pad = 3;
+  const xStep = (w - pad * 2) / (bibiVals.length - 1);
+  function pathFor(vals) {
+    return vals.map((v, i) => {
+      const x = pad + i * xStep;
+      const y = h - pad - v * (h - pad * 2);
+      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+  }
+  const bibiPath = pathFor(bibiVals);
+  const turnoutPath = pathFor(turnoutVals);
+  return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="מגמה על פני מערכות הבחירות">' +
+    '<path d="' + turnoutPath + '" fill="none" stroke="var(--turnout-line)" stroke-width="1.6"/>' +
+    '<path d="' + bibiPath + '" fill="none" stroke="var(--coalition)" stroke-width="1.8"/>' +
+    '</svg>';
+}
+
+const headRow = document.getElementById('groupsHistHeadRow');
+DATA.elections.forEach(function (e) {
+  const th = document.createElement('th');
+  th.innerHTML = '<span class="ltr-token">' + elecLabel(e) + '</span>';
+  headRow.insertBefore(th, headRow.lastElementChild);
+});
+
+const histBody = document.querySelector('#groupsHistTable tbody');
+DATA.group_order.forEach(function (g) {
+  const gd = DATA.groups[g];
+  const bibiVals = DATA.elections.map(function (e) { return gd.theta_bibi_by_election[e]; });
+  const turnoutVals = DATA.elections.map(function (e) { return gd.theta_vote_by_election[e]; });
+  let cells = '<td class="group-cell">' + gd.label + '</td>' +
+    '<td class="num">' + pct(gd.eligible_share) + '</td>';
+  DATA.elections.forEach(function (e) {
+    cells += '<td><span class="cell-stack">' +
+      '<span class="v-bibi num">' + pct(gd.theta_bibi_by_election[e]) + '</span>' +
+      '<span class="v-turnout num">' + pct(gd.theta_vote_by_election[e]) + '</span>' +
+      '</span></td>';
+  });
+  cells += '<td>' + sparkline(bibiVals, turnoutVals) + '</td>';
+  const tr = document.createElement('tr');
+  tr.innerHTML = cells;
+  histBody.appendChild(tr);
+});
+
+const actualsBody = document.querySelector('#actualsTable tbody');
+DATA.elections.forEach(function (e) {
+  const a = DATA.actuals[e];
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><span class="ltr-token">' + elecLabel(e) + '</span></td>' +
+    '<td class="num">' + pct(a.coalition_share_valid, 1) + '</td>' +
+    '<td class="num">' + pct(a.turnout, 1) + '</td>' +
+    '<td class="num"><span class="ltr-token">' + a.actual_coalition_seats + '</span></td>';
+  actualsBody.appendChild(tr);
+});
+
+const validationBody = document.querySelector('#validationTable tbody');
+DATA.validation.forEach(function (v) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><span class="ltr-token">' + elecLabel(v.election) + '</span></td>' +
+    '<td class="num">' + pct(v.implied_S, 2) + '</td>' +
+    '<td class="num">' + pct(v.implied_R, 2) + '</td>' +
+    '<td class="num"><span class="ltr-token">' + v.implied_seats + '</span></td>' +
+    '<td class="num"><span class="ltr-token">' + v.actual_seats + '</span></td>' +
+    '<td class="num"><span class="ltr-token">' + (v.gap >= 0 ? '+' : '') + v.gap + '</span></td>';
+  validationBody.appendChild(tr);
+});
+
+
+// ---------------------------------------------------------------------
+// Party assignments tab — Coalition/Opposition only (Niche excluded at
+// build time in build_html_he.py), dropdown selects election, dates shown.
+// ---------------------------------------------------------------------
+const partySelect = document.getElementById('partyElection');
+DATA.elections.slice().reverse().forEach(function (e) {
+  const opt = document.createElement('option');
+  opt.value = e;
+  opt.textContent = elecLabel(e);
+  partySelect.appendChild(opt);
+});
+function renderParties(e) {
+  const body = document.querySelector('#partiesTable tbody');
+  body.innerHTML = '';
+  (DATA.parties[e] || []).forEach(function (p) {
+    const tr = document.createElement('tr');
+    const blocClass = p.bloc === 'Coalition' ? 'coalition' : 'opposition';
+    const blocLabel = p.bloc === 'Coalition' ? 'קואליציה' : 'אופוזיציה';
+    tr.innerHTML = '<td class="group-cell">' + p.name + '</td>' +
+      '<td><span class="bloc-chip ' + blocClass + '">' + blocLabel + '</span></td>' +
+      '<td class="num">' + pct(p.share, 2) + '</td>';
+    body.appendChild(tr);
+  });
+}
+partySelect.addEventListener('change', function () { renderParties(partySelect.value); });
+partySelect.value = 'K25';
+renderParties('K25');
+
+// ---------------------------------------------------------------------
+// Scenario builder — SD-based "higher/lower than average" controls.
+// DEFAULT = Average (0 SD) for every group's Turnout and Coalition support,
+// so the tool opens on a live "average election" result.
+// ---------------------------------------------------------------------
+let activeReference = null; // set when a past election is loaded (drives sd-state clearing only)
+let electorateBase = '2026'; // '2022' or '2026' — DEFAULT = 2026 projected
+const SD_STEPS = [-2, -1, 0, 1, 2];
+const SD_LABELS = ['הרבה פחות', 'פחות', 'ממוצע', 'יותר', 'הרבה יותר'];
+const SD_FACES = ['-2', '-1', 'ממוצע', '+1', '+2'];
+// current SD position per group per control (0 = Average, the default); null once a
+// past-election load or hand-typed value has moved the control off a discrete SD step.
+const sdState = {};
+DATA.group_order.forEach(function (g) { sdState['t_' + g] = 0; sdState['k_' + g] = 0; });
+
+function eShare(g) {
+  return electorateBase === '2026' ? DATA.groups[g].eligible_share_2026 : DATA.groups[g].eligible_share;
+}
+
+function sdFracValue(meanFrac, sdFrac, n) {
+  return Math.max(0, Math.min(1, meanFrac + n * sdFrac));
+}
+
+function buildControl(prefix, g, meanFrac, sdFrac, colorVar) {
+  let btns = '';
+  SD_STEPS.forEach(function (n, i) {
+    btns += '<button type="button" class="sd-btn" data-n="' + n + '" title="' + SD_LABELS[i] + ' (' + (n > 0 ? '+' : '') + n + ' SD)">' +
+      SD_FACES[i] + '</button>';
+  });
+  return (
+    '<div class="sd-buttons" id="' + prefix + '_' + g + '_btns">' + btns + '</div>' +
+    '<div class="control-readout">' +
+      '<span class="val ' + colorVar + '" id="' + prefix + '_' + g + '_val">&mdash;</span>' +
+      '<div class="value-bar-track"><div class="value-bar-fill" id="' + prefix + '_' + g + '_bar" style="background:var(--' + (colorVar === 'turnout-val' ? 'turnout-line' : 'coalition') + ')"></div></div>' +
+    '</div>' +
+    '<div class="guidance-mini">' + guidanceMeanSd(meanFrac, sdFrac) + '</div>'
+  );
+}
+
+const groupRowsEl = document.getElementById('groupRows');
+DATA.group_order.forEach(function (g) {
+  const gd = DATA.groups[g];
+  const mono = DATA.group_monogram[g];
+  const color = DATA.group_color[g];
+  const row = document.createElement('div');
+  row.className = 'group-row';
+  row.innerHTML =
+    '<div class="group-id">' +
+      '<span class="badge" style="background:' + color + '">' + mono + '</span>' +
+      '<div><div class="group-name">' + gd.label + '</div>' +
+        '<div class="share-bar-wrap">' +
+          '<div class="share-bar-track"><div class="share-bar-fill" id="e_' + g + '_bar" style="background:' + color + '"></div></div>' +
+          '<span class="share-bar-val num" id="e_' + g + '_col">' + pct(eShare(g)) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="control-block">' +
+      '<div class="control-label">אחוז הצבעה</div>' +
+      buildControl('t', g, gd.theta_vote_mean, gd.theta_vote_sd, 'turnout-val') +
+    '</div>' +
+    '<div class="control-block">' +
+      '<div class="control-label">תמיכה בקואליציה</div>' +
+      buildControl('k', g, gd.theta_bibi_mean, gd.theta_bibi_sd, 'coal-val') +
+    '</div>';
+  groupRowsEl.appendChild(row);
+});
+
+// Hidden per-group current value store (fraction 0-1), read by computeSeats.
+const currentVal = {};
+
+function setControlValue(prefix, g, valFrac, activeN) {
+  currentVal[prefix + '_' + g] = valFrac;
+  document.getElementById(prefix + '_' + g + '_val').innerHTML = pct(valFrac, 1);
+  document.getElementById(prefix + '_' + g + '_bar').style.width = clampPct(valFrac * 100) + '%';
+  const btnGroup = document.getElementById(prefix + '_' + g + '_btns');
+  btnGroup.querySelectorAll('.sd-btn').forEach(function (b) {
+    b.classList.toggle('active', activeN !== null && b.getAttribute('data-n') === String(activeN));
+  });
+}
+
+function wireControl(prefix, g, meanFrac, sdFrac) {
+  const btnGroup = document.getElementById(prefix + '_' + g + '_btns');
+  btnGroup.querySelectorAll('.sd-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const n = parseInt(btn.getAttribute('data-n'), 10);
+      sdState[prefix + '_' + g] = n;
+      setControlValue(prefix, g, sdFracValue(meanFrac, sdFrac, n), n);
+      computeSeats();
+    });
+  });
+  // DEFAULT = Average (0 SD)
+  setControlValue(prefix, g, sdFracValue(meanFrac, sdFrac, 0), 0);
+}
+
+DATA.group_order.forEach(function (g) {
+  const gd = DATA.groups[g];
+  wireControl('t', g, gd.theta_vote_mean, gd.theta_vote_sd);
+  wireControl('k', g, gd.theta_bibi_mean, gd.theta_bibi_sd);
+});
+
+function updateElectorateCol() {
+  let maxShare = 0;
+  DATA.group_order.forEach(function (g) { maxShare = Math.max(maxShare, eShare(g)); });
+  DATA.group_order.forEach(function (g) {
+    document.getElementById('e_' + g + '_col').innerHTML = pct(eShare(g));
+    document.getElementById('e_' + g + '_bar').style.width = clampPct((eShare(g) / maxShare) * 100) + '%';
+  });
+  document.getElementById('baseNote').innerHTML =
+    electorateBase === '2026'
+      ? 'בשימוש: הרכב 2026 (תחזית) (' + '<span class="ltr-token">' + DATA.config.projection_years + '</span>' + ' שנים ממפקד 2022)'
+      : 'בשימוש: הרכב 2022 (בפועל)';
+}
+
+document.getElementById('baseBtn2022').addEventListener('click', function () {
+  electorateBase = '2022';
+  document.getElementById('baseBtn2022').classList.add('active');
+  document.getElementById('baseBtn2026').classList.remove('active');
+  updateElectorateCol();
+  computeSeats();
+});
+document.getElementById('baseBtn2026').addEventListener('click', function () {
+  electorateBase = '2026';
+  document.getElementById('baseBtn2026').classList.add('active');
+  document.getElementById('baseBtn2022').classList.remove('active');
+  updateElectorateCol();
+  computeSeats();
+});
+updateElectorateCol();
+
+// Threshold guidance lines: average + observed K21-K25 min-max, preferred
+// over mean +/- 2SD here since these values are skewed and a symmetric
+// range would go negative (e.g. w_c ran 0%-6%).
+document.getElementById('wcGuidance').innerHTML =
+  guidanceMinMax(DATA.threshold_stats.w_c.mean, DATA.threshold_stats.w_c.min, DATA.threshold_stats.w_c.max);
+document.getElementById('woGuidance').innerHTML =
+  guidanceMinMax(DATA.threshold_stats.w_o.mean, DATA.threshold_stats.w_o.min, DATA.threshold_stats.w_o.max);
+
+// Threshold inputs default to the historical MEAN.
+document.getElementById('wc').value = (DATA.config.w_c_default * 100).toFixed(2);
+document.getElementById('wo').value = (DATA.config.w_o_default * 100).toFixed(2);
+
+document.querySelectorAll('.load-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    const e = btn.getAttribute('data-election');
+    activeReference = e;
+    DATA.group_order.forEach(function (g) {
+      const gd = DATA.groups[g];
+      sdState['t_' + g] = null;
+      sdState['k_' + g] = null;
+      setControlValue('t', g, gd.theta_vote_by_election[e], null);
+      setControlValue('k', g, gd.theta_bibi_by_election[e], null);
+    });
+    // Loading an election also loads THAT election's threshold (wasted-vote)
+    // shares, so the simulator reproduces the election's actual outcome
+    // (e.g. 2022 -> 64 with the 2022 electorate base).
+    document.getElementById('wc').value = (DATA.thresholds[e].w_c * 100).toFixed(2);
+    document.getElementById('wo').value = (DATA.thresholds[e].w_o * 100).toFixed(2);
+    document.querySelectorAll('.load-btn').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    computeSeats();
+  });
+});
+
+document.getElementById('clearBtn').addEventListener('click', function () {
+  activeReference = null;
+  DATA.group_order.forEach(function (g) {
+    const gd = DATA.groups[g];
+    sdState['t_' + g] = 0;
+    sdState['k_' + g] = 0;
+    setControlValue('t', g, sdFracValue(gd.theta_vote_mean, gd.theta_vote_sd, 0), 0);
+    setControlValue('k', g, sdFracValue(gd.theta_bibi_mean, gd.theta_bibi_sd, 0), 0);
+  });
+  document.getElementById('wc').value = (DATA.config.w_c_default * 100).toFixed(2);
+  document.getElementById('wo').value = (DATA.config.w_o_default * 100).toFixed(2);
+  document.querySelectorAll('.load-btn').forEach(function (b) { b.classList.remove('active'); });
+  computeSeats();
+});
+
+// ---------------------------------------------------------------------
+// THE interactive engine: Stage 1-3 seat formula. This is the ONLY
+// arithmetic performed in this page. No calibration constant, no Bader-Ofer.
+// Identical math to build_html.py (English) — only display strings differ.
+// ---------------------------------------------------------------------
+function computeSeats() {
+  const E = {}, t = {}, k = {};
+  DATA.group_order.forEach(function (g) {
+    E[g] = eShare(g); // from CSV, per selected electorate base (2022 or 2026)
+    t[g] = currentVal['t_' + g];
+    k[g] = currentVal['k_' + g];
+  });
+  const wcRaw = parseFloat(document.getElementById('wc').value);
+  const woRaw = parseFloat(document.getElementById('wo').value);
+  const w_c = (isNaN(wcRaw) ? 0 : wcRaw) / 100;
+  const w_o = (isNaN(woRaw) ? 0 : woRaw) / 100;
+
+  // Stage 1 — demographics -> bloc votes
+  let V = 0, CV = 0;
+  DATA.group_order.forEach(function (g) {
+    V += E[g] * t[g];
+    CV += E[g] * t[g] * k[g];
+  });
+
+  const emptyState = document.getElementById('emptyState');
+  const resultBody = document.getElementById('resultBody');
+  const caption = document.getElementById('resultCaption');
+  caption.innerHTML = 'הרכב הבוחרים: ' + (electorateBase === '2026' ? '2026 (תחזית)' : '2022 (בפועל)');
+
+  if (V <= 0) {
+    emptyState.style.display = '';
+    resultBody.style.display = 'none';
+    return;
+  }
+
+  const S = CV / V;
+
+  // Stage 2 — apply threshold via wasted-vote shares
+  const S_c = S - w_c;
+  const S_o = (1 - S) - w_o;
+  const D = S_c + S_o;
+
+  if (D <= 0) {
+    emptyState.style.display = '';
+    resultBody.style.display = 'none';
+    return;
+  }
+
+  const R = S_c / D;
+
+  // Stage 3 — seats (flat proportional, 120)
+  const totalSeats = DATA.config.total_seats;
+  const coalitionSeats = Math.round(totalSeats * R);
+  const oppositionSeats = totalSeats - coalitionSeats;
+  const majority = coalitionSeats >= 61;
+
+  emptyState.style.display = 'none';
+  resultBody.style.display = '';
+
+  document.getElementById('outS').innerHTML = pct(S, 2);
+  document.getElementById('outR').innerHTML = pct(R, 2);
+  document.getElementById('outCoalSeats').innerHTML = '<span class="ltr-token">' + coalitionSeats + '</span>';
+  document.getElementById('outOppSeats').innerHTML = '<span class="ltr-token">' + oppositionSeats + '</span>';
+  const majEl = document.getElementById('outMajority');
+  majEl.textContent = majority ? 'רוב (61 מנדטים ומעלה)' : 'אין רוב (פחות מ-61)';
+  majEl.className = 'majority-badge ' + (majority ? 'yes' : 'no');
+
+  // 120-seat bar, inline SVG. Single measure (coalition vs opposition), one
+  // axis. RTL: coalition fill starts from the RIGHT edge (x anchored at the
+  // right, growing leftward) so the bar reads naturally in RTL layout.
+  const svg = document.getElementById('seatBar');
+  const w = 600, h = 34;
+  const coalW = (coalitionSeats / totalSeats) * w;
+  const majorityX = w - (61 / totalSeats) * w;
+  svg.innerHTML =
+    '<rect x="0" y="8" width="' + w + '" height="18" rx="3" fill="var(--opposition-soft)"></rect>' +
+    '<rect x="' + (w - coalW).toFixed(1) + '" y="8" width="' + coalW.toFixed(1) + '" height="18" rx="3" fill="var(--coalition)"></rect>' +
+    '<line x1="' + majorityX.toFixed(1) + '" y1="2" x2="' + majorityX.toFixed(1) + '" y2="32" stroke="var(--text-primary)" stroke-width="1.5" stroke-dasharray="3,2"></line>';
+}
+
+document.getElementById('wc').addEventListener('input', computeSeats);
+document.getElementById('wo').addEventListener('input', computeSeats);
+computeSeats();
+</script>
+
+<a href="../index.html" aria-label="חזרה לדף הבית" style="position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px">🏠 דף הבית</a>
+</body>
+</html>
