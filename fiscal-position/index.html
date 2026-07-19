@@ -7,23 +7,23 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --ink:#1a1f29; --muted:#6b7280; --line:#e3e6ea; --paper:#ffffff; --bg:#f6f7f9;
-    --blue:#1f5fa6; --blue-soft:#7fa8d0; --amber:#c8841a; --amber-soft:#e0b673;
-    --pos:#2e7d57; --neg:#b4452f; --navy:#2b3a55; --grey:#aab1bb;
+    --ink:#0b0b0b; --muted:#52514e; --line:#e1e0d9; --paper:#fcfcfb; --bg:#f9f9f7;
+    --blue:#2a78d6; --blue-soft:#8fb8e4; --amber:#a8631f; --amber-soft:#d9a24f;
+    --pos:#1baf7a; --neg:#e34948; --navy:#223a5e; --grey:#8f8d87;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:"Arial","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;}
-  .sans{font-family:"Arial","Helvetica Neue",sans-serif;}
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;}
+  .sans{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
   .wrap{max-width:1180px;margin:0 auto;padding:40px 32px 80px;}
   header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:8px;}
   h1{font-size:30px;line-height:1.15;margin:0 0 6px;letter-spacing:-0.01em;}
-  .kicker{font-family:"Arial","Helvetica Neue",sans-serif;text-transform:uppercase;
+  .kicker{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;text-transform:uppercase;
     letter-spacing:.08em;font-size:11px;color:var(--blue);font-weight:700;margin-bottom:10px;}
-  .sub{color:var(--muted);font-size:14px;max-width:760px;margin:0;}
+  .sub{color:var(--muted);font-size:14px;max-width:760px;margin:0;line-height:1.6;}
   /* top tabs */
   .tabs{display:flex;gap:2px;margin:22px 0 0;border-bottom:1px solid var(--line);}
-  .tabs button{font-family:"Arial","Helvetica Neue",sans-serif;border:0;background:none;cursor:pointer;
+  .tabs button{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;border:0;background:none;cursor:pointer;
     font-size:13px;font-weight:700;color:var(--muted);padding:10px 18px;border-bottom:2px solid transparent;
     margin-bottom:-1px;letter-spacing:.02em;}
   .tabs button.on{color:var(--ink);border-bottom-color:var(--ink);}
@@ -31,58 +31,58 @@
   section{margin-top:34px;}
   .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:22px 24px;
     box-shadow:0 1px 2px rgba(16,24,40,.04);}
-  h2{font-size:15px;font-family:"Arial","Helvetica Neue",sans-serif;font-weight:700;margin:0 0 2px;
+  h2{font-size:15px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:700;margin:0 0 2px;
     letter-spacing:.01em;}
-  .cap{color:var(--muted);font-size:12.5px;margin:2px 0 16px;font-family:"Arial","Helvetica Neue",sans-serif;}
+  .cap{color:var(--muted);font-size:12.5px;margin:2px 0 16px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
   .chartbox{position:relative;width:100%;}
   .grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;}
   .heroRow{display:grid;grid-template-columns:1.857fr 1fr;gap:22px;align-items:stretch;}
   .gapblock{margin:0 0 16px;padding:0 0 16px;border-bottom:1px solid var(--line);}
   .gapblock:last-child{margin-bottom:0;padding-bottom:0;border-bottom:0;}
-  .gapblock .nm{font-family:"Arial","Helvetica Neue",sans-serif;font-weight:700;font-size:12.5px;
+  .gapblock .nm{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:700;font-size:12.5px;
     color:var(--ink);margin-bottom:4px;}
   .gapblock .g23{font-size:28px;font-weight:700;line-height:1;letter-spacing:-0.02em;
-    font-family:"Arial","Helvetica Neue",sans-serif;direction:ltr;unicode-bidi:embed;display:inline-block;}
-  .gapblock .g18{font-family:"Arial","Helvetica Neue",sans-serif;font-size:12.5px;color:var(--muted);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;direction:ltr;unicode-bidi:embed;display:inline-block;}
+  .gapblock .g18{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:12.5px;color:var(--muted);
     margin-top:4px;font-weight:600;}
-  .gapblock .lbl{font-family:"Arial","Helvetica Neue",sans-serif;font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .gapblock .lbl{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:11.5px;color:var(--muted);margin-top:2px;}
   .secbtns-slim{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;}
-  .secbtns-slim button{font-family:"Arial","Helvetica Neue",sans-serif;cursor:pointer;
+  .secbtns-slim button{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer;
     border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 18px;
     font-size:12.5px;font-weight:700;color:var(--muted);}
   .secbtns-slim button.on{border-color:var(--ink);background:var(--ink);color:#fff;}
   .secbtns{display:flex;gap:10px;flex-wrap:wrap;}
-  .secbtns button{font-family:"Arial","Helvetica Neue",sans-serif;cursor:pointer;border:1px solid var(--line);
+  .secbtns button{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer;border:1px solid var(--line);
     background:#fff;border-radius:9px;padding:12px 18px;text-align:right;min-width:190px;}
   .secbtns button .nm{font-weight:700;font-size:14px;}
   .secbtns button .vv{font-size:12px;color:var(--muted);margin-top:3px;}
   .secbtns button.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset;}
-  .pill{display:inline-block;font-family:"Arial","Helvetica Neue",sans-serif;font-size:11px;font-weight:700;
+  .pill{display:inline-block;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:11px;font-weight:700;
     padding:2px 8px;border-radius:20px;}
   .pill.io-in{background:#eaf1f9;color:var(--blue);}
   .pill.io-out{background:#fbf1e1;color:var(--amber);}
-  .big{font-size:40px;font-weight:700;line-height:1;letter-spacing:-0.02em;font-family:"Arial","Helvetica Neue",sans-serif;
+  .big{font-size:40px;font-weight:700;line-height:1;letter-spacing:-0.02em;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
     direction:ltr;unicode-bidi:embed;display:inline-block;}
   .big.sub{font-size:13px;color:var(--muted);font-weight:600;direction:rtl;}
   .headline{display:flex;gap:26px;align-items:flex-end;flex-wrap:wrap;margin:4px 0 14px;}
   .demo{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
   .metric{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#fcfcfd;}
-  .metric .k{font-family:"Arial","Helvetica Neue",sans-serif;font-size:11px;text-transform:uppercase;
+  .metric .k{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:11px;text-transform:uppercase;
     letter-spacing:.06em;color:var(--muted);font-weight:700;text-align:right;}
-  .metric .v{font-family:"Arial","Helvetica Neue",sans-serif;font-size:26px;font-weight:700;margin-top:4px;
+  .metric .v{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:26px;font-weight:700;margin-top:4px;
     direction:ltr;unicode-bidi:embed;display:block;}
   .metric .v small{font-size:13px;color:var(--grey);font-weight:600;margin-right:8px;}
   .earnbar{display:flex;height:16px;border-radius:5px;overflow:hidden;margin-top:8px;border:1px solid var(--line);direction:ltr;}
   .earnbar i{display:flex;align-items:center;justify-content:center;height:100%;overflow:hidden;}
-  .earnbar i span{font-family:"Arial","Helvetica Neue",sans-serif;font-size:10px;font-weight:700;color:#fff;
+  .earnbar i span{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:10px;font-weight:700;color:#fff;
     text-shadow:0 1px 1px rgba(0,0,0,.45);direction:ltr;white-space:nowrap;}
-  .earnleg{font-family:"Arial","Helvetica Neue",sans-serif;font-size:11px;color:var(--muted);display:flex;
+  .earnleg{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:11px;color:var(--muted);display:flex;
     gap:14px;margin-top:7px;flex-wrap:wrap;direction:ltr;}
   .earnleg span[dir="rtl"]{direction:rtl;unicode-bidi:isolate;}
   .earnleg b{color:var(--ink);}
   .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-left:5px;vertical-align:middle;}
   /* financial table — RTL: label col rightmost, numbers flow left */
-  .fintbl{width:100%;border-collapse:collapse;font-family:"Arial","Helvetica Neue",sans-serif;
+  .fintbl{width:100%;border-collapse:collapse;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
     font-variant-numeric:tabular-nums;font-size:13px;}
   .fintbl caption{text-align:right;}
   .fintbl thead th{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
@@ -105,12 +105,12 @@
     background:var(--line);opacity:.9;z-index:0;}
   .shareval{position:relative;z-index:1;}
   /* methodology */
-  .method h3{font-family:"Arial","Helvetica Neue",sans-serif;font-size:13px;text-transform:uppercase;
+  .method h3{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;text-transform:uppercase;
     letter-spacing:.06em;color:var(--blue);margin:22px 0 8px;font-weight:700;}
   .method h3:first-child{margin-top:0;}
-  .method p,.method li{font-size:14px;line-height:1.7;color:var(--ink);margin:0 0 10px;}
+  .method p,.method li{font-size:14px;line-height:1.75;color:var(--ink);margin:0 0 10px;}
   .method ul{margin:0 0 12px;padding-right:20px;padding-left:0;}
-  .method .small{color:var(--muted);font-size:12.5px;font-family:"Arial","Helvetica Neue",sans-serif;}
+  .method .small{color:var(--muted);font-size:12.5px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
   .method a{color:var(--blue);text-decoration:underline;}
   .method code{background:#f1f3f5;border-radius:4px;padding:1px 5px;font-size:12px;}
   .flag{border-right:3px solid var(--amber);border-left:0;background:#fdf8ef;
@@ -118,10 +118,10 @@
   .attrib{border-right:3px solid var(--blue);border-left:0;background:#f1f6fc;
     padding:12px 16px;border-radius:8px 0 0 8px;margin:0 0 14px;font-size:14px;line-height:1.6;}
   footer{margin-top:46px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);
-    font-size:11.5px;font-family:"Arial","Helvetica Neue",sans-serif;line-height:1.55;}
+    font-size:11.5px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55;}
   .hide{display:none;}
   details{margin-top:34px;}
-  details summary{cursor:pointer;font-family:"Arial","Helvetica Neue",sans-serif;font-size:12.5px;
+  details summary{cursor:pointer;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:12.5px;
     font-weight:700;color:var(--muted);padding:12px 16px;background:var(--paper);border:1px solid var(--line);
     border-radius:12px;list-style:none;}
   details summary::-webkit-details-marker{display:none;}
@@ -130,7 +130,7 @@
   details[open] summary{border-radius:12px 12px 0 0;border-bottom:0;}
   details section{margin-top:0;}
   details[open] section .card{border-radius:0 0 12px 12px;border-top:0;}
-  .legend-inline{font-family:"Arial","Helvetica Neue",sans-serif;font-size:11.5px;color:var(--muted);
+  .legend-inline{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:11.5px;color:var(--muted);
     display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;}
   @media(max-width:880px){.grid2,.demo,.heroRow{grid-template-columns:1fr;}}
   .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
@@ -223,7 +223,7 @@ const fmtSignKm = v => fmtSignK(v/12);
 const fmtPct = v => (v>=0?'+':'−') + Math.abs(v).toFixed(0) + '%';
 const C = getComputedStyle(document.documentElement);
 const col = n => C.getPropertyValue(n).trim();
-Chart.defaults.font.family = "'Arial','Helvetica Neue',sans-serif";
+Chart.defaults.font.family = "system-ui,-apple-system,'Segoe UI',sans-serif";
 Chart.defaults.font.size = 12;
 Chart.defaults.color = col('--muted');
 
@@ -333,7 +333,7 @@ function heroLabelPlugin(){
         const meta = chart.getDatasetMeta(di);
         const bold = ds.__year==='2023';
         ctx.save();
-        ctx.font = bold ? '700 13px "Arial","Helvetica Neue",sans-serif' : '600 11px "Arial","Helvetica Neue",sans-serif';
+        ctx.font = bold ? '700 13px system-ui,-apple-system,"Segoe UI",sans-serif' : '600 11px system-ui,-apple-system,"Segoe UI",sans-serif';
         ctx.fillStyle = bold ? col('--ink') : col('--muted');
         meta.data.forEach((bar,i)=>{
           const val = ds.data[i];
