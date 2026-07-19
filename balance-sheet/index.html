@@ -157,7 +157,12 @@ footer.pagefoot b{color:var(--gold-dim);}
   nav.topnav button{font-size:12.5px;padding:13px 10px;}
   .methodology p,.methodology li{font-size:15.5px;}
   .legend{font-size:13.5px;}
-  .chart-body{overflow-x:auto;}
+  .chart-body{overflow-x:auto;min-height:260px;}
+  /* Charts that were previously half-width inside .grid2/.grid2b/.small-multiples
+     now render full-width at this breakpoint (those grids already collapse to
+     1fr at <=900px above), so their viewBox-based SVGs (width:100%;height:auto)
+     naturally render taller. The min-height above is just a floor so no chart
+     (e.g. a small-multiples tile) ever renders too short to read. */
   /* SVG chart text lives in viewBox user-units, not screen px -- these
      class rules (not inline attrs) win the cascade over the inline
      font-size presentation attributes some charts (e.g. the donut) set,
