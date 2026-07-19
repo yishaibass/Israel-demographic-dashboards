@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VE1ZYYW7TS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-VE1ZYYW7TS');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>סימולטור מנדטים – בחירות לכנסת</title>
@@ -5783,6 +5792,19 @@ function renderExample(eid) {
     { key: 'Niche', cls: 'niche', label: 'אחר', totalLabel: 'אחר' },
   ];
   blocOrder.forEach(function (b) {
+    if (b.key === 'Niche') {
+      // גוש 'אחר' (מפלגות שוליים) מוצג כשורה מאוחדת אחת ולא מפלגה-מפלגה:
+      // האחוז הוא סך הגוש מתוך examples_bloc_totals.csv, בעיצוב הצ'יפ הקיים.
+      const t = totals[b.key];
+      if (t) {
+        const tr = document.createElement('tr');
+        tr.style.fontWeight = '700';
+        tr.innerHTML = '<td colspan="2"><span class="bloc-chip ' + b.cls + '">' + b.totalLabel + '</span></td>' +
+          '<td class="num">' + pct(t.share_of_valid, 1) + '</td>';
+        partyBody.appendChild(tr);
+      }
+      return;
+    }
     parties.filter(function (p) { return p.bloc === b.key; }).forEach(function (p) {
       const tr = document.createElement('tr');
       tr.innerHTML = '<td class="group-cell">' + p.name + '</td>' +
