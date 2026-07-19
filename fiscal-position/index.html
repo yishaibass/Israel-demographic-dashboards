@@ -145,6 +145,43 @@
     .secbtns-slim button{padding:6px 13px;font-size:11.5px;}
     .fintbl{font-size:12px;}
   }
+
+  /* ===== MOBILE: page-by-page scroll-snap (each card = one chart page) ===== */
+  @media (max-width:640px){
+    html{scroll-snap-type:y mandatory; scroll-padding-top:112px; overflow-x:hidden; -webkit-text-size-adjust:100%;}
+    body{overflow-x:hidden;}
+    .wrap{padding:14px 14px 32px;}
+    /* pinned controls */
+    .tabs{position:sticky; top:0; z-index:60; background:var(--bg); gap:2px;
+      border-bottom:1px solid var(--line); box-shadow:0 2px 6px rgba(16,24,40,.06);
+      overflow-x:auto; -webkit-overflow-scrolling:touch;}
+    .tabs button{min-height:46px; padding:12px 14px; font-size:13px; flex:1 0 auto; white-space:nowrap;}
+    .tabs button.on{background:rgba(0,0,0,.045);}
+    .secbtns-slim{position:sticky; top:47px; z-index:55; background:var(--bg);
+      margin:0 -14px; padding:8px 14px; border-bottom:1px solid var(--line);
+      gap:8px; overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch;}
+    .secbtns-slim button{min-height:40px; padding:9px 16px; font-size:12.5px; white-space:nowrap; flex:0 0 auto;}
+    /* one card = one page */
+    #tab-dash .card, #tab-real .card{
+      scroll-snap-align:start; scroll-snap-stop:normal; scroll-margin-top:112px;
+      min-height:100vh; min-height:calc(100dvh - 116px);
+      display:flex; flex-direction:column; justify-content:center; min-width:0;}
+    /* flex/grid items default to min-width:auto — clamp so a wide nowrap table
+       stays inside its overflow-x scroller instead of blowing out the page */
+    #tab-dash .card>*, #tab-real .card>*{min-width:0; max-width:100%;}
+    #tab-dash section, #tab-real section{margin-top:0;}
+    #tab-dash .heroRow, #tab-real .heroRow,
+    #tab-dash .grid2, #tab-real .grid2{gap:0;}
+    footer{scroll-snap-align:start;}
+    /* wide tables: keep horizontal scroll + fade affordance so they never silently clip */
+    .tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;
+      -webkit-mask-image:linear-gradient(to left, transparent 0, #000 22px);
+              mask-image:linear-gradient(to left, transparent 0, #000 22px);}
+    /* readability floors */
+    h1{font-size:22px;} .sub{font-size:13px; line-height:1.55;}
+    .cap{font-size:12px;}
+    .earnbar{height:18px;} .earnbar i span{font-size:11px;}
+  }
 </style>
 </head>
 <body>
@@ -616,6 +653,7 @@ document.getElementById('prov').innerHTML =
 MODES.forEach(m=>{ buildHero(m.data, m.sfx); buildWaterfall(m.data, m.sfx); renderGap(m.data, m.sfx); buildSecBtns(m.data, m.sfx); });
 syncSec(); renderDrill();
 </script>
-<a href="../index.html" aria-label="חזרה לדף הבית" style="position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px">🏠 דף הבית</a>
+<style>.hb-home-back{position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px}.hb-home-back .hb-lbl{display:inline}@media(max-width:480px){.hb-home-back{padding:0;width:40px;height:40px;gap:0;justify-content:center;border-radius:50%;font-size:18px}.hb-home-back .hb-lbl{display:none}}</style>
+<a href="../index.html" class="hb-home-back" aria-label="חזרה לדף הבית">🏠<span class="hb-lbl">דף הבית</span></a>
 </body>
 </html>

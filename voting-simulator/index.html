@@ -46,6 +46,7 @@
 
   .card {
     background: var(--surface-1);
+    --card-bg: var(--surface-1);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 18px 20px;
@@ -65,10 +66,32 @@
 
   .hero-section { background: #ffffff; border: 1px solid var(--border); border-radius: 14px; padding: 4px 4px 2px; }
   .hero-section .card { border: none; box-shadow: none; }
-  .reference-section .card { background: #f5f5f2; }
+  .reference-section .card { background: #f5f5f2; --card-bg: #f5f5f2; }
 
   table { border-collapse: collapse; width: 100%; font-size: 12.8px; }
   .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Table scroll cue — mobile QA priority fix: soft edge fade + swipe hint
+     so an overflowing table never clips silently. .table-scroll-wrap is the
+     positioning context; --card-bg (set per .card variant above) keeps the
+     fade color matched to whichever card background it sits on. RTL: the
+     hint sits on the left (the edge that overflows first on initial load). */
+  .table-scroll-wrap { position: relative; }
+  .table-fade {
+    position: absolute; top: 0; bottom: 0; width: 26px; pointer-events: none;
+    opacity: 0; z-index: 2;
+  }
+  .table-fade-right { right: 0; background: linear-gradient(to right, rgba(0,0,0,0), var(--card-bg, var(--surface-1))); }
+  .table-fade-left  { left: 0;  background: linear-gradient(to left,  rgba(0,0,0,0), var(--card-bg, var(--surface-1))); }
+  .table-scroll-wrap.overflow-right .table-fade-right { opacity: 1; }
+  .table-scroll-wrap.overflow-left  .table-fade-left  { opacity: 1; }
+  .swipe-hint {
+    position: absolute; top: 3px; left: 8px; font-size: 11px; font-weight: 600;
+    color: var(--text-secondary); background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 2px 8px; z-index: 3; pointer-events: none; display: none;
+  }
+  @media (max-width: 480px) {
+    .table-scroll-wrap.has-overflow .swipe-hint { display: inline-block; }
+  }
   th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--grid); vertical-align: middle; }
   th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; text-align: right; }
   th:first-child, td:first-child { text-align: right; }
@@ -232,12 +255,35 @@
     .party-select-row { flex-wrap: wrap; row-gap: 6px; }
     .threshold-field { max-width: 100%; }
     .value-bar-track, .share-bar-track { max-width: 110px; }
+
+    /* Touch targets: bump tappable controls to >=40px tall, and give the
+       number inputs 16px font to avoid iOS zoom-on-focus. Small gaps added
+       between separate tappable groups (tabs, load buttons). */
+    .tabs-bar { gap: 8px; }
+    button.tab-btn, button.load-btn, button.clear-btn, button.toggle-btn, button.sd-btn {
+      min-height: 40px; display: inline-flex; align-items: center; justify-content: center;
+    }
+    button.load-btn, button.clear-btn, button.toggle-btn { padding-top: 9px; padding-bottom: 9px; }
+    input[type=number] {
+      min-height: 40px; font-size: 16px; padding-top: 9px; padding-bottom: 9px;
+    }
+    .load-row { row-gap: 10px; }
   }
 
   @media (max-width: 400px) {
     .headline .stat .n { font-size: 30px; }
-    .badge { width: 22px; height: 22px; font-size: 9.5px; }
-    button.sd-btn { padding: 5px 7px; font-size: 10.5px; }
+    .badge { width: 22px; height: 22px; }
+  }
+
+  /* Item 4 — no user-visible text below 11px on mobile. Overrides any
+     smaller sizes set above (declared last so it wins at equal specificity). */
+  @media (max-width: 430px) {
+    .badge { font-size: 11px; }
+    button.sd-btn { font-size: 11px; padding: 8px 8px; }
+    .share-bar-val { font-size: 11px; }
+    .guidance-mini { font-size: 11px; }
+    .guidance-line { font-size: 11px; }
+    .control-label { font-size: 11px; }
   }
 </style>
 </head>
@@ -346,6 +392,10 @@
 <h3 class="section-title">דפוסי הצבעה לפי קבוצה, <span class="ltr-token">2019&ndash;2022</span></h3>
 <div class="legend-line"><span class="sw" style="background:var(--coalition)"></span>תמיכה בקואליציה &nbsp;&nbsp;<span class="sw" style="background:var(--turnout-line)"></span>אחוז הצבעה</div>
 <div class="card">
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
 <div class="table-scroll">
 <table id="groupsHistTable">
   <thead>
@@ -355,9 +405,14 @@
 </table>
 </div>
 </div>
+</div>
 
 <h3 class="section-title">תוצאות ארציות לפי מערכת בחירות</h3>
 <div class="card">
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
 <div class="table-scroll">
 <table id="actualsTable">
   <thead>
@@ -367,10 +422,15 @@
 </table>
 </div>
 </div>
+</div>
 
 <h3 class="section-title">בדיקת מודל: תחזית מול תוצאה בפועל</h3>
 <p class="hint">אותה נוסחת מנדטים כמו בבניית התרחיש, מיושמת על הנתונים שנרשמו בפועל בכל מערכת בחירות.</p>
 <div class="card">
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
 <div class="table-scroll">
 <table id="validationTable">
   <thead>
@@ -378,6 +438,7 @@
   </thead>
   <tbody></tbody>
 </table>
+</div>
 </div>
 </div>
 </div>
@@ -390,6 +451,10 @@
   <span class="hint" style="margin:0;">מפלגות קואליציה ואופוזיציה בלבד (מפלגות שוליות אינן מוצגות).</span>
 </div>
 <div class="card">
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
 <div class="table-scroll">
 <table id="partiesTable">
   <thead>
@@ -397,6 +462,7 @@
   </thead>
   <tbody></tbody>
 </table>
+</div>
 </div>
 </div>
 </section>
@@ -1419,8 +1485,62 @@ function computeSeats() {
 document.getElementById('wc').addEventListener('input', computeSeats);
 document.getElementById('wo').addEventListener('input', computeSeats);
 computeSeats();
+
+// ---------------------------------------------------------------------
+// Table-scroll overflow cue (mobile QA) — pure UI affordance, no data or
+// logic change. Identical to build_html.py; works for RTL tables too
+// (spec-compliant scrollLeft is negative in RTL, handled below).
+// ---------------------------------------------------------------------
+function updateTableFade(wrap) {
+  const scroller = wrap.querySelector('.table-scroll');
+  if (!scroller) return;
+  const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+  if (maxScroll <= 1) {
+    wrap.classList.remove('has-overflow', 'overflow-left', 'overflow-right');
+    return;
+  }
+  wrap.classList.add('has-overflow');
+  const rtl = getComputedStyle(scroller).direction === 'rtl';
+  const sl = scroller.scrollLeft;
+  if (!rtl) {
+    wrap.classList.toggle('overflow-right', sl < maxScroll - 1);
+    wrap.classList.toggle('overflow-left', sl > 1);
+  } else {
+    // Spec-compliant RTL: scrollLeft ranges from 0 (start/right) down to
+    // -maxScroll (end/left).
+    wrap.classList.toggle('overflow-left', sl > -(maxScroll - 1));
+    wrap.classList.toggle('overflow-right', sl < -1);
+  }
+}
+const tableScrollWraps = Array.prototype.slice.call(document.querySelectorAll('.table-scroll-wrap'));
+function refreshAllTableFades() { tableScrollWraps.forEach(updateTableFade); }
+tableScrollWraps.forEach(function (wrap) {
+  const scroller = wrap.querySelector('.table-scroll');
+  if (scroller) scroller.addEventListener('scroll', function () { updateTableFade(wrap); });
+});
+window.addEventListener('resize', refreshAllTableFades);
+// A ResizeObserver re-checks each scroller whenever it gains/changes size —
+// this fires when a hidden tab panel becomes visible and the table finally
+// lays out, so the cue appears without any manual resize/scroll.
+if (typeof ResizeObserver !== 'undefined') {
+  tableScrollWraps.forEach(function (wrap) {
+    const scroller = wrap.querySelector('.table-scroll');
+    if (scroller) new ResizeObserver(function () { updateTableFade(wrap); }).observe(scroller);
+  });
+}
+refreshAllTableFades();
+// Hidden tab panels report 0 width until shown — recheck on every tab switch.
+// Defer with a real timer (not rAF) so the just-shown panel has reflowed and
+// the table reports its true width before we measure overflow.
+document.querySelectorAll('.tab-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    refreshAllTableFades();
+    setTimeout(refreshAllTableFades, 60);
+  });
+});
 </script>
 
-<a href="../index.html" aria-label="חזרה לדף הבית" style="position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px">🏠 דף הבית</a>
+<style>.hb-home-back{position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px}.hb-home-back .hb-lbl{display:inline}@media(max-width:480px){.hb-home-back{padding:0;width:40px;height:40px;gap:0;justify-content:center;border-radius:50%;font-size:18px}.hb-home-back .hb-lbl{display:none}}</style>
+<a href="../index.html" class="hb-home-back" aria-label="חזרה לדף הבית">🏠<span class="hb-lbl">דף הבית</span></a>
 </body>
 </html>

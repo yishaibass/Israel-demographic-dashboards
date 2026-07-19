@@ -94,6 +94,12 @@ svg.viz circle.mark:hover{filter:brightness(1.1);}
   padding:6px 10px;font-family:inherit;font-size:13px;cursor:pointer;}
 .selector-row select:hover,.selector-row select:focus{border-color:var(--gold);outline:none;}
 
+.table-scroll{position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.table-scroll.is-scrollable::after{content:'';position:absolute;top:0;right:0;bottom:0;width:26px;
+  pointer-events:none;background:linear-gradient(to right, transparent, var(--panel));}
+[dir="rtl"] .table-scroll.is-scrollable::after{right:auto;left:0;
+  background:linear-gradient(to left, transparent, var(--panel));}
+
 table.stmt{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px;}
 table.stmt td{padding:5px 4px;border-bottom:1px solid var(--line);}
 table.stmt td.amt{text-align:right;font-variant-numeric:tabular-nums;color:var(--txt);}
@@ -154,7 +160,10 @@ footer.pagefoot b{color:var(--gold-dim);}
   .datatable th{font-size:11.5px;}
   .kpi-tile .lab{font-size:12px;}
   .kpi-tile .note{font-size:12.5px;}
-  nav.topnav button{font-size:12.5px;padding:13px 10px;}
+  nav.topnav .wrap{gap:10px;}
+  nav.topnav button{font-size:12.5px;padding:13px 10px;min-height:40px;}
+  .selector-row{gap:12px;}
+  .selector-row select{min-height:42px;padding:10px 12px;font-size:15px;}
   .methodology p,.methodology li{font-size:15.5px;}
   .legend{font-size:13.5px;}
   .chart-body{overflow-x:auto;min-height:260px;}
@@ -167,10 +176,66 @@ footer.pagefoot b{color:var(--gold-dim);}
      class rules (not inline attrs) win the cascade over the inline
      font-size presentation attributes some charts (e.g. the donut) set,
      since presentation attributes sit below author CSS in specificity. */
-  svg.viz .cat-label{font-size:38px;}
-  svg.viz .val-label{font-size:34px;}
-  svg.viz .seg-label{font-size:30px;}
-  svg.viz .axis-tick{font-size:30px;}
+  /* Font sizes below are in SVG viewBox *user units*, not screen px --
+     rendered px = user-units * (containerWidthPx/viewBoxWidth). The chart JS
+     below also switches each chart's viewBox width from ~860-900 (desktop)
+     down to ~380 (mobile, MOBILE branch) to get a taller aspect ratio; that
+     narrower viewBox means the same container width maps to a BIGGER scale
+     factor, so these class font-sizes are scaled down from the original
+     38/34/30/30 by roughly that same ratio (380/860 ~= 0.44) to keep the
+     rendered (on-screen) text size roughly where it was, not larger. */
+  /* Bumped again (17/15/13/13 -> 19/19/19/19): measured rendered (on-screen,
+     post-viewBox-scale) sizes at 360-390px showed val-label/seg-label/axis-tick
+     landing at ~9-11px -- under the ~11px legibility floor -- because the
+     actual chart-container width (and therefore the viewBox-to-screen scale
+     factor) is smaller than the ratio this comment block originally assumed,
+     especially for the narrower nested small-multiples participation tiles
+     (container ~228px, scale ~0.6). Uniform 19px nominal keeps every class
+     >=11px actual even in that narrowest (0.6 scale) case. */
+  svg.viz .cat-label{font-size:19px;}
+  svg.viz .val-label{font-size:19px;}
+  svg.viz .seg-label{font-size:19px;}
+  svg.viz .axis-tick{font-size:19px;}
+
+  /* --- One-chart-per-screen scroll experience (mobile only) ---------------
+     `proximity` (not `mandatory`) is deliberate: several cards on this page
+     are taller than one viewport (the multi-chart participation card, the
+     income-composition legend+bars, a long Hebrew dimension chart with wide
+     category labels), and `mandatory` would fight the user trying to read
+     the middle of a tall card by yanking the scroll back to the nearest
+     snap point on every gesture. `proximity` still gives the snap-to-next-
+     chart feel on the common case (a card that fits ~one screen) without
+     that trap. The unit is one CHART per screen: cards holding exactly one
+     chart (or one table) become snap targets. Cards nested one level down
+     inside the participation small-multiples grid are explicitly opted back
+     out below so only the outer card snaps, not each of its 4 mini-charts.
+     The two table cards (balance-sheet statement, ratios) DO snap (a table
+     can be its own screen); the KPI tile row and the long-form methodology
+     section (no .card wrapper there) are left out of the snap flow on
+     purpose -- see the build_dashboard.py docstring/report for rationale. */
+  html{scroll-snap-type:y proximity;}
+  .pagesec > .card, .grid2 > .card, .grid2b > .card{
+    scroll-snap-align:start;
+    scroll-margin-top:50px; /* clears the sticky top nav so a snapped card's
+                                title isn't hidden underneath it */
+    min-height:100vh;   /* fallback for browsers without svh/dvh support */
+    min-height:100svh;  /* small viewport height -- ignores mobile browser
+                            chrome (address bar) show/hide so a snapped
+                            chart doesn't get clipped by it */
+    display:flex;
+    flex-direction:column;
+    justify-content:center; /* centers the chart vertically when the card is
+                                shorter than one screen; cards taller than a
+                                screen (see above) simply overflow normally */
+  }
+  .small-multiples .card{
+    /* opt the 4 inner participation-metric mini-cards back OUT of the
+       one-screen treatment above -- only the single outer card that wraps
+       the whole small-multiples grid should be a snap target/full screen */
+    scroll-snap-align:none;
+    min-height:0;
+    display:block;
+  }
 }
 @media (max-width:560px){
   .kpi-row{grid-template-columns:1fr;}
@@ -207,7 +272,7 @@ footer.pagefoot b{color:var(--gold-dim);}
     <div class="card">
       <h3>המאזן של משק בית ממוצע</h3>
       <div class="csrc">מקור: fig_national_balance_sheet.csv &middot; ◇ = מודלי (ראו פרק 5)</div>
-      <table class="stmt" id="bs-statement"></table>
+      <div class="table-scroll"><table class="stmt" id="bs-statement"></table></div>
     </div>
     <div class="card">
       <h3>הרכב הנכסים הארצי</h3>
@@ -262,14 +327,10 @@ footer.pagefoot b{color:var(--gold-dim);}
     <div class="chart-body" id="chart-percentile-spread"></div>
   </div>
 
-  <div class="caveat">
-    <b>הסתייגות.</b> לפני חישוב הנתונים הסכומים נחתכים (winsorization) סביב האחוזון ה-99&ndash;99.5, כדי לצמצם את השפעתם של ערכים קיצוניים שדווחו (ראו fig_meta.json, ״winsorization״). בנוסף, ידוע היטב שסקרי משקי בית כמו זה מדגמים ומדווחים בחסר את החזקותיהם של העשירים מאוד &mdash; נדירים בכל מדגם אוכלוסייה ופחות נוטים לחשוף את מלוא נכסיהם. שתי ההשפעות פועלות באותו כיוון: סביר יותר שהאחוזונים ומקדם הג׳יני המוצגים כאן <b>ממעיטים</b> בריכוזיות ההון האמיתית בישראל מאשר מפריזים בה.
-  </div>
-
   <div class="card">
     <h3>יחסים פיננסיים לפי קבוצה חברתית, 2023</h3>
     <div class="csrc">מקור: fig_ratios_by_group.csv</div>
-    <table class="datatable" id="table-ratios"></table>
+    <div class="table-scroll"><table class="datatable" id="table-ratios"></table></div>
   </div>
 </section>
 
@@ -331,6 +392,9 @@ footer.pagefoot b{color:var(--gold-dim);}
 
   <h4>חיתוך ערכים (Winsorization) ותרשימי הפיזור</h4>
   <p>כל הסכומים נחתכים באחוזון ה-99 (הכנסה באחוזון ה-99.5), עם רצפה של אפס, כדי לצמצם את השפעתם של מעט ערכים קיצוניים על כל ממוצע בלוח &mdash; פרט לתרשימי הפיזור בפרק 3 (אחוזונים, ג׳יני, חלק העשירון העליון), הנבנים מחיתוך מתון יותר באחוזון ה-99.5. זו בחירה מכוונת: חיתוך אגרסיבי מדי של הזנב העליון היה ממעיט דווקא באי-השוויון שאותן סטטיסטיקות אמורות למדוד.</p>
+  <div class="caveat">
+    <b>הסתייגות.</b> לפני חישוב הנתונים הסכומים נחתכים (winsorization) סביב האחוזון ה-99&ndash;99.5, כדי לצמצם את השפעתם של ערכים קיצוניים שדווחו (ראו fig_meta.json, ״winsorization״). בנוסף, ידוע היטב שסקרי משקי בית כמו זה מדגמים ומדווחים בחסר את החזקותיהם של העשירים מאוד &mdash; נדירים בכל מדגם אוכלוסייה ופחות נוטים לחשוף את מלוא נכסיהם. שתי ההשפעות פועלות באותו כיוון: סביר יותר שהאחוזונים ומקדם הג׳יני המוצגים כאן <b>ממעיטים</b> בריכוזיות ההון האמיתית בישראל מאשר מפריזים בה.
+  </div>
 
   <h4>רוטציית הגלים האי-זוגיים</h4>
   <p>נכסים והתחייבויות פיננסיים (פיקדונות, השקעות, משכנתה, הלוואות צרכניות, נכס נוסף, קרקע) אינם נאספים בגלים האי-זוגיים (2012, 2014, 2017, 2019, 2021). בשנים אלו השווי נטו אינו מוגדר (לא אפס); הנתונים בלוח זה נלקחים מגל 10 (2023), גל זוגי שבו נאסף מלוא המידע הפיננסי.</p>
@@ -342,12 +406,12 @@ footer.pagefoot b{color:var(--gold-dim);}
   <h4>מגבלות</h4>
   <ul>
     <li>שורות מודליות (פנסיה ושוויי דירות זקופים) נושאות אי-ודאות מודל מעבר לטעות הדגימה הרגילה.</li>
-    <li>חיתוך הערכים מגביל את השפעת קצה הפיזור העליון, מה שכנראה ממעיט בריכוזיות ההון (ראו ההסתייגות בפרק 3).</li>
+    <li>חיתוך הערכים מגביל את השפעת קצה הפיזור העליון, מה שכנראה ממעיט בריכוזיות ההון (ראו ההסתייגות לעיל).</li>
     <li>גודל המדגם משתנה מאוד בין הקבוצות (לחרדים ולמסורתיים יש רק כ-170&ndash;530 משקי בית בגל 10, לעומת כ-2,000 לחילונים); אומדנים מבוססי-מדגם קטן רועשים יותר מכפי שנראה מהמספרים הראשיים.</li>
   </ul>
 
   <h4>רשימת קובצי הנתונים</h4>
-  <table class="datatable" id="table-manifest"></table>
+  <div class="table-scroll"><table class="datatable" id="table-manifest"></table></div>
 </section>
 
 </div>
@@ -380,6 +444,35 @@ const SVGNS = 'http://www.w3.org/2000/svg';
 // chart mirroring (MX), gutter widths (leftPad) and text direction/anchoring.
 const RTL = true;
 
+// Mobile chart-geometry flag -- mirrors the ≤640px CSS breakpoint. Charts read
+// this at DRAW time (not just once) so that a debounced resize/orientation
+// listener near the bottom of this script can flip it and redraw every chart
+// with the other geometry when the viewport crosses the breakpoint (e.g.
+// rotating a phone, or resizing a desktop window down past 640px).
+const MOBILE_MQ = window.matchMedia('(max-width:640px)');
+let MOBILE = MOBILE_MQ.matches;
+
+// Every chart-drawing call below registers a zero-arg "redraw me" function
+// here (after clearing its own container) so the resize watcher can just
+// replay this list instead of re-running each section's one-time DOM setup
+// (option population, small-multiples card creation, etc.) a second time.
+const CHART_RENDERERS = [];
+
+// Wide-table horizontal-scroll affordance. Tables (balance-sheet statement,
+// ratios, manifest) are wrapped in a `.table-scroll` div; whenever a wrapper's
+// content is actually wider than the wrapper itself, we tag it `.is-scrollable`
+// so the CSS edge-fade cue (see `.table-scroll.is-scrollable::after`) appears --
+// otherwise a table wider than a mobile viewport would silently clip with no
+// visual hint that there's more to see by scrolling. Re-run after every table
+// render and on resize (table width can change independent of the MOBILE
+// breakpoint, e.g. dragging a desktop window).
+function markScrollableTables(){
+  document.querySelectorAll('.table-scroll').forEach(el=>{
+    if(el.scrollWidth > el.clientWidth + 4) el.classList.add('is-scrollable');
+    else el.classList.remove('is-scrollable');
+  });
+}
+
 // Data-derived display labels for the active language only (see TR in
 // build_dashboard.py). English's TR is empty, so tr() is pure identity there.
 const TR = {"All": "כלל האוכלוסייה", "Haredi": "חרדים", "Dati (Religious)": "דתיים", "Masorti": "מסורתיים", "Hiloni (Secular)": "חילונים", "Arab": "ערבים", "Primary Residence": "דירת מגורים", "Additional Properties": "נכסי נדל״ן נוספים", "Land & Other Real Estate": "קרקע ונדל״ן אחר", "Total Real Estate": "סך הנדל״ן", "Bank Deposits & Savings": "פיקדונות וחיסכון בבנק", "Investment Portfolio": "תיק השקעות", "Pension & Retirement Savings": "פנסיה וחיסכון לטווח ארוך", "Total Financial Assets": "סך הנכסים הפיננסיים", "Total Assets": "סך הנכסים", "Mortgage": "משכנתה", "Consumer Loans": "הלוואות צרכניות", "Total Liabilities": "סך ההתחייבויות", "Net Worth": "שווי נטו", "Assets — Real Estate": "נכסים — נדל״ן", "Assets — Financial": "נכסים — פיננסיים", "Liabilities": "התחייבויות", "Real Estate": "נדל״ן", "Financial ex-pension": "פיננסי (ללא פנסיה)", "Pension": "פנסיה", "Pension ◇": "פנסיה ◇", "Total assets": "סך הנכסים", "Share of assets": "חלק מסך הנכסים", "Mean value": "ערך ממוצע", "Total / month": "סה״כ לחודש", "p50 (median)": "p50 (חציון)", "Mean": "ממוצע", "Median": "חציון", "Bar = mean": "עמודה = ממוצע", "Tick = median": "קו = חציון", "Box = p25–p75": "קופסה = p25–p75", "Line = median (p50)": "קו = חציון (p50)", "Whiskers = p10–p90": "שפמים = p10–p90", "Education": "השכלה", "Age band": "קבוצת גיל", "Tenure": "צורת מגורים", "Household size": "גודל משק הבית", "Occupation": "משלח יד", "Locality SES": "אשכול חברתי-כלכלי (יישוב)", "No diploma": "ללא תעודה", "Secondary / Matriculation": "תיכונית / בגרות", "Post-secondary (non-academic)": "על-תיכונית (לא אקדמית)", "Academic degree": "תואר אקדמי", "Under 35": "עד 35", "35-44": "35–44", "45-54": "45–54", "55-64": "55–64", "65-74": "65–74", "75+": "75+", "Owner": "בעלות", "Renter": "שכירות", "Other": "אחר", "Managers & Professionals": "מנהלים ובעלי מקצועות חופשיים", "Technicians & Clerical": "טכנאים ופקידות", "Sales & Service": "מכירות ושירותים", "Skilled Manual & Agriculture": "עבודה מקצועית וחקלאות", "Operators & Unskilled": "מפעילים ובלתי-מקצועיים", "Low cluster (1-3)": "אשכול נמוך (1–3)", "Mid cluster (4-7)": "אשכול בינוני (4–7)", "High cluster (8-10)": "אשכול גבוה (8–10)", "With a mortgage": "עם משכנתה", "With a pension": "עם פנסיה", "Owns additional property": "בעלות על נכס נוסף", "With an investment portfolio": "עם תיק השקעות", "Work": "עבודה", "Govt transfers": "קצבאות והעברות", "Rental": "שכר דירה", "Interest": "ריבית", "Capital gains": "רווחי הון", "Mean net worth": "שווי נטו ממוצע", "Capital-income share": "שיעור הכנסות ההון", "Group": "קבוצה", "Leverage ratio": "יחס מינוף", "Equity ratio": "יחס הון עצמי", "Debt / income": "חוב להכנסה", "File": "קובץ", "Description": "תיאור"};
@@ -390,7 +483,7 @@ function tr(s){ return (TR[s]!==undefined) ? TR[s] : s; }
 const MANIFEST_DESC = {"fig_national_balance_sheet.csv": "מאזן ארצי, גל 10 (2023)", "fig_networth_by_group.csv": "אגרגט שווי נטו ומאזן לפי קבוצה חברתית", "fig_composition_by_group.csv": "חלקי הרכב הנכסים לפי קבוצה", "fig_networth_by_dimension.csv": "שווי נטו לפי חתכים חברתיים-דמוגרפיים", "fig_networth_distribution.csv": "אחוזונים, ממוצע, חלק העשירון העליון ומקדם ג׳יני", "fig_income_wealth.csv": "הקשר בין עשירון הכנסה לעושר", "fig_trajectory.csv": "סדרת זמן על פני 10 גלים, כלל האוכלוסייה והקבוצות", "fig_participation.csv": "שיעורי החזקה לפי קבוצה", "fig_ratios_by_group.csv": "מינוף / הון עצמי / חוב-להכנסה לפי קבוצה", "fig_income_composition_by_group.csv": "הרכב ההכנסה לפי מקור ולפי קבוצה", "fig_meta.json": "מטא-נתונים: מתודולוגיה, תוויות ועוגני כיול"};
 
 // KPI tile label/note strings (Section 1) for the active language.
-const UI = {"kpi1_label": "שווי נטו ממוצע, 2023", "kpi1_note": "כלל משקי הבית, משוקלל.", "kpi2_label": "שווי נטו חציוני, 2023", "kpi2_note": "משק הבית האופייני — למחצית יש יותר, למחצית פחות.", "kpi3_label": "שיעור הנדל״ן מסך הנכסים", "kpi3_note": "סך הנדל״ן ÷ סך הנכסים, מאזן ארצי.", "kpi4_label": "מקדם ג׳יני, שווי נטו", "kpi4_note": "0 = שוויון, 1 = ריכוזיות מלאה. ראו הסתייגות בפרק 3."};
+const UI = {"kpi1_label": "שווי נטו ממוצע, 2023", "kpi1_note": "כלל משקי הבית, משוקלל.", "kpi2_label": "שווי נטו חציוני, 2023", "kpi2_note": "משק הבית האופייני — למחצית יש יותר, למחצית פחות.", "kpi3_label": "שיעור הנדל״ן מסך הנכסים", "kpi3_note": "סך הנדל״ן ÷ סך הנכסים, מאזן ארצי.", "kpi4_label": "מקדם ג׳יני, שווי נטו", "kpi4_note": "0 = שוויון, 1 = ריכוזיות מלאה. ראו הסתייגות במתודולוגיה."};
 
 // Single primary accent used for EVERY single-series magnitude bar (net worth,
 // participation rates, income-decile bars, box-plot fill, etc). Chosen once and
@@ -465,6 +558,18 @@ function moveTooltip(evt){
 }
 function hideTooltip(){ ttEl.style.display = 'none'; }
 
+// On touch devices there is no true "hover" -- a tap fires pointerdown/move
+// (which shows the tooltip via the chart marks' own listeners below) but
+// often no 'pointerleave' at all, since there's no pointer left hovering to
+// leave. Without this, a tapped tooltip can stay stuck on screen, overlapping
+// whatever the user scrolls to next. Hiding on any scroll (capture, so it
+// fires before the scroll-snap settles) and on any new touch elsewhere
+// (capture phase, so it runs before that touch's own pointermove/show, if
+// any -- e.g. tapping a different mark still hides-then-shows correctly in
+// the same gesture) keeps the tooltip from ever surviving past its target.
+window.addEventListener('scroll', hideTooltip, {passive:true, capture:true});
+document.addEventListener('touchstart', hideTooltip, {passive:true, capture:true});
+
 // ---------------------------------------------------------------------------
 // SVG helpers
 // ---------------------------------------------------------------------------
@@ -477,6 +582,72 @@ function svText(x, y, content, cls, attrs){
   const e = sv('text', Object.assign({x, y}, attrs||{}));
   if(cls) e.setAttribute('class', cls);
   e.textContent = content;
+  return e;
+}
+
+// Off-screen canvas used purely to MEASURE text width in CSS px (matches the
+// system-ui stack used throughout the page closely enough for wrap decisions;
+// never rendered, never appended to the document).
+const _measureCanvas = document.createElement('canvas');
+const _measureCtx = _measureCanvas.getContext('2d');
+function textWidthPx(str, fontSizePx){
+  _measureCtx.font = fontSizePx + 'px system-ui, -apple-system, "Segoe UI", sans-serif';
+  return _measureCtx.measureText(str).width;
+}
+// Greedy word-wrap into at most 2 lines (a 3rd+ line would need more vertical
+// room than the mobile row height comfortably gives every chart type here).
+// Any words beyond what fits on 2 lines are appended to the 2nd line as-is
+// (may still overflow in the rare case of a single very long word -- no
+// worse than the un-wrapped original, and every real category label in this
+// dataset fits within 2 lines at the mobile font size).
+function wrapLabelLines(str, maxWidthPx, fontSizePx){
+  if(textWidthPx(str, fontSizePx) <= maxWidthPx) return [str];
+  const words = str.split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w=>{
+    const candidate = cur ? cur+' '+w : w;
+    if(cur && textWidthPx(candidate, fontSizePx) > maxWidthPx){
+      lines.push(cur);
+      cur = w;
+    } else {
+      cur = candidate;
+    }
+  });
+  if(cur) lines.push(cur);
+  if(lines.length > 2) lines = [lines[0], lines.slice(1).join(' ')];
+  return lines;
+}
+
+// Category-axis row label that WRAPS onto a 2nd line (instead of clipping
+// past the SVG's left edge / a bar it shouldn't overlap) whenever the text is
+// wider than the leftPad gutter it has to live in. This only kicks in on
+// MOBILE, where the leftPad gutter is narrowest relative to the larger
+// (19px, see the <=640px CSS block) mobile category-label font -- desktop's
+// wider gutters and smaller 16px font were never observed to overflow.
+// `maxWidthPx` should be the caller's available gutter width in the SAME
+// viewBox user-units as `x`/`y` (viewBox units render 1:1 with CSS px inside
+// an SVG, so textWidthPx's px measurement is directly comparable). The
+// multi-line block is anchored so its LAST line lands on the original `y`
+// (growing upward), matching every single-line call site's existing
+// bottom-of-row baseline.
+function svCatLabelWrap(x, y, text, maxWidthPx, rtl, extraAttrs){
+  const attrs = Object.assign({'text-anchor':'end'}, rtl ? {direction:'rtl'} : {}, extraAttrs||{});
+  const fontSizePx = MOBILE ? 19 : 16;
+  if(!MOBILE || !maxWidthPx || textWidthPx(text, fontSizePx) <= maxWidthPx){
+    return svText(x, y, text, 'cat-label', attrs);
+  }
+  const lines = wrapLabelLines(text, maxWidthPx, fontSizePx);
+  const lineHeight = fontSizePx + 2;
+  const e = sv('text', Object.assign({x, y: y - (lines.length-1)*lineHeight}, attrs));
+  e.setAttribute('class', 'cat-label');
+  lines.forEach((line,i)=>{
+    const tspan = document.createElementNS(SVGNS, 'tspan');
+    tspan.setAttribute('x', x);
+    if(i>0) tspan.setAttribute('dy', lineHeight);
+    tspan.textContent = line;
+    e.appendChild(tspan);
+  });
   return e;
 }
 function niceMax(v){
@@ -521,8 +692,8 @@ function chartHBarGrouped(containerId, rows, labelKey, series, opts){
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH;
-    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH+2, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
-    else svgEl.appendChild(svText(leftPad-10, cy+barH+2, tr(r[labelKey]), 'cat-label', {'text-anchor':'end'}));
+    if(RTL) svgEl.appendChild(svCatLabelWrap(MX(leftPad-10), cy+barH+2, tr(r[labelKey]), leftPad-14, true));
+    else svgEl.appendChild(svCatLabelWrap(leftPad-10, cy+barH+2, tr(r[labelKey]), leftPad-14, false));
     series.forEach((s,si)=>{
       const v = num(r[s.key])||0;
       const by = cy + si*(barH+gap);
@@ -548,8 +719,14 @@ function chartHBarGrouped(containerId, rows, labelKey, series, opts){
 function chartBarWithMedianTick(containerId, rows, labelKey, meanKey, medianKey, opts){
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = opts.rowH||40, barH = opts.barH||20, leftPad = opts.leftPad || (RTL?210:175), rightPad = 85, topPad = 8;
-  const width = opts.width||860;
+  // MOBILE branch: narrower viewBox (480 vs 860) + taller rowH/barH so the
+  // same bar-chart geometry naturally renders TALL at full mobile width
+  // instead of wide-and-short. leftPad shrinks in proportion (category-label
+  // gutter scales with the narrower viewBox + the smaller mobile font-size
+  // set in the CSS <=640px block) so labels keep the same visual proportion.
+  const rowH = opts.rowH || (MOBILE?120:40), barH = opts.barH || (MOBILE?64:20),
+        leftPad = opts.leftPad || (RTL?(MOBILE?155:210):(MOBILE?150:175)), rightPad = 85, topPad = 8;
+  const width = opts.width || (MOBILE?380:860);
   const height = rows.length*rowH + topPad + 6;
   const maxVal = Math.max(...rows.flatMap(r=>[num(r[meanKey])||0, num(r[medianKey])||0])) * 1.1;
   const scaleW = width - leftPad - rightPad;
@@ -569,8 +746,8 @@ function chartBarWithMedianTick(containerId, rows, labelKey, meanKey, medianKey,
     // RTL: anchor 'end' (explicit direction:rtl) pins the label's LEFT edge at
     // MX(leftPad-10) -- just outside the bar's gutter boundary -- and grows the
     // text RIGHTWARD into the open right-margin, away from the bar.
-    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
-    else svgEl.appendChild(svText(leftPad-10, cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end'}));
+    if(RTL) svgEl.appendChild(svCatLabelWrap(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), leftPad-14, true));
+    else svgEl.appendChild(svCatLabelWrap(leftPad-10, cy+barH-4, tr(r[labelKey]), leftPad-14, false));
     const w = Math.max(x(meanV),1.5);
     const rect = sv('rect',{class:'mark', x: RTL?MX(leftPad+w):leftPad, y:cy, width:w, height:barH, rx:4, fill:PRIMARY_ACCENT});
     svgEl.appendChild(rect);
@@ -603,8 +780,8 @@ function chartStacked100(containerId, groups, segmentGetter, segments, opts){
   // segmentGetter(groupLabel, segKey) -> share (0..1)
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = 40, barH = 22, leftPad = opts.leftPad || (RTL?210:175), rightPad = 14, topPad = 6;
-  const width = 860;
+  const rowH = MOBILE?120:40, barH = MOBILE?64:22, leftPad = opts.leftPad || (RTL?(MOBILE?155:210):(MOBILE?150:175)), rightPad = 14, topPad = 6;
+  const width = MOBILE?380:860;
   const height = groups.length*rowH + topPad + 6;
   const scaleW = width - leftPad - rightPad;
   const gapPx = 2;
@@ -614,8 +791,8 @@ function chartStacked100(containerId, groups, segmentGetter, segments, opts){
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   groups.forEach((g,i)=>{
     const cy = topPad + i*rowH;
-    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH-5, tr(g), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
-    else svgEl.appendChild(svText(leftPad-10, cy+barH-5, tr(g), 'cat-label', {'text-anchor':'end'}));
+    if(RTL) svgEl.appendChild(svCatLabelWrap(MX(leftPad-10), cy+barH-5, tr(g), leftPad-14, true));
+    else svgEl.appendChild(svCatLabelWrap(leftPad-10, cy+barH-5, tr(g), leftPad-14, false));
     let cx = leftPad;
     segments.forEach((s,si)=>{
       const share = segmentGetter(g, s.key) || 0;
@@ -645,8 +822,8 @@ function chartStacked100(containerId, groups, segmentGetter, segments, opts){
 function chartStackedAbs(containerId, rows, labelKey, segments, opts){
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = 46, barH = 24, leftPad = opts.leftPad || (RTL?210:175), rightPad = 88, topPad = 6;
-  const width = 860;
+  const rowH = MOBILE?120:46, barH = MOBILE?64:24, leftPad = opts.leftPad || (RTL?(MOBILE?155:210):(MOBILE?150:175)), rightPad = 88, topPad = 6;
+  const width = MOBILE?380:860;
   const height = rows.length*rowH + topPad + 6;
   const scaleW = width - leftPad - rightPad;
   const totals = rows.map(r=>segments.reduce((a,s)=>a+(num(r[s.key])||0),0));
@@ -658,8 +835,8 @@ function chartStackedAbs(containerId, rows, labelKey, segments, opts){
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH + (rowH-barH)/2 - 3;
-    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH-7, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
-    else svgEl.appendChild(svText(leftPad-10, cy+barH-7, tr(r[labelKey]), 'cat-label', {'text-anchor':'end'}));
+    if(RTL) svgEl.appendChild(svCatLabelWrap(MX(leftPad-10), cy+barH-7, tr(r[labelKey]), leftPad-14, true));
+    else svgEl.appendChild(svCatLabelWrap(leftPad-10, cy+barH-7, tr(r[labelKey]), leftPad-14, false));
     const total = totals[i];
     let cx = leftPad;
     segments.forEach((s,si)=>{
@@ -694,11 +871,18 @@ function chartDonut(containerId, segs){ // segs: [{label,value,color}]
   // Hebrew: legend sits on the LEFT (natural reading position on an RTL page)
   // and is widened (legendW 250) so the longest segment label
   // ("פיננסי (ללא פנסיה)") fits fully; the donut is shifted right by legendW.
-  const size = 240, cy = size/2, rOuter = 96, rInner = 58;
-  const legendW = RTL ? 250 : 190;
-  const width = size + legendW;
-  const cx = RTL ? (legendW + size/2) : size/2;
-  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${size}`});
+  // MOBILE: legend moves BELOW the donut instead of beside it (a side legend
+  // at mobile width would squeeze the donut down to almost nothing), and the
+  // donut itself is drawn bigger since it's no longer sharing width with a
+  // side legend -- this is the "taller" branch for what is otherwise a
+  // roughly-square chart.
+  const size = MOBILE ? 300 : 240, cy = size/2, rOuter = MOBILE?128:96, rInner = MOBILE?74:58;
+  const legendW = MOBILE ? 0 : (RTL ? 250 : 190);
+  const width = MOBILE ? 340 : (size + legendW);
+  const cx = MOBILE ? width/2 : (RTL ? (legendW + size/2) : size/2);
+  const legendRowH = MOBILE ? 70 : 0;
+  const height = MOBILE ? (size + 34 + segs.length*legendRowH) : size;
+  const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   let angle = -Math.PI/2;
   segs.forEach(s=>{
     const frac = s.value/total;
@@ -719,10 +903,29 @@ function chartDonut(containerId, segs){ // segs: [{label,value,color}]
   const t2 = svText(cx, cy+(RTL?16:15), fmtNISCompact(total), null, {'text-anchor':'middle','font-size':21,'font-weight':600});
   t2.setAttribute('fill','var(--txt)');
   svgEl.appendChild(t2);
-  // side legend with values
-  let ly = RTL ? 38 : 36;
+  // side legend with values (below the donut on MOBILE, beside it otherwise)
+  let ly = MOBILE ? (size + 34) : (RTL ? 38 : 36);
   segs.forEach(s=>{
-    if(RTL){
+    if(MOBILE){
+      // one row per segment, stacked below the donut; RTL still gets a
+      // mirrored (right-anchored) layout so Hebrew text reads naturally.
+      const swX = RTL ? (width - 40 - 16) : 40;
+      const sw = sv('rect',{x:swX, y:ly-14, width:16, height:16, rx:2, fill:s.color});
+      svgEl.appendChild(sw);
+      const textX = RTL ? swX - 10 : swX + 24;
+      // 'start' is direction-relative in SVG (not physical): under the RTL
+      // direction this Hebrew (and unicode-bidi:plaintext-resolved) text
+      // resolves to, 'start' anchors at the PHYSICAL RIGHT and grows left --
+      // exactly the "swatch on the right, text growing toward center" layout
+      // this branch wants. Under plain LTR direction 'start' anchors at the
+      // physical left and grows right, which is what the else-branch wants.
+      // So, perhaps counter-intuitively, both branches use the same token.
+      svgEl.appendChild(svText(textX, ly, tr(s.label), 'cat-label', {'font-size':22,'text-anchor':'start'}));
+      const t = svText(textX, ly+24, `${fmtPct(s.value/total)}  ·  ${fmtNIS(s.value)}`, null, {'font-size':18,'text-anchor':'start'});
+      t.setAttribute('fill','var(--dim)');
+      svgEl.appendChild(t);
+      ly += legendRowH;
+    } else if(RTL){
       // right-aligned toward the donut so the color swatch sits closest to the
       // chart it labels; full strings never clipped because legendW (250)
       // comfortably exceeds the longest label's rendered width.
@@ -753,8 +956,9 @@ function chartDonut(containerId, segs){ // segs: [{label,value,color}]
 function chartHBarSingle(containerId, rows, labelKey, valueKey, opts){
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = opts.rowH||34, barH = opts.barH||18, leftPad = opts.leftPad || (RTL?170:160), rightPad = 70, topPad = 6;
-  const width = opts.width||860;
+  const rowH = opts.rowH || (MOBILE?100:34), barH = opts.barH || (MOBILE?56:18),
+        leftPad = opts.leftPad || (RTL?(MOBILE?155:170):(MOBILE?150:160)), rightPad = 70, topPad = 6;
+  const width = opts.width || (MOBILE?380:860);
   const vals = rows.map(r=>num(r[valueKey])||0);
   const minV = Math.min(0,...vals), maxV = Math.max(...vals)*1.12;
   const height = rows.length*rowH + topPad + 6;
@@ -773,8 +977,8 @@ function chartHBarSingle(containerId, rows, labelKey, valueKey, opts){
     const cy = topPad + i*rowH;
     const v = num(r[valueKey])||0;
     const color = opts.colorFn ? opts.colorFn(r) : (opts.color||'#2a78d6');
-    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
-    else svgEl.appendChild(svText(leftPad-10, cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end'}));
+    if(RTL) svgEl.appendChild(svCatLabelWrap(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), leftPad-14, true));
+    else svgEl.appendChild(svCatLabelWrap(leftPad-10, cy+barH-4, tr(r[labelKey]), leftPad-14, false));
     const bx = Math.min(x0, xOf(v)), bw = Math.max(Math.abs(xOf(v)-x0),1.5);
     const rect = sv('rect',{class:'mark', x: RTL?MX(bx+bw):bx, y:cy, width:bw, height:barH, rx:4, fill:color});
     svgEl.appendChild(rect);
@@ -806,9 +1010,9 @@ function chartHBarSingle(containerId, rows, labelKey, valueKey, opts){
 function chartBoxPlot(containerId, rows, labelKey, opts){
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = 46, leftPad = opts.leftPad || (RTL?210:175), rightPad = 20, topPad = 8;
-  const width = 900;
-  const boxH = 16, capH = 9;
+  const rowH = MOBILE?100:46, leftPad = opts.leftPad || (RTL?(MOBILE?155:210):(MOBILE?150:175)), rightPad = 20, topPad = 8;
+  const width = MOBILE?380:900;
+  const boxH = MOBILE?32:16, capH = MOBILE?18:9;
   const vals = rows.flatMap(r=>[num(r.p10),num(r.p90)]).filter(v=>v!==null);
   const minV = Math.min(0,...vals)*1.05, maxV = Math.max(...vals)*1.08;
   const height = rows.length*rowH + topPad + 6;
@@ -832,8 +1036,8 @@ function chartBoxPlot(containerId, rows, labelKey, opts){
     const cy = topPad + i*rowH + 18;
     const isAll = r[labelKey]==='All';
     const boxColor = isAll ? GROUP_ALL_COLOR : PRIMARY_ACCENT;
-    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', 'font-style': isAll?'italic':'normal', direction:'rtl'}));
-    else svgEl.appendChild(svText(leftPad-10, cy+4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', 'font-style': isAll?'italic':'normal'}));
+    if(RTL) svgEl.appendChild(svCatLabelWrap(MX(leftPad-10), cy+4, tr(r[labelKey]), leftPad-14, true, {'font-style': isAll?'italic':'normal'}));
+    else svgEl.appendChild(svCatLabelWrap(leftPad-10, cy+4, tr(r[labelKey]), leftPad-14, false, {'font-style': isAll?'italic':'normal'}));
     const p10=num(r.p10), p25=num(r.p25), p50=num(r.p50), p75=num(r.p75), p90=num(r.p90);
     // In RTL every plotted x is mirrored via MX(); in LTR the plain xOf() value
     // is used. P* below are the final (possibly mirrored) screen coordinates.
@@ -1003,39 +1207,55 @@ function chartLines(containerId, seriesList, opts){
     html += `<tr class="${cls}"><td>${esc(tr(r.item))}${flag}</td><td class="amt">${fmtNIS(r.value_nis)}</td></tr>`;
   });
   document.getElementById('bs-statement').innerHTML = html;
+  markScrollableTables();
 
-  const reV = num(rows.find(r=>r.item==='Total Real Estate').value_nis);
-  const depV = num(rows.find(r=>r.item==='Bank Deposits & Savings').value_nis);
-  const invV = num(rows.find(r=>r.item==='Investment Portfolio').value_nis);
-  const penV = num(rows.find(r=>r.item==='Pension & Retirement Savings').value_nis);
-  chartDonut('donut-national', [
-    {label:'Real Estate', value:reV, color:ASSET_COLORS['Real Estate']},
-    {label:'Financial ex-pension', value:depV+invV, color:ASSET_COLORS['Financial ex-pension']},
-    {label:'Pension ◇', value:penV, color:ASSET_COLORS['Pension']},
-  ]);
+  function drawDonut(){
+    const reV = num(rows.find(r=>r.item==='Total Real Estate').value_nis);
+    const depV = num(rows.find(r=>r.item==='Bank Deposits & Savings').value_nis);
+    const invV = num(rows.find(r=>r.item==='Investment Portfolio').value_nis);
+    const penV = num(rows.find(r=>r.item==='Pension & Retirement Savings').value_nis);
+    document.getElementById('donut-national').innerHTML = '';
+    chartDonut('donut-national', [
+      {label:'Real Estate', value:reV, color:ASSET_COLORS['Real Estate']},
+      {label:'Financial ex-pension', value:depV+invV, color:ASSET_COLORS['Financial ex-pension']},
+      {label:'Pension ◇', value:penV, color:ASSET_COLORS['Pension']},
+    ]);
+  }
+  drawDonut();
+  CHART_RENDERERS.push(drawDonut);
 })();
 
 // ---------------------------------------------------------------------------
 // Section 2: net worth by group (sorted by median desc -- sort only, no math)
 // ---------------------------------------------------------------------------
 (function renderNetworthByGroup(){
-  const rows = [...FIGURES.fig_networth_by_group].sort((a,b)=>num(b.median_networth)-num(a.median_networth));
-  chartBarWithMedianTick('chart-networth-group', rows, 'group', 'mean_networth', 'median_networth');
+  function draw(){
+    const rows = [...FIGURES.fig_networth_by_group].sort((a,b)=>num(b.median_networth)-num(a.median_networth));
+    document.getElementById('chart-networth-group').innerHTML = '';
+    chartBarWithMedianTick('chart-networth-group', rows, 'group', 'mean_networth', 'median_networth');
+  }
+  draw();
+  CHART_RENDERERS.push(draw);
 })();
 
 // ---------------------------------------------------------------------------
 // Section 2: asset composition by group (100% stacked), sorted by RE share desc
 // ---------------------------------------------------------------------------
 (function renderCompositionByGroup(){
-  const rows = FIGURES.fig_composition_by_group;
-  const byGroup = {};
-  rows.forEach(r=>{ (byGroup[r.group]=byGroup[r.group]||{})[r.asset_class] = num(r.share_of_assets); });
-  const groups = Object.keys(byGroup).sort((a,b)=>(byGroup[b]['Real Estate']||0)-(byGroup[a]['Real Estate']||0));
-  chartStacked100('chart-composition-group', groups, (g,k)=>byGroup[g][k], [
-    {key:'Real Estate', label:'Real Estate', color:ASSET_COLORS['Real Estate']},
-    {key:'Financial ex-pension', label:'Financial ex-pension', color:ASSET_COLORS['Financial ex-pension']},
-    {key:'Pension', label:'Pension ◇', color:ASSET_COLORS['Pension']},
-  ]);
+  function draw(){
+    const rows = FIGURES.fig_composition_by_group;
+    const byGroup = {};
+    rows.forEach(r=>{ (byGroup[r.group]=byGroup[r.group]||{})[r.asset_class] = num(r.share_of_assets); });
+    const groups = Object.keys(byGroup).sort((a,b)=>(byGroup[b]['Real Estate']||0)-(byGroup[a]['Real Estate']||0));
+    document.getElementById('chart-composition-group').innerHTML = '';
+    chartStacked100('chart-composition-group', groups, (g,k)=>byGroup[g][k], [
+      {key:'Real Estate', label:'Real Estate', color:ASSET_COLORS['Real Estate']},
+      {key:'Financial ex-pension', label:'Financial ex-pension', color:ASSET_COLORS['Financial ex-pension']},
+      {key:'Pension', label:'Pension ◇', color:ASSET_COLORS['Pension']},
+    ]);
+  }
+  draw();
+  CHART_RENDERERS.push(draw);
 })();
 
 // ---------------------------------------------------------------------------
@@ -1049,10 +1269,14 @@ function chartLines(containerId, seriesList, opts){
   function render(dim){
     document.getElementById('chart-dimension').innerHTML = '';
     const sub = rows.filter(r=>r.dimension===dim).sort((a,b)=>num(b.median_networth)-num(a.median_networth));
-    chartBarWithMedianTick('chart-dimension', sub, 'category', 'mean_networth', 'median_networth', RTL ? {leftPad:320} : undefined);
+    chartBarWithMedianTick('chart-dimension', sub, 'category', 'mean_networth', 'median_networth', RTL ? {leftPad: MOBILE?160:320} : undefined);
   }
   sel.addEventListener('change', ()=>render(sel.value));
   render(dims[0]);
+  // Redraw with whatever dimension is currently selected -- not necessarily
+  // dims[0] -- so a resize after the user has picked a different dimension
+  // still redraws the chart they're looking at, not the default one.
+  CHART_RENDERERS.push(()=>render(sel.value));
 })();
 
 // ---------------------------------------------------------------------------
@@ -1073,23 +1297,34 @@ function chartLines(containerId, seriesList, opts){
     card.innerHTML = `<h3 style="font-size:15px;">${esc(tr(m.label))}</h3><div class="chart-body" id="pp-${m.key}"></div>`;
     container.appendChild(card);
   });
-  metrics.forEach(m=>{
-    const sub = [...rows].sort((a,b)=>num(b[m.key])-num(a[m.key]));
-    chartHBarSingle(`pp-${m.key}`, sub, 'group', m.key, {
-      width:560, rowH:30, barH:16, leftPad: RTL?170:150,
-      color:PRIMARY_ACCENT, fmt:v=>fmtPct(v,0), valueLabel:m.label,
+  function draw(){
+    metrics.forEach(m=>{
+      const sub = [...rows].sort((a,b)=>num(b[m.key])-num(a[m.key]));
+      document.getElementById(`pp-${m.key}`).innerHTML = '';
+      chartHBarSingle(`pp-${m.key}`, sub, 'group', m.key, {
+        width: MOBILE?380:560, rowH: MOBILE?120:30, barH: MOBILE?64:16,
+        leftPad: RTL?(MOBILE?155:170):(MOBILE?150:150),
+        color:PRIMARY_ACCENT, fmt:v=>fmtPct(v,0), valueLabel:m.label,
+      });
     });
-  });
+  }
+  draw();
+  CHART_RENDERERS.push(draw);
 })();
 
 // ---------------------------------------------------------------------------
 // Section 3: percentile spread (All + groups, sorted by median desc, All pinned first)
 // ---------------------------------------------------------------------------
 (function renderPercentileSpread(){
-  const rows = FIGURES.fig_networth_distribution;
-  const all = rows.find(r=>r.scope==='All');
-  const groups = rows.filter(r=>r.scope!=='All').sort((a,b)=>num(b.p50)-num(a.p50));
-  chartBoxPlot('chart-percentile-spread', [all, ...groups].map(r=>({...r, [ 'group']: r.scope})), 'group');
+  function draw(){
+    const rows = FIGURES.fig_networth_distribution;
+    const all = rows.find(r=>r.scope==='All');
+    const groups = rows.filter(r=>r.scope!=='All').sort((a,b)=>num(b.p50)-num(a.p50));
+    document.getElementById('chart-percentile-spread').innerHTML = '';
+    chartBoxPlot('chart-percentile-spread', [all, ...groups].map(r=>({...r, [ 'group']: r.scope})), 'group');
+  }
+  draw();
+  CHART_RENDERERS.push(draw);
 })();
 
 // ---------------------------------------------------------------------------
@@ -1102,57 +1337,70 @@ function chartLines(containerId, seriesList, opts){
     h += `<tr><td>${esc(tr(r.group))}</td><td>${fmtNum(r.leverage_ratio,3)}</td><td>${fmtPct(r.equity_ratio,1)}</td><td>${fmtNum(r.debt_to_income_ratio,3)}</td></tr>`;
   });
   document.getElementById('table-ratios').innerHTML = h;
+  markScrollableTables();
 })();
 
 // ---------------------------------------------------------------------------
 // Section 4: income decile charts
 // ---------------------------------------------------------------------------
 (function renderIncomeDecile(){
-  const rows = [...FIGURES.fig_income_wealth].sort((a,b)=>Number(a.income_decile)-Number(b.income_decile));
-  // One color for all deciles: decile order + bar length already encode
-  // magnitude, so a sequential ramp on top of that would be a redundant
-  // double-encoding of the same information.
-  chartHBarSingle('chart-income-decile-networth', rows, 'income_decile', 'mean_networth', {
-    width:860, rowH:30, barH:18, leftPad:66,
-    color:PRIMARY_ACCENT, valueLabel:'Mean net worth',
-  });
+  function draw(){
+    const rows = [...FIGURES.fig_income_wealth].sort((a,b)=>Number(a.income_decile)-Number(b.income_decile));
+    // One color for all deciles: decile order + bar length already encode
+    // magnitude, so a sequential ramp on top of that would be a redundant
+    // double-encoding of the same information.
+    document.getElementById('chart-income-decile-networth').innerHTML = '';
+    chartHBarSingle('chart-income-decile-networth', rows, 'income_decile', 'mean_networth', {
+      width: MOBILE?380:860, rowH: MOBILE?70:30, barH: MOBILE?38:18, leftPad: MOBILE?43:66,
+      color:PRIMARY_ACCENT, valueLabel:'Mean net worth',
+    });
 
-  const groups2 = rows.map(r=>r.income_decile);
-  const byDec = {};
-  rows.forEach(r=>{ byDec[r.income_decile] = {'Real Estate':num(r.real_estate_share),'Financial ex-pension':num(r.financial_share),'Pension':num(r.pension_share)}; });
-  chartStacked100('chart-income-decile-composition', groups2, (g,k)=>byDec[g][k], [
-    {key:'Real Estate', label:'Real Estate', color:ASSET_COLORS['Real Estate']},
-    {key:'Financial ex-pension', label:'Financial ex-pension', color:ASSET_COLORS['Financial ex-pension']},
-    {key:'Pension', label:'Pension', color:ASSET_COLORS['Pension']},
-  ], {leftPad:76});
+    const groups2 = rows.map(r=>r.income_decile);
+    const byDec = {};
+    rows.forEach(r=>{ byDec[r.income_decile] = {'Real Estate':num(r.real_estate_share),'Financial ex-pension':num(r.financial_share),'Pension':num(r.pension_share)}; });
+    document.getElementById('chart-income-decile-composition').innerHTML = '';
+    chartStacked100('chart-income-decile-composition', groups2, (g,k)=>byDec[g][k], [
+      {key:'Real Estate', label:'Real Estate', color:ASSET_COLORS['Real Estate']},
+      {key:'Financial ex-pension', label:'Financial ex-pension', color:ASSET_COLORS['Financial ex-pension']},
+      {key:'Pension', label:'Pension', color:ASSET_COLORS['Pension']},
+    ], {leftPad: MOBILE?48:76});
 
-  chartHBarSingle('chart-capital-share', rows, 'income_decile', 'capital_income_share', {
-    width:860, rowH:30, barH:18, leftPad:66,
-    color:PRIMARY_ACCENT, fmt:v=>fmtPct(v,1), valueLabel:'Capital-income share',
-  });
+    document.getElementById('chart-capital-share').innerHTML = '';
+    chartHBarSingle('chart-capital-share', rows, 'income_decile', 'capital_income_share', {
+      width: MOBILE?380:860, rowH: MOBILE?70:30, barH: MOBILE?38:18, leftPad: MOBILE?43:66,
+      color:PRIMARY_ACCENT, fmt:v=>fmtPct(v,1), valueLabel:'Capital-income share',
+    });
+  }
+  draw();
+  CHART_RENDERERS.push(draw);
 })();
 
 // ---------------------------------------------------------------------------
 // Section 4: monthly income composition by group (stacked, absolute NIS)
 // ---------------------------------------------------------------------------
 (function renderIncomeComposition(){
-  const rows = FIGURES.fig_income_composition_by_group.filter(r=>r.group!=='All');
-  const sorted = [...rows].sort((a,b)=>num(b.mean_total_monthly)-num(a.mean_total_monthly));
-  // dark-mode-consistent categorical steps (validated set, see GROUP_PALETTE) --
-  // previously mixed light-mode hexes (#eda100, #1baf7a) with dark ones, and used
-  // a low-chroma grey for "Govt transfers" which fails the categorical chroma
-  // floor (grey reads as "no category," not identity #4) -- swapped for green.
-  // Order chosen so the two green-family hues (Govt transfers #008300 and
-  // Rental #1baf7a) are never adjacent in the stack.
-  const segs = [
-    {key:'mean_work', label:'Work', color:'#2a78d6'},
-    {key:'mean_govt_transfers', label:'Govt transfers', color:'#008300'},
-    {key:'mean_pension', label:'Pension', color:'#eda100'},
-    {key:'mean_rental', label:'Rental', color:'#1baf7a'},
-    {key:'mean_interest', label:'Interest', color:'#4a3aa7'},
-    {key:'mean_capital_gains', label:'Capital gains', color:'#e34948'},
-  ];
-  chartStackedAbs('chart-income-composition', sorted, 'group', segs, {legend:true, leftPad: RTL?190:175});
+  function draw(){
+    const rows = FIGURES.fig_income_composition_by_group.filter(r=>r.group!=='All');
+    const sorted = [...rows].sort((a,b)=>num(b.mean_total_monthly)-num(a.mean_total_monthly));
+    // dark-mode-consistent categorical steps (validated set, see GROUP_PALETTE) --
+    // previously mixed light-mode hexes (#eda100, #1baf7a) with dark ones, and used
+    // a low-chroma grey for "Govt transfers" which fails the categorical chroma
+    // floor (grey reads as "no category," not identity #4) -- swapped for green.
+    // Order chosen so the two green-family hues (Govt transfers #008300 and
+    // Rental #1baf7a) are never adjacent in the stack.
+    const segs = [
+      {key:'mean_work', label:'Work', color:'#2a78d6'},
+      {key:'mean_govt_transfers', label:'Govt transfers', color:'#008300'},
+      {key:'mean_pension', label:'Pension', color:'#eda100'},
+      {key:'mean_rental', label:'Rental', color:'#1baf7a'},
+      {key:'mean_interest', label:'Interest', color:'#4a3aa7'},
+      {key:'mean_capital_gains', label:'Capital gains', color:'#e34948'},
+    ];
+    document.getElementById('chart-income-composition').innerHTML = '';
+    chartStackedAbs('chart-income-composition', sorted, 'group', segs, {legend:true, leftPad: RTL?(MOBILE?155:190):(MOBILE?150:175)});
+  }
+  draw();
+  CHART_RENDERERS.push(draw);
 })();
 
 // ---------------------------------------------------------------------------
@@ -1177,6 +1425,37 @@ function chartLines(containerId, seriesList, opts){
     h += `<tr><td>${esc(r.file)}</td><td style="text-align:left;">${esc(desc)}</td></tr>`;
   });
   document.getElementById('table-manifest').innerHTML = h;
+  markScrollableTables();
+})();
+
+// ---------------------------------------------------------------------------
+// Mobile <-> desktop chart-geometry breakpoint watcher. Debounced so a drag-
+// resize doesn't redraw on every pixel; only actually redraws when MOBILE
+// flips (e.g. crossing 640px, or rotating a phone), never on every resize
+// event, so it can't double-render. Registered once at script load -- there
+// is exactly one 'resize' and one 'orientationchange' listener for the life
+// of the page, so there is nothing to leak on repeated calls.
+// ---------------------------------------------------------------------------
+(function chartResizeWatcher(){
+  let resizeTimer = null;
+  function handleBreakpointChange(){
+    const nowMobile = MOBILE_MQ.matches;
+    // Table-scroll affordance can change on ANY resize (window width, table
+    // reflow) independent of the chart-geometry breakpoint, so it's checked
+    // unconditionally every time, unlike the chart redraw below.
+    markScrollableTables();
+    if(nowMobile === MOBILE) return; // didn't cross the breakpoint -- nothing to redraw
+    MOBILE = nowMobile;
+    CHART_RENDERERS.forEach(draw=>{
+      try{ draw(); } catch(err){ console.error('Chart redraw failed on breakpoint change:', err); }
+    });
+  }
+  function scheduleCheck(){
+    if(resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(handleBreakpointChange, 150);
+  }
+  window.addEventListener('resize', scheduleCheck);
+  window.addEventListener('orientationchange', scheduleCheck);
 })();
 
 // ---------------------------------------------------------------------------
@@ -1202,6 +1481,7 @@ function chartLines(containerId, seriesList, opts){
 
 document.addEventListener('pointermove', moveTooltip);
 </script>
-<a href="../index.html" aria-label="חזרה לדף הבית" style="position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px">🏠 דף הבית</a>
+<style>.hb-home-back{position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px}.hb-home-back .hb-lbl{display:inline}@media(max-width:480px){.hb-home-back{padding:0;width:40px;height:40px;gap:0;justify-content:center;border-radius:50%;font-size:18px}.hb-home-back .hb-lbl{display:none}}</style>
+<a href="../index.html" class="hb-home-back" aria-label="חזרה לדף הבית">🏠<span class="hb-lbl">דף הבית</span></a>
 </body>
 </html>
