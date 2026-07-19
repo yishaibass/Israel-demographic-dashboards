@@ -162,10 +162,26 @@
     background: var(--guidance-soft); border-radius: 5px; padding: 2px 6px; white-space: nowrap;
   }
 
-  /* Output panel — the hero */
+  /* Output panel — the hero. Sticky so the result stays visible while the
+     reader scrolls the input controls below and watches it update live. */
   .result-hero {
     background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
     border: 1.5px solid var(--coalition-soft);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  /* Callout explaining the SD scale, above the first (Haredi) group row.
+     Subtle: small font, muted tinted background. */
+  .group-callout {
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    background: var(--opposition-soft);
+    border-radius: 8px;
+    padding: 9px 13px;
+    margin: 2px 0 12px;
   }
   .output-grid { display: flex; gap: 28px; flex-wrap: wrap; align-items: stretch; }
   .headline { display: flex; gap: 34px; align-items: baseline; }
@@ -253,46 +269,7 @@
 <section class="tab-panel active" id="tab-scenario">
 
 <div class="hero-section">
-<div class="card">
-  <div class="electorate-toggle-row">
-    <span class="lbl">הרכב הבוחרים:</span>
-    <div class="toggle-group">
-      <button class="toggle-btn" id="baseBtn2022" data-base="2022">2022 (בפועל)</button>
-      <button class="toggle-btn active" id="baseBtn2026" data-base="2026">2026 (תחזית)</button>
-    </div>
-    <span class="electorate-note" id="baseNote"></span>
-  </div>
-
-  <div class="load-row">
-    <span class="lbl">טען תוצאות בחירות:</span>
-    <button class="load-btn" data-election="K25">2022</button>
-    <button class="load-btn" data-election="K24">2021</button>
-    <button class="load-btn" data-election="K23">2020</button>
-    <button class="load-btn" data-election="K22">ספטמבר 2019</button>
-    <button class="load-btn" data-election="K21">אפריל 2019</button>
-    <button class="clear-btn" id="clearBtn">איפוס לממוצע</button>
-  </div>
-
-  <div id="groupRows"></div>
-
-  <div class="threshold-block">
-    <div class="block-lbl">אחוז החסימה &middot; קולות שאבדו</div>
-    <div class="threshold-row">
-      <div class="threshold-field">
-        <label for="wc">קולות הקואליציה שאבדו מתחת לאחוז החסימה (<span class="ltr-token">3.25%</span>)</label>
-        <input type="number" id="wc" step="0.01">
-        <span class="guidance-line" id="wcGuidance"></span>
-      </div>
-      <div class="threshold-field">
-        <label for="wo">קולות האופוזיציה שאבדו מתחת לאחוז החסימה</label>
-        <input type="number" id="wo" step="0.01">
-        <span class="guidance-line" id="woGuidance"></span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<h3 class="section-title" style="margin: 20px 20px 4px;">תוצאה</h3>
+<h3 class="section-title" style="margin: 4px 20px 4px;">תוצאה</h3>
 <div class="card result-hero" id="outputCard">
   <p class="hint" id="resultCaption" style="margin:0 0 10px;font-weight:600;"></p>
   <div id="emptyState" class="empty-state">קבעו הנחות למעלה, או טענו תוצאות בחירות, כדי לראות תוצאה.</div>
@@ -319,6 +296,47 @@
     <div class="seat-bar-wrap">
       <svg id="seatBar" width="100%" height="34" viewBox="0 0 600 34" preserveAspectRatio="none"></svg>
       <div class="seat-bar-caption"><span>0</span><span>61 (רוב)</span><span>120</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="electorate-toggle-row">
+    <span class="lbl">הרכב הבוחרים:</span>
+    <div class="toggle-group">
+      <button class="toggle-btn" id="baseBtn2022" data-base="2022">2022 (בפועל)</button>
+      <button class="toggle-btn active" id="baseBtn2026" data-base="2026">2026 (תחזית)</button>
+    </div>
+    <span class="electorate-note" id="baseNote"></span>
+  </div>
+
+  <div class="load-row">
+    <span class="lbl">טען תוצאות בחירות:</span>
+    <button class="load-btn" data-election="K25">2022</button>
+    <button class="load-btn" data-election="K24">2021</button>
+    <button class="load-btn" data-election="K23">2020</button>
+    <button class="load-btn" data-election="K22">ספטמבר 2019</button>
+    <button class="load-btn" data-election="K21">אפריל 2019</button>
+    <button class="clear-btn" id="clearBtn">איפוס לממוצע</button>
+  </div>
+
+  <div class="group-callout">כל קבוצה מתחילה בממוצע שלה לשנים <span dir="ltr">2019&ndash;2022</span>. לחצו על <span dir="ltr">&minus;/+</span> כדי להזיז אותה מעל או מתחת לממוצע: <span dir="ltr">+1</span> = סטיית תקן אחת (שינוי מתון וסביר), <span dir="ltr">+2</span> = שתי סטיות תקן (שינוי גדול ונדיר); <span dir="ltr">&minus;1/&minus;2</span> באותו אופן מתחת לממוצע.</div>
+
+  <div id="groupRows"></div>
+
+  <div class="threshold-block">
+    <div class="block-lbl">אחוז החסימה &middot; קולות שאבדו</div>
+    <div class="threshold-row">
+      <div class="threshold-field">
+        <label for="wc">קולות הקואליציה שאבדו מתחת לאחוז החסימה (<span class="ltr-token">3.25%</span>)</label>
+        <input type="number" id="wc" step="0.01">
+        <span class="guidance-line" id="wcGuidance"></span>
+      </div>
+      <div class="threshold-field">
+        <label for="wo">קולות האופוזיציה שאבדו מתחת לאחוז החסימה</label>
+        <input type="number" id="wo" step="0.01">
+        <span class="guidance-line" id="woGuidance"></span>
+      </div>
     </div>
   </div>
 </div>
@@ -1406,6 +1424,7 @@ document.getElementById('wc').addEventListener('input', computeSeats);
 document.getElementById('wo').addEventListener('input', computeSeats);
 computeSeats();
 </script>
+
 <a href="../index.html" aria-label="חזרה לדף הבית" style="position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px">🏠 דף הבית</a>
 </body>
 </html>

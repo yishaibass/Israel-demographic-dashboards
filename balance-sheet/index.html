@@ -4,35 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>מאזן משק הבית הישראלי — הלמ״ס, סקר ארוך טווח 2012–2023</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0d1117; --panel:#11161d; --panel2:#0f141b; --line:#222b36;
-  --txt:#e6edf3; --muted:#8b97a6; --dim:#5d6875;
-  --gold:#c9a84c; --gold-dim:#9c8438;
-  --pos:#5fb88a; --neg:#d97b6c;
-  --g-haredi:#3987e5; --g-dati:#199e70; --g-masdati:#c98500; --g-mastrad:#008300;
-  --g-hiloni:#9085e9; --g-arab:#e66767; --g-other:#d55181; --g-jewna:#d95926;
-  --a-re:#3987e5; --a-fin:#199e70; --a-pen:#c98500;
+  color-scheme: light;
+  --bg:#f9f9f7; --panel:#fcfcfb; --panel2:#f5f5f2; --line:#e1e0d9;
+  --border:rgba(11,11,11,0.10); --baseline:#c3c2b7;
+  --txt:#0b0b0b; --muted:#52514e; --dim:#898781;
+  --gold:#2a78d6; --gold-dim:#184f95;
+  --amber:#a8631f; --amber-soft:#fbeedc;
+  --pos:#1baf7a; --neg:#e34948;
+  --g-haredi:#2a78d6; --g-dati:#1baf7a; --g-masdati:#eda100; --g-mastrad:#008300;
+  --g-hiloni:#4a3aa7; --g-arab:#e34948; --g-other:#e87ba4; --g-jewna:#eb6834;
+  --a-re:#2a78d6; --a-fin:#1baf7a; --a-pen:#eda100;
 }
 *{box-sizing:border-box;}
-html,body{background:var(--bg);color:var(--txt);font-family:'IBM Plex Mono',monospace;margin:0;padding:0;}
+html,body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;}
 body{padding-bottom:60px;}
-::selection{background:var(--gold);color:#0d1117;}
+::selection{background:var(--gold);color:#ffffff;}
 a{color:var(--gold);}
 .wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
 
 header.masthead{border-bottom:2px solid var(--gold);padding:22px 0 16px;position:relative;}
-header.masthead h1{font-family:'Playfair Display',serif;font-weight:700;font-size:30px;color:#fff;margin:0 0 4px;line-height:1.15;}
+header.masthead h1{font-size:30px;font-weight:700;color:var(--txt);margin:0 0 4px;line-height:1.15;letter-spacing:-0.01em;}
 header.masthead .sub{color:var(--muted);font-size:12.5px;letter-spacing:.3px;}
 header.masthead .aiflag{color:var(--gold-dim);font-size:10.5px;margin-top:6px;letter-spacing:.5px;}
 
-nav.topnav{position:sticky;top:0;z-index:50;background:rgba(13,17,23,.96);backdrop-filter:blur(6px);
+nav.topnav{position:sticky;top:0;z-index:50;background:rgba(249,249,247,.96);backdrop-filter:blur(6px);
   border-bottom:1px solid var(--line);}
 nav.topnav .wrap{display:flex;gap:2px;overflow-x:auto;padding:0 24px;}
-nav.topnav button{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);
+nav.topnav button{background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);
   font-family:inherit;font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;padding:13px 14px;
   cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;}
 nav.topnav button:hover{color:var(--txt);}
@@ -41,21 +41,21 @@ nav.topnav button.active{color:var(--gold);border-bottom-color:var(--gold);}
 section.pagesec{padding:38px 0 14px;border-bottom:1px solid var(--line);}
 section.pagesec:last-of-type{border-bottom:none;}
 .sec-kicker{color:var(--gold-dim);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
-.sec-head{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:#fff;margin:0 0 6px;}
-.sec-intro{color:#c7d0db;font-size:14.5px;line-height:1.7;max-width:820px;margin-bottom:22px;}
+.sec-head{font-size:23px;font-weight:700;color:var(--txt);margin:0 0 6px;letter-spacing:-0.01em;}
+.sec-intro{color:var(--muted);font-size:14.5px;line-height:1.7;max-width:820px;margin-bottom:22px;}
 
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
-.kpi-tile{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;}
-.kpi-tile .lab{font-size:11.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.kpi-tile .val{font-family:'IBM Plex Mono',monospace;font-size:29px;font-weight:600;color:#fff;line-height:1;}
+.kpi-tile{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+.kpi-tile .lab{font-size:11.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+.kpi-tile .val{font-size:29px;font-weight:700;color:var(--txt);line-height:1;font-variant-numeric:tabular-nums;}
 .kpi-tile .val .unit{font-size:15px;color:var(--gold);}
 .kpi-tile .note{font-size:11.5px;color:var(--dim);margin-top:7px;line-height:1.5;}
 
 .grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start;}
 .grid2b{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
 
-.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px 16px;margin-bottom:18px;}
-.card h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:#fff;margin:0 0 2px;
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px 16px;margin-bottom:18px;}
+.card h3{font-size:16px;font-weight:700;color:var(--txt);margin:0 0 2px;
   padding-left:11px;border-left:3px solid var(--gold);}
 .card .csrc{font-size:11.5px;color:var(--dim);margin:6px 0 12px 14px;}
 .chart-body{margin-top:6px;}
@@ -65,45 +65,45 @@ section.pagesec:last-of-type{border-bottom:none;}
 .legend .sw{width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0;}
 .legend .ln{width:14px;height:0;border-top:2px solid;display:inline-block;flex-shrink:0;}
 
-svg.viz{width:100%;height:auto;display:block;overflow:visible;font-family:'IBM Plex Mono',monospace;}
+svg.viz{width:100%;height:auto;display:block;overflow:visible;font-family:inherit;}
 svg.viz text{fill:var(--muted);}
-svg.viz .axis-line{stroke:var(--line);stroke-width:1;}
+svg.viz .axis-line{stroke:var(--baseline);stroke-width:1;}
 svg.viz .grid{stroke:var(--line);stroke-width:1;}
-svg.viz .cat-label{fill:#c7d0db;font-size:16px;}
-svg.viz .val-label{fill:#fff;font-size:15px;font-weight:500;}
+svg.viz .cat-label{fill:var(--muted);font-size:16px;}
+svg.viz .val-label{fill:var(--txt);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;}
 svg.viz .val-label.gold{fill:var(--gold);}
-svg.viz .seg-label{fill:#0d1117;font-size:13px;font-weight:600;}
+svg.viz .seg-label{fill:#ffffff;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;}
 svg.viz .axis-tick{fill:var(--dim);font-size:13px;}
 svg.viz rect.mark{cursor:pointer;}
-svg.viz rect.mark:hover{filter:brightness(1.18);}
-svg.viz circle.mark:hover{filter:brightness(1.2);}
+svg.viz rect.mark:hover{filter:brightness(1.08);}
+svg.viz circle.mark:hover{filter:brightness(1.1);}
 
-#tooltip{position:fixed;pointer-events:none;background:#0b0f14;border:1px solid var(--gold-dim);
-  border-radius:5px;padding:8px 11px;font-size:11.3px;color:var(--txt);z-index:1000;display:none;
-  box-shadow:0 6px 18px rgba(0,0,0,.45);max-width:260px;line-height:1.6;}
-#tooltip .tt-title{color:var(--gold);font-weight:600;margin-bottom:3px;}
+#tooltip{position:fixed;pointer-events:none;background:#ffffff;border:1px solid var(--border);
+  border-radius:8px;padding:8px 11px;font-size:11.3px;color:var(--txt);z-index:1000;display:none;
+  box-shadow:0 6px 18px rgba(11,11,11,.14);max-width:260px;line-height:1.6;}
+#tooltip .tt-title{color:var(--gold);font-weight:700;margin-bottom:3px;}
 #tooltip .tt-row{display:flex;justify-content:space-between;gap:14px;}
-#tooltip .tt-row .k{color:var(--muted);}
-#tooltip .tt-row .v{color:#fff;font-weight:600;}
+#tooltip .tt-row .k{color:var(--dim);}
+#tooltip .tt-row .v{color:var(--txt);font-weight:600;}
 #tooltip .tt-row .v.keyed::before{content:'';display:inline-block;width:9px;height:9px;border-radius:2px;
   margin-right:5px;vertical-align:middle;background:var(--sw,var(--gold));}
 
 .selector-row{margin:0 0 14px 14px;display:flex;align-items:center;gap:10px;}
 .selector-row label{font-size:11.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-dim);}
-.selector-row select{background:#0b0f14;color:var(--txt);border:1px solid var(--line);border-radius:4px;
+.selector-row select{background:var(--panel);color:var(--txt);border:1px solid var(--baseline);border-radius:6px;
   padding:6px 10px;font-family:inherit;font-size:13px;cursor:pointer;}
 .selector-row select:hover,.selector-row select:focus{border-color:var(--gold);outline:none;}
 
 table.stmt{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px;}
 table.stmt td{padding:5px 4px;border-bottom:1px solid var(--line);}
-table.stmt td.amt{text-align:right;font-variant-numeric:tabular-nums;color:#fff;}
+table.stmt td.amt{text-align:right;font-variant-numeric:tabular-nums;color:var(--txt);}
 .stmt .amt, .datatable td, svg text{unicode-bidi:plaintext;}
 table.stmt tr.seg td{padding-top:14px;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;
   color:var(--gold);font-weight:600;border-bottom:1px solid var(--gold-dim);padding-bottom:5px;}
-table.stmt tr.subtotal td{border-top:1px solid var(--dim);font-weight:600;color:#fff;padding-top:7px;}
+table.stmt tr.subtotal td{border-top:1px solid var(--dim);font-weight:600;color:var(--txt);padding-top:7px;}
 table.stmt tr.total td{border-top:2px solid var(--gold-dim);border-bottom:2px solid var(--gold-dim);
-  font-size:14px;font-weight:600;color:#fff;padding:9px 4px;}
-table.stmt tr.networth td:first-child{font-family:'Playfair Display',serif;color:#fff;font-size:14px;}
+  font-size:14px;font-weight:600;color:var(--txt);padding:9px 4px;}
+table.stmt tr.networth td:first-child{color:var(--txt);font-size:14px;font-weight:700;}
 table.stmt tr.networth td.amt{color:var(--gold);font-size:20px;}
 table.stmt .modeled-flag{color:var(--gold-dim);margin-left:4px;}
 
@@ -111,24 +111,24 @@ table.stmt .modeled-flag{color:var(--gold-dim);margin-left:4px;}
 .small-multiples .card{margin-bottom:0;}
 
 .datatable{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px;}
-.datatable th{text-align:right;color:var(--gold-dim);font-weight:600;font-size:11.5px;letter-spacing:.6px;
+.datatable th{text-align:right;color:var(--dim);font-weight:700;font-size:11px;letter-spacing:.6px;
   text-transform:uppercase;border-bottom:1px solid var(--line);padding:6px 7px;}
 .datatable th:first-child,.datatable td:first-child{text-align:left;}
-.datatable td{text-align:right;padding:5px 7px;border-bottom:1px solid var(--line);color:#c7d0db;
+.datatable td{text-align:right;padding:5px 7px;border-bottom:1px solid var(--line);color:var(--muted);
   font-variant-numeric:tabular-nums;}
 
-.caveat{background:#1a1108;border:1px solid var(--gold-dim);border-radius:5px;padding:12px 16px;
-  font-size:12px;color:#e3d3ad;line-height:1.6;margin:14px 0;}
-.caveat b{color:var(--gold);}
+.caveat{background:var(--amber-soft);border:1px solid var(--amber);border-radius:8px;padding:12px 16px;
+  font-size:12px;color:#6b4210;line-height:1.6;margin:14px 0;}
+.caveat b{color:var(--amber);}
 
-.methodology p, .methodology li{font-size:14.5px;line-height:1.75;color:#c7d0db;max-width:860px;}
-.methodology h4{font-family:'Playfair Display',serif;color:var(--gold);font-size:16.5px;margin:22px 0 6px;}
-.methodology code{background:#0b0f14;border:1px solid var(--line);border-radius:3px;padding:1px 6px;
-  color:var(--gold);font-size:13px;}
+.methodology p, .methodology li{font-size:14.5px;line-height:1.75;color:var(--muted);max-width:860px;}
+.methodology h4{color:var(--gold);font-size:16.5px;font-weight:700;margin:22px 0 6px;}
+.methodology code{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 6px;
+  color:var(--gold-dim);font-size:13px;}
 .methodology .stat-row{display:flex;gap:22px;flex-wrap:wrap;margin:10px 0 4px;}
-.methodology .stat-row div{background:var(--panel2);border:1px solid var(--line);border-radius:4px;
+.methodology .stat-row div{background:var(--panel2);border:1px solid var(--line);border-radius:6px;
   padding:8px 14px;font-size:13px;}
-.methodology .stat-row b{display:block;color:#fff;font-size:16px;}
+.methodology .stat-row b{display:block;color:var(--txt);font-size:16px;}
 
 footer.pagefoot{max-width:1180px;margin:30px auto 0;padding:18px 24px 0;border-top:1px solid var(--line);
   font-size:10.7px;color:var(--dim);line-height:1.7;}
@@ -342,10 +342,26 @@ const MANIFEST = JSON.parse(document.getElementById('manifest-data').textContent
 
 const SVGNS = 'http://www.w3.org/2000/svg';
 
+// RTL flag -- true for the Hebrew build, false for the English build. Drives
+// chart mirroring (MX), gutter widths (leftPad) and text direction/anchoring.
+const RTL = true;
+
+// Data-derived display labels for the active language only (see TR in
+// build_dashboard.py). English's TR is empty, so tr() is pure identity there.
+const TR = {"All": "כלל האוכלוסייה", "Haredi": "חרדים", "Dati (Religious)": "דתיים", "Masorti": "מסורתיים", "Hiloni (Secular)": "חילונים", "Arab": "ערבים", "Primary Residence": "דירת מגורים", "Additional Properties": "נכסי נדל״ן נוספים", "Land & Other Real Estate": "קרקע ונדל״ן אחר", "Total Real Estate": "סך הנדל״ן", "Bank Deposits & Savings": "פיקדונות וחיסכון בבנק", "Investment Portfolio": "תיק השקעות", "Pension & Retirement Savings": "פנסיה וחיסכון לטווח ארוך", "Total Financial Assets": "סך הנכסים הפיננסיים", "Total Assets": "סך הנכסים", "Mortgage": "משכנתה", "Consumer Loans": "הלוואות צרכניות", "Total Liabilities": "סך ההתחייבויות", "Net Worth": "שווי נטו", "Assets — Real Estate": "נכסים — נדל״ן", "Assets — Financial": "נכסים — פיננסיים", "Liabilities": "התחייבויות", "Real Estate": "נדל״ן", "Financial ex-pension": "פיננסי (ללא פנסיה)", "Pension": "פנסיה", "Pension ◇": "פנסיה ◇", "Total assets": "סך הנכסים", "Share of assets": "חלק מסך הנכסים", "Mean value": "ערך ממוצע", "Total / month": "סה״כ לחודש", "p50 (median)": "p50 (חציון)", "Mean": "ממוצע", "Median": "חציון", "Bar = mean": "עמודה = ממוצע", "Tick = median": "קו = חציון", "Box = p25–p75": "קופסה = p25–p75", "Line = median (p50)": "קו = חציון (p50)", "Whiskers = p10–p90": "שפמים = p10–p90", "Education": "השכלה", "Age band": "קבוצת גיל", "Tenure": "צורת מגורים", "Household size": "גודל משק הבית", "Occupation": "משלח יד", "Locality SES": "אשכול חברתי-כלכלי (יישוב)", "No diploma": "ללא תעודה", "Secondary / Matriculation": "תיכונית / בגרות", "Post-secondary (non-academic)": "על-תיכונית (לא אקדמית)", "Academic degree": "תואר אקדמי", "Under 35": "עד 35", "35-44": "35–44", "45-54": "45–54", "55-64": "55–64", "65-74": "65–74", "75+": "75+", "Owner": "בעלות", "Renter": "שכירות", "Other": "אחר", "Managers & Professionals": "מנהלים ובעלי מקצועות חופשיים", "Technicians & Clerical": "טכנאים ופקידות", "Sales & Service": "מכירות ושירותים", "Skilled Manual & Agriculture": "עבודה מקצועית וחקלאות", "Operators & Unskilled": "מפעילים ובלתי-מקצועיים", "Low cluster (1-3)": "אשכול נמוך (1–3)", "Mid cluster (4-7)": "אשכול בינוני (4–7)", "High cluster (8-10)": "אשכול גבוה (8–10)", "With a mortgage": "עם משכנתה", "With a pension": "עם פנסיה", "Owns additional property": "בעלות על נכס נוסף", "With an investment portfolio": "עם תיק השקעות", "Work": "עבודה", "Govt transfers": "קצבאות והעברות", "Rental": "שכר דירה", "Interest": "ריבית", "Capital gains": "רווחי הון", "Mean net worth": "שווי נטו ממוצע", "Capital-income share": "שיעור הכנסות ההון", "Group": "קבוצה", "Leverage ratio": "יחס מינוף", "Equity ratio": "יחס הון עצמי", "Debt / income": "חוב להכנסה", "File": "קובץ", "Description": "תיאור"};
+function tr(s){ return (TR[s]!==undefined) ? TR[s] : s; }
+
+// Manifest per-file description overrides for the active language (empty for
+// English -- falls back to the CSV's own "description" column).
+const MANIFEST_DESC = {"fig_national_balance_sheet.csv": "מאזן ארצי, גל 10 (2023)", "fig_networth_by_group.csv": "אגרגט שווי נטו ומאזן לפי קבוצה חברתית", "fig_composition_by_group.csv": "חלקי הרכב הנכסים לפי קבוצה", "fig_networth_by_dimension.csv": "שווי נטו לפי חתכים חברתיים-דמוגרפיים", "fig_networth_distribution.csv": "אחוזונים, ממוצע, חלק העשירון העליון ומקדם ג׳יני", "fig_income_wealth.csv": "הקשר בין עשירון הכנסה לעושר", "fig_trajectory.csv": "סדרת זמן על פני 10 גלים, כלל האוכלוסייה והקבוצות", "fig_participation.csv": "שיעורי החזקה לפי קבוצה", "fig_ratios_by_group.csv": "מינוף / הון עצמי / חוב-להכנסה לפי קבוצה", "fig_income_composition_by_group.csv": "הרכב ההכנסה לפי מקור ולפי קבוצה", "fig_meta.json": "מטא-נתונים: מתודולוגיה, תוויות ועוגני כיול"};
+
+// KPI tile label/note strings (Section 1) for the active language.
+const UI = {"kpi1_label": "שווי נטו ממוצע, 2023", "kpi1_note": "כלל משקי הבית, משוקלל.", "kpi2_label": "שווי נטו חציוני, 2023", "kpi2_note": "משק הבית האופייני — למחצית יש יותר, למחצית פחות.", "kpi3_label": "שיעור הנדל״ן מסך הנכסים", "kpi3_note": "סך הנדל״ן ÷ סך הנכסים, מאזן ארצי.", "kpi4_label": "מקדם ג׳יני, שווי נטו", "kpi4_note": "0 = שוויון, 1 = ריכוזיות מלאה. ראו הסתייגות בפרק 3."};
+
 // Single primary accent used for EVERY single-series magnitude bar (net worth,
 // participation rates, income-decile bars, box-plot fill, etc). Chosen once and
 // reused everywhere a "how much" bar needs a color -- never re-picked per chart.
-const PRIMARY_ACCENT = '#c9a84c'; // gold -- matches --gold in the CSS theme
+const PRIMARY_ACCENT = '#2a78d6'; // blue -- matches --gold (accent) in the CSS theme
 
 // Fixed categorical color assignment -- one social group = one color everywhere
 // this dashboard genuinely needs group *identity* (the over-time trajectories are
@@ -356,78 +372,11 @@ const PRIMARY_ACCENT = '#c9a84c'; // gold -- matches --gold in the CSS theme
 // adjacent slots collide (old palette had two greens: Dati #1baf7a vs Masorti
 // (Traditional) #3fbf3f -- fixed below by giving them non-adjacent hue families).
 const GROUP_ORDER = ['Haredi','Dati (Religious)','Masorti','Hiloni (Secular)','Arab'];
-const GROUP_PALETTE = ['#3987e5','#199e70','#c98500','#9085e9','#e66767'];
+const GROUP_PALETTE = ['#2a78d6','#1baf7a','#eda100','#4a3aa7','#e34948'];
 const GROUP_COLORS = {};
 GROUP_ORDER.forEach((g,i)=>{ GROUP_COLORS[g] = GROUP_PALETTE[i]; });
-const GROUP_ALL_COLOR = '#8b97a6'; // neutral reference for "All"
-const ASSET_COLORS = { 'Real Estate':'#3987e5', 'Financial ex-pension':'#199e70', 'Pension':'#c98500' };
-
-// ---------------------------------------------------------------------------
-// Hebrew translation dictionary for data-derived labels (English key -> Hebrew).
-// Everything else in this script is unchanged from the English build; this is
-// the only display-layer addition for the Hebrew version.
-// ---------------------------------------------------------------------------
-const TR = {
-  // Groups / scopes
-  'All':'כלל האוכלוסייה', 'Haredi':'חרדים', 'Dati (Religious)':'דתיים', 'Masorti':'מסורתיים',
-  'Hiloni (Secular)':'חילונים', 'Arab':'ערבים',
-  // Balance-sheet items
-  'Primary Residence':'דירת מגורים', 'Additional Properties':'נכסי נדל״ן נוספים',
-  'Land & Other Real Estate':'קרקע ונדל״ן אחר', 'Total Real Estate':'סך הנדל״ן',
-  'Bank Deposits & Savings':'פיקדונות וחיסכון בבנק', 'Investment Portfolio':'תיק השקעות',
-  'Pension & Retirement Savings':'פנסיה וחיסכון לטווח ארוך', 'Total Financial Assets':'סך הנכסים הפיננסיים',
-  'Total Assets':'סך הנכסים', 'Mortgage':'משכנתה', 'Consumer Loans':'הלוואות צרכניות',
-  'Total Liabilities':'סך ההתחייבויות', 'Net Worth':'שווי נטו',
-  // segStarts section headers
-  'Assets — Real Estate':'נכסים — נדל״ן', 'Assets — Financial':'נכסים — פיננסיים', 'Liabilities':'התחייבויות',
-  // Asset classes (donut + stacked)
-  'Real Estate':'נדל״ן', 'Financial ex-pension':'פיננסי (ללא פנסיה)', 'Pension':'פנסיה', 'Pension ◇':'פנסיה ◇',
-  // Donut + tooltip keys
-  'Total assets':'סך הנכסים', 'Share of assets':'חלק מסך הנכסים', 'Mean value':'ערך ממוצע', 'Total / month':'סה״כ לחודש',
-  // Box-plot tooltip keys
-  'p50 (median)':'p50 (חציון)', 'Mean':'ממוצע', 'Median':'חציון',
-  // Legend
-  'Bar = mean':'עמודה = ממוצע', 'Tick = median':'קו = חציון',
-  'Box = p25–p75':'קופסה = p25–p75', 'Line = median (p50)':'קו = חציון (p50)', 'Whiskers = p10–p90':'שפמים = p10–p90',
-  // Dimension names (in the <select>)
-  'Education':'השכלה', 'Age band':'קבוצת גיל', 'Tenure':'צורת מגורים', 'Household size':'גודל משק הבית',
-  'Occupation':'משלח יד', 'Locality SES':'אשכול חברתי-כלכלי (יישוב)',
-  // Dimension categories
-  'No diploma':'ללא תעודה', 'Secondary / Matriculation':'תיכונית / בגרות',
-  'Post-secondary (non-academic)':'על-תיכונית (לא אקדמית)', 'Academic degree':'תואר אקדמי',
-  'Under 35':'עד 35', '35-44':'35–44', '45-54':'45–54', '55-64':'55–64', '65-74':'65–74', '75+':'75+',
-  'Owner':'בעלות', 'Renter':'שכירות', 'Other':'אחר',
-  'Managers & Professionals':'מנהלים ובעלי מקצועות חופשיים', 'Technicians & Clerical':'טכנאים ופקידות',
-  'Sales & Service':'מכירות ושירותים', 'Skilled Manual & Agriculture':'עבודה מקצועית וחקלאות',
-  'Operators & Unskilled':'מפעילים ובלתי-מקצועיים',
-  'Low cluster (1-3)':'אשכול נמוך (1–3)', 'Mid cluster (4-7)':'אשכול בינוני (4–7)', 'High cluster (8-10)':'אשכול גבוה (8–10)',
-  // Participation metric labels
-  'With a mortgage':'עם משכנתה', 'With a pension':'עם פנסיה', 'Owns additional property':'בעלות על נכס נוסף',
-  'With an investment portfolio':'עם תיק השקעות',
-  // Income sources (stacked bar legend)
-  'Work':'עבודה', 'Govt transfers':'קצבאות והעברות', 'Rental':'שכר דירה', 'Interest':'ריבית', 'Capital gains':'רווחי הון',
-  // Chart valueLabels
-  'Mean net worth':'שווי נטו ממוצע', 'Capital-income share':'שיעור הכנסות ההון',
-  // Ratios table headers
-  'Group':'קבוצה', 'Leverage ratio':'יחס מינוף', 'Equity ratio':'יחס הון עצמי', 'Debt / income':'חוב להכנסה',
-  // Manifest table headers
-  'File':'קובץ', 'Description':'תיאור',
-  // Manifest per-file descriptions (by filename, applied separately -- see renderMethodology)
-};
-function tr(s){ return (TR[s]!==undefined) ? TR[s] : s; }
-const MANIFEST_DESC_HE = {
-  'fig_national_balance_sheet.csv':'מאזן ארצי, גל 10 (2023)',
-  'fig_networth_by_group.csv':'אגרגט שווי נטו ומאזן לפי קבוצה חברתית',
-  'fig_composition_by_group.csv':'חלקי הרכב הנכסים לפי קבוצה',
-  'fig_networth_by_dimension.csv':'שווי נטו לפי חתכים חברתיים-דמוגרפיים',
-  'fig_networth_distribution.csv':'אחוזונים, ממוצע, חלק העשירון העליון ומקדם ג׳יני',
-  'fig_income_wealth.csv':'הקשר בין עשירון הכנסה לעושר',
-  'fig_trajectory.csv':'סדרת זמן על פני 10 גלים, כלל האוכלוסייה והקבוצות',
-  'fig_participation.csv':'שיעורי החזקה לפי קבוצה',
-  'fig_ratios_by_group.csv':'מינוף / הון עצמי / חוב-להכנסה לפי קבוצה',
-  'fig_income_composition_by_group.csv':'הרכב ההכנסה לפי מקור ולפי קבוצה',
-  'fig_meta.json':'מטא-נתונים: מתודולוגיה, תוויות ועוגני כיול',
-};
+const GROUP_ALL_COLOR = '#898781'; // neutral reference for "All"
+const ASSET_COLORS = { 'Real Estate':'#2a78d6', 'Financial ex-pension':'#1baf7a', 'Pension':'#eda100' };
 
 function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function num(v){ if(v===null||v===undefined||v==='') return null; const n = Number(v); return isNaN(n) ? null : n; }
@@ -513,11 +462,13 @@ function legendHtml(items){ // items: [{label,color,isLine}]
 
 // ---------------------------------------------------------------------------
 // Chart: horizontal grouped bars (e.g. mean+median net worth by group)
+// NOTE: not called by any render function below in either language build --
+// dead code carried over unchanged from both original builders.
 // ---------------------------------------------------------------------------
 function chartHBarGrouped(containerId, rows, labelKey, series, opts){
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = 54, barH = 17, gap = 4, leftPad = opts.leftPad||210, rightPad = 85, topPad = 8;
+  const rowH = 54, barH = 17, gap = 4, leftPad = opts.leftPad || (RTL?210:175), rightPad = 85, topPad = 8;
   const width = 860;
   const height = rows.length*rowH + topPad + 6;
   const maxVal = Math.max(...rows.flatMap(r=>series.map(s=>num(r[s.key])||0))) * 1.08;
@@ -526,7 +477,8 @@ function chartHBarGrouped(containerId, rows, labelKey, series, opts){
   // RTL mirror: the LTR geometry above is computed as usual (leftPad = gutter
   // size, x() = bar length from that gutter); MX() flips every x-coordinate
   // across the viewBox so the label gutter lands on the right and bars grow
-  // leftward from it, without touching any of the length/scale math.
+  // leftward from it, without touching any of the length/scale math. When
+  // RTL is false, MX() is never applied (plain leftPad-based coords are used).
   const MX = xv => width - xv;
 
   if(opts.legend!==false){
@@ -535,16 +487,17 @@ function chartHBarGrouped(containerId, rows, labelKey, series, opts){
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH;
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH+2, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH+2, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    else svgEl.appendChild(svText(leftPad-10, cy+barH+2, tr(r[labelKey]), 'cat-label', {'text-anchor':'end'}));
     series.forEach((s,si)=>{
       const v = num(r[s.key])||0;
       const by = cy + si*(barH+gap);
       const w = Math.max(x(v),1.5);
-      const rect = sv('rect',{class:'mark', x:MX(leftPad+w), y:by, width:w, height:barH, rx:4, fill:s.color});
+      const rect = sv('rect',{class:'mark', x: RTL?MX(leftPad+w):leftPad, y:by, width:w, height:barH, rx:4, fill:s.color});
       svgEl.appendChild(rect);
       const lbl = fmtNISCompact(v);
-      const labelX = MX(leftPad+w+6);
-      svgEl.appendChild(svText(labelX, by+barH-3.5, lbl, 'val-label', {'text-anchor':'start'}));
+      if(RTL) svgEl.appendChild(svText(MX(leftPad+w+6), by+barH-3.5, lbl, 'val-label', {'text-anchor':'start'}));
+      else svgEl.appendChild(svText(leftPad+w+6, by+barH-3.5, lbl, 'val-label'));
       rect.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]), series.map(s2=>({k:tr(s2.label), v:fmtNIS(r[s2.key]), color:s2.color}))));
       rect.addEventListener('pointerleave', hideTooltip);
     });
@@ -561,7 +514,7 @@ function chartHBarGrouped(containerId, rows, labelKey, series, opts){
 function chartBarWithMedianTick(containerId, rows, labelKey, meanKey, medianKey, opts){
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = opts.rowH||40, barH = opts.barH||20, leftPad = opts.leftPad||210, rightPad = 85, topPad = 8;
+  const rowH = opts.rowH||40, barH = opts.barH||20, leftPad = opts.leftPad || (RTL?210:175), rightPad = 85, topPad = 8;
   const width = opts.width||860;
   const height = rows.length*rowH + topPad + 6;
   const maxVal = Math.max(...rows.flatMap(r=>[num(r[meanKey])||0, num(r[medianKey])||0])) * 1.1;
@@ -572,31 +525,34 @@ function chartBarWithMedianTick(containerId, rows, labelKey, meanKey, medianKey,
   container.insertAdjacentHTML('beforeend',
     `<div class="legend">
        <span class="lk"><span class="sw" style="background:${PRIMARY_ACCENT}"></span>${tr('Bar = mean')}</span>
-       <span class="lk"><span class="ln" style="border-color:#fff"></span>${tr('Tick = median')}</span>
+       <span class="lk"><span class="ln" style="border-color:var(--txt)"></span>${tr('Tick = median')}</span>
      </div>`);
 
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH;
     const meanV = num(r[meanKey])||0, medV = num(r[medianKey])||0;
-    // anchor 'end' (ambient/explicit direction:rtl) pins the label's LEFT edge
-    // at MX(leftPad-10) -- just outside the bar's gutter boundary -- and grows
-    // the text RIGHTWARD into the open right-margin, away from the bar. 'start'
-    // would pin the right edge and grow the text back over the bar.
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    // RTL: anchor 'end' (explicit direction:rtl) pins the label's LEFT edge at
+    // MX(leftPad-10) -- just outside the bar's gutter boundary -- and grows the
+    // text RIGHTWARD into the open right-margin, away from the bar.
+    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    else svgEl.appendChild(svText(leftPad-10, cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end'}));
     const w = Math.max(x(meanV),1.5);
-    const rect = sv('rect',{class:'mark', x:MX(leftPad+w), y:cy, width:w, height:barH, rx:4, fill:PRIMARY_ACCENT});
+    const rect = sv('rect',{class:'mark', x: RTL?MX(leftPad+w):leftPad, y:cy, width:w, height:barH, rx:4, fill:PRIMARY_ACCENT});
     svgEl.appendChild(rect);
     const tx = leftPad + x(medV);
-    const mtx = MX(tx);
-    svgEl.appendChild(sv('line',{x1:mtx, x2:mtx, y1:cy-3, y2:cy+barH+3, stroke:'#fff', 'stroke-width':2, 'stroke-linecap':'round'}));
+    const tickX = RTL ? MX(tx) : tx;
+    svgEl.appendChild(sv('line',{x1:tickX, x2:tickX, y1:cy-3, y2:cy+barH+3, stroke:'var(--txt)', 'stroke-width':2, 'stroke-linecap':'round'}));
     const lbl = fmtNISCompact(meanV);
-    const labelX = Math.min(MX(leftPad + w + 6), MX(tx + 8));
-    // anchor 'start' under the page's ambient direction:rtl pins the label's
-    // RIGHT edge at labelX and extends it further LEFT (away from the bar,
-    // into open margin) -- 'end' would pin the left edge and run the text
-    // back over the bar, which is what the pre-fix version did.
-    svgEl.appendChild(svText(labelX, cy+barH-3.5, lbl, 'val-label', {'text-anchor':'start'}));
+    if(RTL){
+      const labelX = Math.min(MX(leftPad + w + 6), MX(tx + 8));
+      // anchor 'start' under ambient direction:rtl pins the label's RIGHT edge
+      // at labelX and extends it further LEFT, away from the bar.
+      svgEl.appendChild(svText(labelX, cy+barH-3.5, lbl, 'val-label', {'text-anchor':'start'}));
+    } else {
+      const labelX = Math.max(leftPad + w + 6, tx + 8);
+      svgEl.appendChild(svText(labelX, cy+barH-3.5, lbl, 'val-label'));
+    }
     rect.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]), [
       {k:tr('Mean'), v:fmtNIS(meanV), color:PRIMARY_ACCENT}, {k:tr('Median'), v:fmtNIS(medV)},
     ]));
@@ -613,7 +569,7 @@ function chartStacked100(containerId, groups, segmentGetter, segments, opts){
   // segmentGetter(groupLabel, segKey) -> share (0..1)
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = 40, barH = 22, leftPad = opts.leftPad||210, rightPad = 14, topPad = 6;
+  const rowH = 40, barH = 22, leftPad = opts.leftPad || (RTL?210:175), rightPad = 14, topPad = 6;
   const width = 860;
   const height = groups.length*rowH + topPad + 6;
   const scaleW = width - leftPad - rightPad;
@@ -624,18 +580,19 @@ function chartStacked100(containerId, groups, segmentGetter, segments, opts){
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   groups.forEach((g,i)=>{
     const cy = topPad + i*rowH;
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-5, tr(g), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH-5, tr(g), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    else svgEl.appendChild(svText(leftPad-10, cy+barH-5, tr(g), 'cat-label', {'text-anchor':'end'}));
     let cx = leftPad;
     segments.forEach((s,si)=>{
       const share = segmentGetter(g, s.key) || 0;
       let w = share*scaleW;
       if(si>0) { cx += gapPx; w = Math.max(w-gapPx,0); }
       w = Math.max(w, share>0?1:0);
-      const rect = sv('rect',{class:'mark', x:MX(cx+w), y:cy, width:w, height:barH, rx: si===0||si===segments.length-1?4:0, fill:s.color});
+      const rect = sv('rect',{class:'mark', x: RTL?MX(cx+w):cx, y:cy, width:w, height:barH, rx: si===0||si===segments.length-1?4:0, fill:s.color});
       svgEl.appendChild(rect);
       if(share>=0.15){
         const tx = cx + w/2;
-        const t = svText(MX(tx), cy+barH/2+4, fmtPct(share,0), 'seg-label', {'text-anchor':'middle'});
+        const t = svText(RTL?MX(tx):tx, cy+barH/2+4, fmtPct(share,0), 'seg-label', {'text-anchor':'middle'});
         svgEl.appendChild(t);
       }
       rect.addEventListener('pointermove', e=>showTooltip(e, tr(g), [{k:tr(s.label), v:fmtPct(share), color:s.color}]));
@@ -654,7 +611,7 @@ function chartStacked100(containerId, groups, segmentGetter, segments, opts){
 function chartStackedAbs(containerId, rows, labelKey, segments, opts){
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = 46, barH = 24, leftPad = opts.leftPad||210, rightPad = 88, topPad = 6;
+  const rowH = 46, barH = 24, leftPad = opts.leftPad || (RTL?210:175), rightPad = 88, topPad = 6;
   const width = 860;
   const height = rows.length*rowH + topPad + 6;
   const scaleW = width - leftPad - rightPad;
@@ -667,18 +624,19 @@ function chartStackedAbs(containerId, rows, labelKey, segments, opts){
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH + (rowH-barH)/2 - 3;
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-7, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH-7, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    else svgEl.appendChild(svText(leftPad-10, cy+barH-7, tr(r[labelKey]), 'cat-label', {'text-anchor':'end'}));
     const total = totals[i];
     let cx = leftPad;
     segments.forEach((s,si)=>{
       const v = num(r[s.key])||0;
       const w = x(v);
       const ww = Math.max(w, v>0?1:0);
-      const rect = sv('rect',{class:'mark', x:MX(cx+ww), y:cy, width:ww, height:barH,
+      const rect = sv('rect',{class:'mark', x: RTL?MX(cx+ww):cx, y:cy, width:ww, height:barH,
         rx: si===0||si===segments.length-1?4:0, fill:s.color});
       svgEl.appendChild(rect);
       if(w>=40){
-        svgEl.appendChild(svText(MX(cx+w/2), cy+barH/2+3.5, fmtNISCompact(v), 'seg-label', {'text-anchor':'middle'}));
+        svgEl.appendChild(svText(RTL?MX(cx+w/2):cx+w/2, cy+barH/2+3.5, fmtNISCompact(v), 'seg-label', {'text-anchor':'middle'}));
       }
       rect.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]),
         segments.map(s2=>({k:tr(s2.label), v:fmtNIS(num(r[s2.key])||0), color:s2.color}))
@@ -686,7 +644,8 @@ function chartStackedAbs(containerId, rows, labelKey, segments, opts){
       rect.addEventListener('pointerleave', hideTooltip);
       cx += w;
     });
-    svgEl.appendChild(svText(MX(cx+6), cy+barH-7, fmtNISCompact(total), 'val-label', {'text-anchor':'start'}));
+    if(RTL) svgEl.appendChild(svText(MX(cx+6), cy+barH-7, fmtNISCompact(total), 'val-label', {'text-anchor':'start'}));
+    else svgEl.appendChild(svText(cx+6, cy+barH-7, fmtNISCompact(total), 'val-label'));
   });
   container.appendChild(svgEl);
 }
@@ -697,12 +656,14 @@ function chartStackedAbs(containerId, rows, labelKey, segments, opts){
 function chartDonut(containerId, segs){ // segs: [{label,value,color}]
   const container = document.getElementById(containerId);
   const total = segs.reduce((a,s)=>a+s.value,0);
-  // Legend sits on the LEFT (natural reading position on an RTL page) and is
-  // widened so the longest segment label ("פיננסי (ללא פנסיה)") fits fully;
-  // the donut itself is shifted right by the legend width to make room.
-  const size = 240, legendW = 250, cy = size/2, rOuter = 96, rInner = 58;
+  // English: legend on the right (legendW 190), donut on the left (cx=size/2).
+  // Hebrew: legend sits on the LEFT (natural reading position on an RTL page)
+  // and is widened (legendW 250) so the longest segment label
+  // ("פיננסי (ללא פנסיה)") fits fully; the donut is shifted right by legendW.
+  const size = 240, cy = size/2, rOuter = 96, rInner = 58;
+  const legendW = RTL ? 250 : 190;
   const width = size + legendW;
-  const cx = legendW + size/2;
+  const cx = RTL ? (legendW + size/2) : size/2;
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${size}`});
   let angle = -Math.PI/2;
   segs.forEach(s=>{
@@ -721,22 +682,33 @@ function chartDonut(containerId, segs){ // segs: [{label,value,color}]
     path.addEventListener('pointerleave', hideTooltip);
   });
   svgEl.appendChild(svText(cx, cy-5, tr('Total assets'), null, {'text-anchor':'middle','font-size':15}));
-  const t2 = svText(cx, cy+16, fmtNISCompact(total), null, {'text-anchor':'middle','font-size':21,'font-weight':600});
-  t2.setAttribute('fill','#fff');
+  const t2 = svText(cx, cy+(RTL?16:15), fmtNISCompact(total), null, {'text-anchor':'middle','font-size':21,'font-weight':600});
+  t2.setAttribute('fill','var(--txt)');
   svgEl.appendChild(t2);
-  // side legend with values -- right-aligned toward the donut so the color
-  // swatch sits closest to the chart it labels; full strings never clipped
-  // because legendW (250) comfortably exceeds the longest label's rendered width.
-  let ly = 38;
+  // side legend with values
+  let ly = RTL ? 38 : 36;
   segs.forEach(s=>{
-    const swX = legendW - 22;
-    const sw = sv('rect',{x:swX, y:ly-12, width:13, height:13, rx:2, fill:s.color});
-    svgEl.appendChild(sw);
-    svgEl.appendChild(svText(swX-9, ly, tr(s.label), 'cat-label', {'font-size':16,'text-anchor':'start'}));
-    const t = svText(swX-9, ly+18, `${fmtPct(s.value/total)}  ·  ${fmtNIS(s.value)}`, null, {'font-size':15,'text-anchor':'start'});
-    t.setAttribute('fill','var(--dim)');
-    svgEl.appendChild(t);
-    ly += 56;
+    if(RTL){
+      // right-aligned toward the donut so the color swatch sits closest to the
+      // chart it labels; full strings never clipped because legendW (250)
+      // comfortably exceeds the longest label's rendered width.
+      const swX = legendW - 22;
+      const sw = sv('rect',{x:swX, y:ly-12, width:13, height:13, rx:2, fill:s.color});
+      svgEl.appendChild(sw);
+      svgEl.appendChild(svText(swX-9, ly, tr(s.label), 'cat-label', {'font-size':16,'text-anchor':'start'}));
+      const t = svText(swX-9, ly+18, `${fmtPct(s.value/total)}  ·  ${fmtNIS(s.value)}`, null, {'font-size':15,'text-anchor':'start'});
+      t.setAttribute('fill','var(--dim)');
+      svgEl.appendChild(t);
+      ly += 56;
+    } else {
+      const sw = sv('rect',{x:size+8, y:ly-11, width:13, height:13, rx:2, fill:s.color});
+      svgEl.appendChild(sw);
+      svgEl.appendChild(svText(size+27, ly, tr(s.label), 'cat-label', {'font-size':16}));
+      const t = svText(size+27, ly+16, `${fmtPct(s.value/total)}  ·  ${fmtNIS(s.value)}`, null, {'font-size':15});
+      t.setAttribute('fill','var(--dim)');
+      svgEl.appendChild(t);
+      ly += 52;
+    }
   });
   container.appendChild(svgEl);
 }
@@ -747,7 +719,7 @@ function chartDonut(containerId, segs){ // segs: [{label,value,color}]
 function chartHBarSingle(containerId, rows, labelKey, valueKey, opts){
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = opts.rowH||34, barH = opts.barH||18, leftPad = opts.leftPad||170, rightPad = 70, topPad = 6;
+  const rowH = opts.rowH||34, barH = opts.barH||18, leftPad = opts.leftPad || (RTL?170:160), rightPad = 70, topPad = 6;
   const width = opts.width||860;
   const vals = rows.map(r=>num(r[valueKey])||0);
   const minV = Math.min(0,...vals), maxV = Math.max(...vals)*1.12;
@@ -759,22 +731,32 @@ function chartHBarSingle(containerId, rows, labelKey, valueKey, opts){
   const MX = xv => width - xv; // RTL mirror
 
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
-  if(minV<0){ const mx0 = MX(x0); svgEl.appendChild(sv('line',{class:'axis-line', x1:mx0, x2:mx0, y1:topPad-2, y2:height-2})); }
+  if(minV<0){
+    const ax = RTL ? MX(x0) : x0;
+    svgEl.appendChild(sv('line',{class:'axis-line', x1:ax, x2:ax, y1:topPad-2, y2:height-2}));
+  }
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH;
     const v = num(r[valueKey])||0;
-    const color = opts.colorFn ? opts.colorFn(r) : (opts.color||'#3987e5');
-    svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    const color = opts.colorFn ? opts.colorFn(r) : (opts.color||'#2a78d6');
+    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', direction:'rtl'}));
+    else svgEl.appendChild(svText(leftPad-10, cy+barH-4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end'}));
     const bx = Math.min(x0, xOf(v)), bw = Math.max(Math.abs(xOf(v)-x0),1.5);
-    const rect = sv('rect',{class:'mark', x:MX(bx+bw), y:cy, width:bw, height:barH, rx:4, fill:color});
+    const rect = sv('rect',{class:'mark', x: RTL?MX(bx+bw):bx, y:cy, width:bw, height:barH, rx:4, fill:color});
     svgEl.appendChild(rect);
     const lbl = opts.fmt ? opts.fmt(v) : fmtNISCompact(v);
-    const labelX = v>=0 ? MX(xOf(v))-6 : MX(xOf(v))+6;
-    // anchor 'start' (ambient direction:rtl) pins the right edge at labelX and
-    // extends left, away from a positive (leftward-growing) bar; 'end' does
-    // the mirror-image for a negative bar that grows rightward from x0.
-    const t = svText(labelX, cy+barH-3.5, lbl, 'val-label', {'text-anchor': v>=0?'start':'end'});
-    svgEl.appendChild(t);
+    if(RTL){
+      const labelX = v>=0 ? MX(xOf(v))-6 : MX(xOf(v))+6;
+      // anchor 'start' (ambient direction:rtl) pins the right edge at labelX and
+      // extends left, away from a positive (leftward-growing) bar; 'end' does
+      // the mirror-image for a negative bar that grows rightward from x0.
+      const t = svText(labelX, cy+barH-3.5, lbl, 'val-label', {'text-anchor': v>=0?'start':'end'});
+      svgEl.appendChild(t);
+    } else {
+      const labelX = v>=0 ? xOf(v)+6 : xOf(v)-6;
+      const t = svText(labelX, cy+barH-3.5, lbl, 'val-label', {'text-anchor': v>=0?'start':'end'});
+      svgEl.appendChild(t);
+    }
     rect.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]), [{k:tr(opts.valueLabel||'Value'), v: opts.fmt?opts.fmt(v):fmtNIS(v), color}]));
     rect.addEventListener('pointerleave', hideTooltip);
   });
@@ -790,7 +772,7 @@ function chartHBarSingle(containerId, rows, labelKey, valueKey, opts){
 function chartBoxPlot(containerId, rows, labelKey, opts){
   opts = opts||{};
   const container = document.getElementById(containerId);
-  const rowH = 46, leftPad = opts.leftPad||210, rightPad = 20, topPad = 8;
+  const rowH = 46, leftPad = opts.leftPad || (RTL?210:175), rightPad = 20, topPad = 8;
   const width = 900;
   const boxH = 16, capH = 9;
   const vals = rows.flatMap(r=>[num(r.p10),num(r.p90)]).filter(v=>v!==null);
@@ -805,39 +787,43 @@ function chartBoxPlot(containerId, rows, labelKey, opts){
   container.insertAdjacentHTML('beforeend',
     `<div class="legend">
        <span class="lk"><span class="sw" style="background:${PRIMARY_ACCENT}"></span>${tr('Box = p25–p75')}</span>
-       <span class="lk"><span class="ln" style="border-color:#fff"></span>${tr('Line = median (p50)')}</span>
+       <span class="lk"><span class="ln" style="border-color:var(--txt)"></span>${tr('Line = median (p50)')}</span>
        <span class="lk"><span class="ln" style="border-color:var(--dim)"></span>${tr('Whiskers = p10–p90')}</span>
      </div>`);
 
   const svgEl = sv('svg',{class:'viz','viewBox':`0 0 ${width} ${height}`});
-  const mx0 = MX(x0);
-  svgEl.appendChild(sv('line',{class:'axis-line', x1:mx0, x2:mx0, y1:topPad-2, y2:height-2}));
+  const ax = RTL ? MX(x0) : x0;
+  svgEl.appendChild(sv('line',{class:'axis-line', x1:ax, x2:ax, y1:topPad-2, y2:height-2}));
   rows.forEach((r,i)=>{
     const cy = topPad + i*rowH + 18;
     const isAll = r[labelKey]==='All';
     const boxColor = isAll ? GROUP_ALL_COLOR : PRIMARY_ACCENT;
-    svgEl.appendChild(svText(MX(leftPad-10), cy+4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', 'font-style': isAll?'italic':'normal', direction:'rtl'}));
+    if(RTL) svgEl.appendChild(svText(MX(leftPad-10), cy+4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', 'font-style': isAll?'italic':'normal', direction:'rtl'}));
+    else svgEl.appendChild(svText(leftPad-10, cy+4, tr(r[labelKey]), 'cat-label', {'text-anchor':'end', 'font-style': isAll?'italic':'normal'}));
     const p10=num(r.p10), p25=num(r.p25), p50=num(r.p50), p75=num(r.p75), p90=num(r.p90);
-    const mP10 = MX(xOf(p10)), mP90 = MX(xOf(p90)), mP25 = MX(xOf(p25)), mP75 = MX(xOf(p75)), mP50 = MX(xOf(p50));
+    // In RTL every plotted x is mirrored via MX(); in LTR the plain xOf() value
+    // is used. P* below are the final (possibly mirrored) screen coordinates.
+    const P10 = RTL?MX(xOf(p10)):xOf(p10), P90 = RTL?MX(xOf(p90)):xOf(p90);
+    const P25 = RTL?MX(xOf(p25)):xOf(p25), P75 = RTL?MX(xOf(p75)):xOf(p75), P50 = RTL?MX(xOf(p50)):xOf(p50);
 
     // whisker: full p10-p90 line + end caps
-    svgEl.appendChild(sv('line',{x1:mP10, x2:mP90, y1:cy, y2:cy, stroke:'var(--dim)', 'stroke-width':1.5}));
-    [mP10,mP90].forEach(v=>{
+    svgEl.appendChild(sv('line',{x1:P10, x2:P90, y1:cy, y2:cy, stroke:'var(--dim)', 'stroke-width':1.5}));
+    [P10,P90].forEach(v=>{
       svgEl.appendChild(sv('line',{x1:v, x2:v, y1:cy-capH/2, y2:cy+capH/2, stroke:'var(--dim)', 'stroke-width':1.5}));
     });
 
     // box: p25-p75
-    const bx = Math.min(mP25,mP75), bw = Math.max(Math.abs(mP75-mP25),2);
+    const bx = Math.min(P25,P75), bw = Math.max(Math.abs(P75-P25),2);
     const rect = sv('rect',{class:'mark', x:bx, y:cy-boxH/2, width:bw, height:boxH, rx:3,
       fill:boxColor, 'fill-opacity':isAll?0.45:0.6, stroke:boxColor, 'stroke-width':1.3});
     svgEl.appendChild(rect);
 
     // median line inside the box
-    svgEl.appendChild(sv('line',{x1:mP50, x2:mP50, y1:cy-boxH/2, y2:cy+boxH/2, stroke:'#fff', 'stroke-width':2}));
+    svgEl.appendChild(sv('line',{x1:P50, x2:P50, y1:cy-boxH/2, y2:cy+boxH/2, stroke:'var(--txt)', 'stroke-width':2}));
 
     // hover hit-area across the whole whisker span
-    const hitX = Math.min(mP10,mP90)-4;
-    const hit = sv('rect',{x:hitX, y:cy-capH/2-6, width:Math.abs(mP90-mP10)+8, height:capH+12, fill:'transparent', class:'mark'});
+    const hitX = Math.min(P10,P90)-4;
+    const hit = sv('rect',{x:hitX, y:cy-capH/2-6, width:Math.abs(P90-P10)+8, height:capH+12, fill:'transparent', class:'mark'});
     svgEl.appendChild(hit);
     hit.addEventListener('pointermove', e=>showTooltip(e, tr(r[labelKey]), [
       {k:'p10', v:fmtNIS(p10)}, {k:'p25', v:fmtNIS(p25)}, {k:tr('p50 (median)'), v:fmtNIS(p50)},
@@ -845,7 +831,9 @@ function chartBoxPlot(containerId, rows, labelKey, opts){
     ]));
     hit.addEventListener('pointerleave', hideTooltip);
     if(p10<0){
-      const t = svText(mP10+8, cy-capH/2-11, fmtNISCompact(p10), 'val-label', {'text-anchor':'start'});
+      const t = RTL
+        ? svText(P10+8, cy-capH/2-11, fmtNISCompact(p10), 'val-label', {'text-anchor':'start'})
+        : svText(P10-8, cy-capH/2-8, fmtNISCompact(p10), 'val-label', {'text-anchor':'end'});
       svgEl.appendChild(t);
     }
   });
@@ -857,6 +845,8 @@ function chartBoxPlot(containerId, rows, labelKey, opts){
 // Legitimately multi-color (genuinely simultaneous series, not a magnitude
 // ramp). Hovering a legend item OR a line highlights that series and dims the
 // rest, so an 8-series tangle stays readable.
+// NOTE: not called by any render function below in either language build --
+// dead code (like chartHBarGrouped above) carried over unchanged.
 // ---------------------------------------------------------------------------
 function chartLines(containerId, seriesList, opts){
   // seriesList: [{label, color, points:[{x,y}] (y may be null), dashed}]
@@ -920,7 +910,7 @@ function chartLines(containerId, seriesList, opts){
       if(seg.length<2){
         // single point: draw a dot only
         const p = seg[0];
-        const c = sv('circle',{cx:xOf(p.x), cy:yOf(p.y), r:5, fill:s.color, stroke:'#0d1117','stroke-width':2});
+        const c = sv('circle',{cx:xOf(p.x), cy:yOf(p.y), r:5, fill:s.color, stroke:'#f9f9f7','stroke-width':2});
         g.appendChild(c);
         return;
       }
@@ -929,7 +919,7 @@ function chartLines(containerId, seriesList, opts){
       if(s.dashed) path.setAttribute('stroke-dasharray','5,4');
       g.appendChild(path);
       seg.forEach(p=>{
-        const c = sv('circle',{class:'mark', cx:xOf(p.x), cy:yOf(p.y), r:4.5, fill:s.color, stroke:'#0d1117','stroke-width':1.5});
+        const c = sv('circle',{class:'mark', cx:xOf(p.x), cy:yOf(p.y), r:4.5, fill:s.color, stroke:'#f9f9f7','stroke-width':1.5});
         g.appendChild(c);
         const hit = sv('circle',{cx:xOf(p.x), cy:yOf(p.y), r:12, fill:'transparent', class:'mark'});
         g.appendChild(hit);
@@ -953,10 +943,10 @@ function chartLines(containerId, seriesList, opts){
   const assetsRow = bs.find(r=>r.item==='Total Assets');
   const reShare = num(reRow.value_nis) / num(assetsRow.value_nis); // ratio of two totals already in one figure table
   const tiles = [
-    {label:'שווי נטו ממוצע, 2023', value:fmtNIS(dist.mean), note:'כלל משקי הבית, משוקלל.'},
-    {label:'שווי נטו חציוני, 2023', value:fmtNIS(dist.p50), note:'משק הבית האופייני — למחצית יש יותר, למחצית פחות.'},
-    {label:'שיעור הנדל״ן מסך הנכסים', value:fmtPct(reShare,0), note:'סך הנדל״ן ÷ סך הנכסים, מאזן ארצי.'},
-    {label:'מקדם ג׳יני, שווי נטו', value:fmtNum(dist.gini,3), note:'0 = שוויון, 1 = ריכוזיות מלאה. ראו הסתייגות בפרק 3.'},
+    {label:UI.kpi1_label, value:fmtNIS(dist.mean), note:UI.kpi1_note},
+    {label:UI.kpi2_label, value:fmtNIS(dist.p50), note:UI.kpi2_note},
+    {label:UI.kpi3_label, value:fmtPct(reShare,0), note:UI.kpi3_note},
+    {label:UI.kpi4_label, value:fmtNum(dist.gini,3), note:UI.kpi4_note},
   ];
   const row = document.getElementById('kpi-row');
   row.innerHTML = tiles.map(t=>`<div class="kpi-tile"><div class="lab">${esc(t.label)}</div><div class="val">${t.value}</div><div class="note">${esc(t.note)}</div></div>`).join('');
@@ -1025,7 +1015,7 @@ function chartLines(containerId, seriesList, opts){
   function render(dim){
     document.getElementById('chart-dimension').innerHTML = '';
     const sub = rows.filter(r=>r.dimension===dim).sort((a,b)=>num(b.median_networth)-num(a.median_networth));
-    chartBarWithMedianTick('chart-dimension', sub, 'category', 'mean_networth', 'median_networth', {leftPad:320});
+    chartBarWithMedianTick('chart-dimension', sub, 'category', 'mean_networth', 'median_networth', RTL ? {leftPad:320} : undefined);
   }
   sel.addEventListener('change', ()=>render(sel.value));
   render(dims[0]);
@@ -1052,7 +1042,7 @@ function chartLines(containerId, seriesList, opts){
   metrics.forEach(m=>{
     const sub = [...rows].sort((a,b)=>num(b[m.key])-num(a[m.key]));
     chartHBarSingle(`pp-${m.key}`, sub, 'group', m.key, {
-      width:560, rowH:30, barH:16, leftPad:170,
+      width:560, rowH:30, barH:16, leftPad: RTL?170:150,
       color:PRIMARY_ACCENT, fmt:v=>fmtPct(v,0), valueLabel:m.label,
     });
   });
@@ -1119,16 +1109,16 @@ function chartLines(containerId, seriesList, opts){
   // a low-chroma grey for "Govt transfers" which fails the categorical chroma
   // floor (grey reads as "no category," not identity #4) -- swapped for green.
   // Order chosen so the two green-family hues (Govt transfers #008300 and
-  // Rental #199e70) are never adjacent in the stack.
+  // Rental #1baf7a) are never adjacent in the stack.
   const segs = [
-    {key:'mean_work', label:'Work', color:'#3987e5'},
+    {key:'mean_work', label:'Work', color:'#2a78d6'},
     {key:'mean_govt_transfers', label:'Govt transfers', color:'#008300'},
-    {key:'mean_pension', label:'Pension', color:'#c98500'},
-    {key:'mean_rental', label:'Rental', color:'#199e70'},
-    {key:'mean_interest', label:'Interest', color:'#9085e9'},
-    {key:'mean_capital_gains', label:'Capital gains', color:'#e66767'},
+    {key:'mean_pension', label:'Pension', color:'#eda100'},
+    {key:'mean_rental', label:'Rental', color:'#1baf7a'},
+    {key:'mean_interest', label:'Interest', color:'#4a3aa7'},
+    {key:'mean_capital_gains', label:'Capital gains', color:'#e34948'},
   ];
-  chartStackedAbs('chart-income-composition', sorted, 'group', segs, {legend:true, leftPad:190});
+  chartStackedAbs('chart-income-composition', sorted, 'group', segs, {legend:true, leftPad: RTL?190:175});
 })();
 
 // ---------------------------------------------------------------------------
@@ -1149,7 +1139,7 @@ function chartLines(containerId, seriesList, opts){
 
   let h = `<tr><th>${tr('File')}</th><th>${tr('Description')}</th></tr>`;
   MANIFEST.forEach(r=>{
-    const desc = MANIFEST_DESC_HE[r.file] !== undefined ? MANIFEST_DESC_HE[r.file] : r.description;
+    const desc = MANIFEST_DESC[r.file] !== undefined ? MANIFEST_DESC[r.file] : r.description;
     h += `<tr><td>${esc(r.file)}</td><td style="text-align:left;">${esc(desc)}</td></tr>`;
   });
   document.getElementById('table-manifest').innerHTML = h;
