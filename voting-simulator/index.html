@@ -441,7 +441,7 @@
 <span class="swipe-hint">&#8644; החלק</span>
 <div class="table-scroll">
 <table id="exCalcTable">
-  <thead><tr><th>קבוצה</th><th>חלק &times; תמיכה = תרומה</th></tr></thead>
+  <thead><tr><th>קבוצה</th><th>חלק מהזכאים</th><th>אחוז הצבעה</th><th>חלק מהמצביעים</th><th>תמיכה בקואליציה</th><th>תרומה</th></tr></thead>
   <tbody></tbody>
 </table>
 </div>
@@ -541,7 +541,7 @@
 </section>
 
 <footer class="foot">
-  איך זה עובד: אחוז ההצבעה ושיעור התמיכה של כל קבוצה נאמדים מתוצאות הקלפיות בחמש מערכות הבחירות שבין 2019 ל-2022, בשילוב נתוני מפקד האוכלוסין 2022.
+  איך זה עובד: אחוז ההצבעה (החלק מבעלי זכות הבחירה שהצביעו) ושיעור התמיכה בקואליציה (מבין מי שהצביעו, החלק שתמך בקואליציה) של כל קבוצה נאמדים בנפרד מתוצאות הקלפיות בחמש מערכות הבחירות שבין 2019 ל-2022, בשילוב נתוני מפקד האוכלוסין 2022 &ndash; שני מספרים נפרדים, לא מספר אחד שמשמש כפול.
   מספר המנדטים נגזר ישירות מהנתונים לאחר הסרת מפלגות שלא עברו את אחוז החסימה (<span class="ltr-token">3.25%</span>) &ndash; ללא גורמי תיקון.
   גדלי הקבוצות בתרחיש מוקרנים לשנת 2026.
 </footer>
@@ -555,15 +555,15 @@ const DATA = {
       "label": "חרדים",
       "eligible_share": 0.1002239702849948,
       "eligible_share_2026": 0.1057661389027475,
-      "theta_bibi_mean": 0.9999999999999992,
-      "theta_bibi_sd": 1.1780925919142425e-15,
+      "theta_bibi_mean": 0.9999999999999998,
+      "theta_bibi_sd": 1.1102230246251563e-16,
       "theta_vote_mean": 0.7178894949904515,
       "theta_vote_sd": 0.0159068100797883,
       "theta_bibi_by_election": {
-        "K21": 0.9999999999999968,
+        "K21": 1.0,
         "K22": 1.0,
         "K23": 1.0,
-        "K24": 0.9999999999999996,
+        "K24": 1.0,
         "K25": 1.0
       },
       "theta_vote_by_election": {
@@ -578,16 +578,16 @@ const DATA = {
       "label": "דתי-לאומי",
       "eligible_share": 0.1266073206688994,
       "eligible_share_2026": 0.1291231701897964,
-      "theta_bibi_mean": 0.893381746325355,
-      "theta_bibi_sd": 0.103732972557907,
+      "theta_bibi_mean": 0.8878966362794039,
+      "theta_bibi_sd": 0.1073373370145969,
       "theta_vote_mean": 0.7265612634106189,
       "theta_vote_sd": 0.0158907965351216,
       "theta_bibi_by_election": {
-        "K21": 0.9531268983745296,
-        "K22": 0.9359517640924576,
-        "K23": 0.9526583637522268,
-        "K24": 0.6863890061769402,
-        "K25": 0.9387826992306209
+        "K21": 0.9477542690227866,
+        "K22": 0.9356648637449958,
+        "K23": 0.9527797568245628,
+        "K24": 0.6738683491324459,
+        "K25": 0.9294159426722282
       },
       "theta_vote_by_election": {
         "K21": 0.7497053181514912,
@@ -601,16 +601,16 @@ const DATA = {
       "label": "מסורתי",
       "eligible_share": 0.2141300605916428,
       "eligible_share_2026": 0.2131844186465337,
-      "theta_bibi_mean": 0.7757167168788368,
-      "theta_bibi_sd": 0.0405853484531474,
+      "theta_bibi_mean": 0.8057157071503406,
+      "theta_bibi_sd": 0.0418528877912537,
       "theta_vote_mean": 0.555762903550975,
       "theta_vote_sd": 0.027202380625579,
       "theta_bibi_by_election": {
-        "K21": 0.8096792527571379,
-        "K22": 0.7160120441418578,
-        "K23": 0.789436590302252,
-        "K24": 0.7413716321013951,
-        "K25": 0.8220840650915409
+        "K21": 0.8479704229687598,
+        "K22": 0.7308644535922806,
+        "K23": 0.8079384903598429,
+        "K24": 0.7996431551321127,
+        "K25": 0.8421620136987071
       },
       "theta_vote_by_election": {
         "K21": 0.5447921433263972,
@@ -624,16 +624,16 @@ const DATA = {
       "label": "חילוני",
       "eligible_share": 0.4063768481198171,
       "eligible_share_2026": 0.3976358942261687,
-      "theta_bibi_mean": 0.2014956251357359,
-      "theta_bibi_sd": 0.0317461476129266,
+      "theta_bibi_mean": 0.1945021355178594,
+      "theta_bibi_sd": 0.0299824045565977,
       "theta_vote_mean": 0.6881180279430703,
       "theta_vote_sd": 0.0151257916418041,
       "theta_bibi_by_election": {
-        "K21": 0.2366068841016927,
-        "K22": 0.1982009060219273,
-        "K23": 0.2247335208356433,
-        "K24": 0.1444731659845491,
-        "K25": 0.203463648734867
+        "K21": 0.2299044318783133,
+        "K22": 0.1920419211398402,
+        "K23": 0.2168868161875021,
+        "K24": 0.142305629532121,
+        "K25": 0.1913718788515206
       },
       "theta_vote_by_election": {
         "K21": 0.7135531244489086,
@@ -647,16 +647,16 @@ const DATA = {
       "label": "ערבים",
       "eligible_share": 0.1330653632840706,
       "eligible_share_2026": 0.1347804828400884,
-      "theta_bibi_mean": 0.0070723927072748,
-      "theta_bibi_sd": 0.0086622453724861,
+      "theta_bibi_mean": 1.1276161710537547e-09,
+      "theta_bibi_sd": 1.888824080977304e-09,
       "theta_vote_mean": 0.5349389649941096,
       "theta_vote_sd": 0.0811080694789284,
       "theta_bibi_by_election": {
-        "K21": 0.0175543757531126,
-        "K22": 2.860493667651859e-10,
-        "K23": 7.849138962469036e-12,
-        "K24": 0.0178075843228069,
-        "K25": 3.166556184577421e-09
+        "K21": 4.460019943909085e-11,
+        "K22": 7.269130750654095e-10,
+        "K23": 7.429225361327212e-13,
+        "K24": 4.864717835293891e-09,
+        "K25": 1.1068229342490673e-12
       },
       "theta_vote_by_election": {
         "K21": 0.4763165271198704,
@@ -670,16 +670,16 @@ const DATA = {
       "label": "דרוזים",
       "eligible_share": 0.0195964370505751,
       "eligible_share_2026": 0.0195098951946651,
-      "theta_bibi_mean": 0.140931056336927,
-      "theta_bibi_sd": 0.0334985521456426,
+      "theta_bibi_mean": 0.1410282930901609,
+      "theta_bibi_sd": 0.041041592351955,
       "theta_vote_mean": 0.5272110122277713,
       "theta_vote_sd": 0.043272011165454,
       "theta_bibi_by_election": {
-        "K21": 0.184852663192501,
-        "K22": 0.1086893143058809,
-        "K23": 0.1272887216889656,
-        "K24": 0.1769414830945075,
-        "K25": 0.1068830994027801
+        "K21": 0.1952947894057236,
+        "K22": 0.0999972657743322,
+        "K23": 0.1213328025935917,
+        "K24": 0.1853976123171538,
+        "K25": 0.1031189953600029
       },
       "theta_vote_by_election": {
         "K21": 0.5371505024008392,
@@ -794,43 +794,43 @@ const DATA = {
   "validation": [
     {
       "election": "K21",
-      "implied_S": 0.5083424558267094,
-      "implied_R": 0.4905361344848157,
+      "implied_S": 0.5099009071586509,
+      "implied_R": 0.4922397323553245,
       "implied_seats": 59,
       "actual_seats": 60,
       "gap": -1
     },
     {
       "election": "K22",
-      "implied_S": 0.4607374271068828,
-      "implied_R": 0.4548085078798835,
+      "implied_S": 0.4606240168936413,
+      "implied_R": 0.4546917946831751,
       "implied_seats": 55,
       "actual_seats": 55,
       "gap": 0
     },
     {
       "election": "K23",
-      "implied_S": 0.4848672213581453,
-      "implied_R": 0.4844458993732567,
+      "implied_S": 0.4849660670726951,
+      "implied_R": 0.4845455221454294,
       "implied_seats": 58,
       "actual_seats": 58,
       "gap": 0
     },
     {
       "election": "K24",
-      "implied_S": 0.4149129334416515,
-      "implied_R": 0.4211458926529146,
+      "implied_S": 0.4209833515635658,
+      "implied_R": 0.4273075026020765,
       "implied_seats": 51,
       "actual_seats": 52,
       "gap": -1
     },
     {
       "election": "K25",
-      "implied_S": 0.4956995143797759,
-      "implied_R": 0.5302493581540726,
-      "implied_seats": 64,
+      "implied_S": 0.4931162898534518,
+      "implied_R": 0.5274181168933053,
+      "implied_seats": 63,
       "actual_seats": 64,
-      "gap": 0
+      "gap": -1
     }
   ],
   "parties": {
@@ -1147,20 +1147,32 @@ const DATA = {
       "locality_code": 6100,
       "locality_name": "בני ברק",
       "valid_votes": 87692.0,
-      "predicted_coalition_share": 0.9526774625601612,
+      "predicted_coalition_share": 0.9554271514042624,
       "actual_coalition_share": 0.9795990512247412,
-      "diff_pp": 2.6921588664580054,
+      "diff_pp": 2.4171899820478626,
       "share_haredi": 0.8803927776427518,
-      "contrib_haredi": 0.8803927776427517,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.887179639595918,
+      "contrib_haredi": 0.8871796395959178,
       "share_dati": 0.0506701898993177,
-      "contrib_dati": 0.0475682976442096,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0507732784807974,
+      "contrib_dati": 0.0471894944817898,
       "share_masorti": 0.017401786330743,
-      "contrib_masorti": 0.0143057312466316,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.0141914051528413,
+      "contrib_masorti": 0.011951462340731,
       "share_hiloni": 0.0511671548708365,
-      "contrib_hiloni": 0.0104106560254024,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.0475856486359154,
+      "contrib_hiloni": 0.0091065549858234,
       "share_arab": 0.0003680912563508,
-      "contrib_arab": 1.165581644286545e-12,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0002700281345279,
+      "contrib_arab": 2.988733321880594e-16,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     },
     {
@@ -1169,20 +1181,32 @@ const DATA = {
       "locality_code": 3650,
       "locality_name": "אפרת",
       "valid_votes": 5783.0,
-      "predicted_coalition_share": 0.9056895570911748,
+      "predicted_coalition_share": 0.9004034239340638,
       "actual_coalition_share": 0.8618364170845582,
-      "diff_pp": -4.385314000661666,
+      "diff_pp": -3.8567006849505647,
       "share_haredi": 0.0110902102921239,
-      "contrib_haredi": 0.0110902102921238,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0112957408182767,
+      "contrib_haredi": 0.0112957408182767,
       "share_dati": 0.8977380636209042,
-      "contrib_dati": 0.8427809625681032,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.9092266506595176,
+      "contrib_dati": 0.8450497446254283,
       "share_masorti": 0.0537781348630035,
-      "contrib_masorti": 0.044210147721219,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.04432789877433,
+      "contrib_masorti": 0.0373312724948222,
       "share_hiloni": 0.0373935912239683,
-      "contrib_hiloni": 0.0076082365097286,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.0351497097478757,
+      "contrib_hiloni": 0.0067266659955365,
       "share_arab": 0.0,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0,
       "contrib_arab": 0.0,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     },
     {
@@ -1191,20 +1215,32 @@ const DATA = {
       "locality_code": 2650,
       "locality_name": "רמת השרון",
       "valid_votes": 27275.0,
-      "predicted_coalition_share": 0.3508849140742591,
+      "predicted_coalition_share": 0.3372374832267572,
       "actual_coalition_share": 0.2457561869844179,
-      "diff_pp": -10.51287270898412,
+      "diff_pp": -9.148129624233928,
       "share_haredi": 0.0215587961534468,
-      "contrib_haredi": 0.0215587961534468,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0237357448537393,
+      "contrib_haredi": 0.0237357448537393,
       "share_dati": 0.0382773650901156,
-      "contrib_dati": 0.0359341281187347,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0419052053544066,
+      "contrib_dati": 0.0389473659373391,
       "share_masorti": 0.1654060572302642,
-      "contrib_masorti": 0.1359776839186197,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.14737582193032,
+      "contrib_masorti": 0.1241143189673403,
       "share_hiloni": 0.7736728740432088,
-      "contrib_hiloni": 0.1574143058800224,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.7861136880254964,
+      "contrib_hiloni": 0.1504400534683374,
       "share_arab": 0.0010849074829641,
-      "contrib_arab": 3.43542049987434e-12,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0008695398360376,
+      "contrib_arab": 9.624266327696602e-16,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     },
     {
@@ -1213,20 +1249,32 @@ const DATA = {
       "locality_code": 7300,
       "locality_name": "נצרת",
       "valid_votes": 28462.0,
-      "predicted_coalition_share": 0.000152797263359,
+      "predicted_coalition_share": 0.0001773660294284,
       "actual_coalition_share": 0.0260347129506008,
-      "diff_pp": 2.5881915687241706,
+      "diff_pp": 2.5857346921172377,
       "share_haredi": 0.0,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0,
       "contrib_haredi": 0.0,
       "share_dati": 0.0,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0,
       "contrib_dati": 0.0,
       "share_masorti": 0.0001091880223356,
-      "contrib_masorti": 8.976173326095717e-05,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.0001213701072332,
+      "contrib_masorti": 0.0001022132939103,
       "share_hiloni": 0.0003097966897803,
-      "contrib_hiloni": 6.303236486869068e-05,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.0003927052128183,
+      "contrib_hiloni": 7.515273441182549e-05,
       "share_arab": 0.999581015287884,
-      "contrib_arab": 3.165229445946027e-09,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.9994859246799486,
+      "contrib_arab": 1.106253943894903e-12,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     },
     {
@@ -1235,21 +1283,33 @@ const DATA = {
       "locality_code": 481,
       "locality_name": "מגאר",
       "valid_votes": 7377.0,
-      "predicted_coalition_share": 0.1068830994027801,
+      "predicted_coalition_share": 0.1031189953600029,
       "actual_coalition_share": 0.1191541276941846,
-      "diff_pp": 1.227102829140447,
+      "diff_pp": 1.6035132334181648,
       "share_haredi": 0.0,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0,
       "contrib_haredi": 0.0,
       "share_dati": 0.0,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0,
       "contrib_dati": 0.0,
       "share_masorti": 0.0,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.0,
       "contrib_masorti": 0.0,
       "share_hiloni": 0.0,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.0,
       "contrib_hiloni": 0.0,
       "share_arab": 0.0,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0,
       "contrib_arab": 0.0,
       "share_druze": 1.0,
-      "contrib_druze": 0.1068830994027801
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 1.0,
+      "contrib_druze": 0.1031189953600029
     },
     {
       "example_id": "masorti",
@@ -1257,20 +1317,32 @@ const DATA = {
       "locality_code": 2200,
       "locality_name": "דימונה",
       "valid_votes": 18471.0,
-      "predicted_coalition_share": 0.6708748483261461,
+      "predicted_coalition_share": 0.671866758705085,
       "actual_coalition_share": 0.8169021709707108,
-      "diff_pp": 14.602732264456474,
+      "diff_pp": 14.503541226562575,
       "share_haredi": 0.0443254963650039,
-      "contrib_haredi": 0.0443254963650039,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0502080529302424,
+      "contrib_haredi": 0.0502080529302424,
       "share_dati": 0.186342375501618,
-      "contrib_dati": 0.1749349982544548,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.2098838295245888,
+      "contrib_dati": 0.195069377269253,
       "share_masorti": 0.4806788466511779,
-      "contrib_masorti": 0.3951584202585138,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.440627151060558,
+      "contrib_masorti": 0.371079448827484,
       "share_hiloni": 0.2774742995312258,
-      "contrib_hiloni": 0.0564559334127746,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.2900628870408057,
+      "contrib_hiloni": 0.0555098796780954,
       "share_arab": 0.011178981950974,
-      "contrib_arab": 3.539887443413623e-11,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0092180794438048,
+      "contrib_arab": 1.0202781738133129e-14,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     },
     {
@@ -1279,20 +1351,32 @@ const DATA = {
       "locality_code": 7100,
       "locality_name": "אשקלון",
       "valid_votes": 73602.0,
-      "predicted_coalition_share": 0.6335565596771908,
+      "predicted_coalition_share": 0.6319845198224571,
       "actual_coalition_share": 0.6642210809488872,
-      "diff_pp": 3.0664521271696388,
+      "diff_pp": 3.223656112643014,
       "share_haredi": 0.0447531200070402,
-      "contrib_haredi": 0.0447531200070402,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0498024931972707,
+      "contrib_haredi": 0.0498024931972707,
       "share_dati": 0.2207255145786182,
-      "contrib_dati": 0.207213294365183,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.2442462388790649,
+      "contrib_dati": 0.2270063483519324,
       "share_masorti": 0.3764908716835243,
-      "contrib_masorti": 0.3095071462634493,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.3390616644300604,
+      "contrib_masorti": 0.2855448540844549,
       "share_hiloni": 0.3542794964990122,
-      "contrib_hiloni": 0.0720829990296405,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.3638508677798998,
+      "contrib_hiloni": 0.0696308241887956,
       "share_arab": 0.0037509972318048,
-      "contrib_arab": 1.18777434827045e-11,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0030387357137041,
+      "contrib_arab": 3.363342379049469e-15,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     },
     {
@@ -1301,20 +1385,32 @@ const DATA = {
       "locality_code": 8300,
       "locality_name": "ראשון לציון",
       "valid_votes": 139546.0,
-      "predicted_coalition_share": 0.4759629443079547,
+      "predicted_coalition_share": 0.4634459707065244,
       "actual_coalition_share": 0.4843779112264056,
-      "diff_pp": 0.8414966918450895,
+      "diff_pp": 2.0931940519881174,
       "share_haredi": 0.0166243074164871,
-      "contrib_haredi": 0.0166243074164871,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0186106027846571,
+      "contrib_haredi": 0.0186106027846571,
       "share_dati": 0.0819578248474741,
-      "contrib_dati": 0.0769405880333821,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0912336147534892,
+      "contrib_dati": 0.084793976059509,
       "share_masorti": 0.321972039981509,
-      "contrib_masorti": 0.264688083473815,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.2916966958521083,
+      "contrib_masorti": 0.2456558767680708,
       "share_hiloni": 0.5785306914197738,
-      "contrib_hiloni": 0.1177099653813725,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.5977132888110198,
+      "contrib_hiloni": 0.1143855150942864,
       "share_arab": 0.0009151363347559,
-      "contrib_arab": 2.8978306205528447e-12,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0007457977987254,
+      "contrib_arab": 8.254661079417532e-16,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     },
     {
@@ -1323,20 +1419,32 @@ const DATA = {
       "locality_code": 3000,
       "locality_name": "ירושלים",
       "valid_votes": 264700.0,
-      "predicted_coalition_share": 0.728703036169348,
+      "predicted_coalition_share": 0.7498139907821528,
       "actual_coalition_share": 0.7734265205893465,
-      "diff_pp": 4.472348441999852,
+      "diff_pp": 2.361252980719364,
       "share_haredi": 0.3741478256741722,
-      "contrib_haredi": 0.3741478256741722,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.4000784421325927,
+      "contrib_haredi": 0.4000784421325927,
       "share_dati": 0.2168793727074422,
-      "contrib_dati": 0.2036026029177364,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.2306044868913572,
+      "contrib_dati": 0.2143274865685762,
       "share_masorti": 0.137278734842945,
-      "contrib_masorti": 0.112854660390312,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.1187959581554368,
+      "contrib_masorti": 0.10004544333945,
       "share_hiloni": 0.1872469463543638,
-      "contrib_hiloni": 0.0380979469197207,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.1847848228991776,
+      "contrib_hiloni": 0.0353626187414611,
       "share_arab": 0.0844471204210765,
-      "contrib_arab": 2.674065514391141e-10,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0657362899214355,
+      "contrib_arab": 7.275843329749064e-14,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     },
     {
@@ -1345,20 +1453,32 @@ const DATA = {
       "locality_code": 4000,
       "locality_name": "חיפה",
       "valid_votes": 139764.0,
-      "predicted_coalition_share": 0.3620484651728107,
+      "predicted_coalition_share": 0.367923273517378,
       "actual_coalition_share": 0.3504407429667153,
-      "diff_pp": -1.1607722206095406,
+      "diff_pp": -1.7482530550662678,
       "share_haredi": 0.0556775770565651,
-      "contrib_haredi": 0.0556775770565651,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0633888613747169,
+      "contrib_haredi": 0.0633888613747169,
       "share_dati": 0.0632544595425548,
-      "contrib_dati": 0.0593821922677337,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0716096172627008,
+      "contrib_dati": 0.0665551199326106,
       "share_masorti": 0.1674116310852032,
-      "contrib_masorti": 0.1376264342261292,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.1542462885109284,
+      "contrib_masorti": 0.1299003649379153,
       "share_hiloni": 0.5375027025446297,
-      "contrib_hiloni": 0.1093622610645822,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.56475866736841,
+      "contrib_hiloni": 0.1080789272719736,
       "share_arab": 0.1761536297710467,
-      "contrib_arab": 5.578003657872694e-10,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.1459965654832438,
+      "contrib_arab": 1.6159234699845e-13,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     },
     {
@@ -1367,20 +1487,32 @@ const DATA = {
       "locality_code": 7400,
       "locality_name": "נתניה",
       "valid_votes": 113043.0,
-      "predicted_coalition_share": 0.6284642110903926,
+      "predicted_coalition_share": 0.6276985135913525,
       "actual_coalition_share": 0.6291765080544571,
-      "diff_pp": 0.0712296964064496,
+      "diff_pp": 0.1477994463104592,
       "share_haredi": 0.0817897612551245,
-      "contrib_haredi": 0.0817897612551245,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0903643839351976,
+      "contrib_haredi": 0.0903643839351976,
       "share_dati": 0.2068928618316922,
-      "contrib_dati": 0.1942274392819039,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.2272958145192117,
+      "contrib_dati": 0.2112523537168251,
       "share_masorti": 0.3368058379649018,
-      "contrib_masorti": 0.2768827124207493,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.3011441521931958,
+      "contrib_masorti": 0.2536121656246117,
       "share_hiloni": 0.3713896737455883,
-      "contrib_hiloni": 0.0755642981227292,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.3786847406715493,
+      "contrib_hiloni": 0.0724696103147152,
       "share_arab": 0.0031218652026928,
-      "contrib_arab": 9.885561565004023e-12,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0025109086808454,
+      "contrib_arab": 2.779131313764816e-15,
       "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
       "contrib_druze": 0.0
     }
   ],
@@ -5586,7 +5718,7 @@ const DATA = {
       "arab": 0.018,
       "druze": 0.013
     },
-    "model_method": "Constrained weighted least-squares ecological inference (scipy lsq_linear), locality level, weighted by eligible voters, bounds [0,1] for theta_bibi and [0.20,0.95] for theta_vote, 200-resample bootstrap for CIs. Demographic basis: CONTINUOUS fractional PUF-derived share_ columns (share_haredi..share_druze from data/clean/model_input_v2.csv, rova-level granularity, see docs/session_census_microdata.md) merged onto fresh party_mapping.xlsx-derived vote columns from model_input.csv; superseded the old binary modal pct_ columns. Rows with is_envelope==True, demog_source=='none', or null share_ are excluded from the regression only (national actuals still use all votes incl. envelopes). Seat logic: Stage1 V=sum(E*t), CV=sum(E*t*k), S=CV/V; Stage2 S_c=S-w_c, S_o=(1-S)-w_o, R=S_c/(S_c+S_o); Stage3 seats=round(120*R). No calibration constant. 2026 projection (eligible_share_2026): raw_2026_g = eligible_share_g (2022 census) * (1 + cagr_g)^projection_years, then renormalized to sum to 1.0. projection_years=3.5 (2022 census / K25 Nov-2022 -> mid-2026 election). CAGR per group (annual, source: IDI/CBS reference values): haredi 3.0%, dati 2.0%, masorti 1.3%, hiloni 0.8%, arab 1.8%, druze 1.3%. The Stage 1-3 seat regression/validation above is unchanged and still uses the 2022 eligible_share only; eligible_share_2026 is used only by the scenario simulator when the 2026-projected electorate base is selected."
+    "model_method": "CLEAN COALITION COEFFICIENT method (two linear regressions on eligible shares, no reduced-form vote-choice regression, no turnout double-count, no calibration constant, no Bader-Ofer). At the locality level (weighted by eligible voters), on the same six fractional share_ columns (share_haredi..share_druze, CONTINUOUS PUF-derived, rova-level granularity, see docs/session_census_microdata.md), two constrained weighted least-squares ecological-inference regressions (scipy lsq_linear) are fit per election, in order: Reg A (turnout) y=voted/eligible, bounds [0.20,0.95] -> a_g = P(voted|eligible); then Reg B (coalition per eligible) y=bibi_votes/eligible, bounds [0, a_g] per group (that election's own fitted a_g as the upper bound) -> b_g. Clean coalition support k_g = b_g / a_g = P(coalition|voted) is then in [0,1] BY CONSTRUCTION (the b<=a bound is a deliberate hard cap, not a fitted result): Haredi pins at k=1 because the bound binds, Arab pins at k=0. k_g is what the theta_bibi_* columns hold (names kept for downstream compatibility; the VALUES are the clean k, not a share of valid votes). This removes the prior model's turnout double-count, where theta_bibi was fit directly on coalition share OF VALID VOTES (a reduced-form coefficient that partly absorbed each group's turnout tendency) and was then re-multiplied by theta_vote downstream — b_g's own regression, bounded by a_g, means turnout is factored out exactly once. 200-resample NESTED bootstrap for k's CI: each resample refits Reg A, then refits Reg B bounded by that resample's a, then computes k=b/a, so the reported interval reflects both regressions' sampling variation jointly. Demographic merge: fresh party_mapping.xlsx-derived vote columns (model_input.csv) merged onto fractional demographics (model_input_v2.csv); rows with is_envelope==True, demog_source=='none', or null share_ are excluded from both regressions only (national actuals still use all votes incl. envelopes). Seat logic (unchanged): Stage1 V=sum(E*t), CV=sum(E*t*k), S=CV/V; Stage2 S_c=S-w_c, S_o=(1-S)-w_o, R=S_c/(S_c+S_o); Stage3 seats=round(120*R). 2026 projection (eligible_share_2026): raw_2026_g = eligible_share_g (2022 census) * (1 + cagr_g)^projection_years, then renormalized to sum to 1.0. projection_years=3.5 (2022 census / K25 Nov-2022 -> mid-2026 election). CAGR per group (annual, source: IDI/CBS reference values): haredi 3.0%, dati 2.0%, masorti 1.3%, hiloni 0.8%, arab 1.8%, druze 1.3%. The Stage 1-3 seat regression/validation above is unchanged and still uses the 2022 eligible_share only; eligible_share_2026 is used only by the scenario simulator when the 2026-projected electorate base is selected."
   }
 };
 
@@ -5756,25 +5888,33 @@ function renderExample(eid) {
   document.getElementById('exGap').innerHTML =
     '<span class="ltr-token">' + (gap >= 0 ? '+' : '') + gap.toFixed(1) + '</span> נק\' אחוז';
 
-  // Calculation table — one row per group with nonzero share; contribution
-  // is the contrib_* value from the CSV, displayed as-is (not recomputed).
-  // Wrapped in ltr-token so the share × support = contribution expression
-  // reads left-to-right inside the RTL layout.
+  // Calculation table — one row per group with nonzero eligible share,
+  // walking eligible share -> turnout -> share of voters -> coalition
+  // support -> contribution. All values (turnout_*, voter_share_*,
+  // contrib_*) are read as-is from the CSV; no model math is performed
+  // here. Contributions sum to predicted_coalition_share (turnout-weighted).
+  // Numbers wrapped via pct() (uses ltr-token, direction:ltr) so digits
+  // read left-to-right inside the RTL layout.
   const calcBody = document.querySelector('#exCalcTable tbody');
   calcBody.innerHTML = '';
   DATA.group_order.forEach(function (g) {
     const share = ex['share_' + g];
     if (share <= 0.0005) return;
+    const turnout = ex['turnout_' + g];
+    const voterShare = ex['voter_share_' + g];
     const theta = DATA.groups[g].theta_bibi_by_election.K25;
     const contrib = ex['contrib_' + g];
     const tr = document.createElement('tr');
     tr.innerHTML = '<td class="group-cell">' + DATA.groups[g].label + '</td>' +
-      '<td class="num"><span class="ltr-token">' + (share * 100).toFixed(1) + '% × ' +
-      (theta * 100).toFixed(0) + '% = ' + (contrib * 100).toFixed(1) + '%</span></td>';
+      '<td class="num">' + pct(share, 1) + '</td>' +
+      '<td class="num">' + pct(turnout, 0) + '</td>' +
+      '<td class="num">' + pct(voterShare, 1) + '</td>' +
+      '<td class="num">' + pct(theta, 0) + '</td>' +
+      '<td class="num">' + pct(contrib, 1) + '</td>';
     calcBody.appendChild(tr);
   });
   const totalTr = document.createElement('tr');
-  totalTr.innerHTML = '<td style="font-weight:700;">חלק חזוי לקואליציה</td>' +
+  totalTr.innerHTML = '<td style="font-weight:700;" colspan="5">חלק חזוי לקואליציה</td>' +
     '<td class="num" style="font-weight:700;">' + pct(ex.predicted_coalition_share, 1) + '</td>';
   calcBody.appendChild(totalTr);
 
@@ -6187,8 +6327,8 @@ document.querySelectorAll('.tab-btn').forEach(function (btn) {
   });
 });
 </script>
-
 <style>.hb-home-back{position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px}.hb-home-back .hb-lbl{display:inline}@media(max-width:480px){.hb-home-back{padding:0;width:40px;height:40px;gap:0;justify-content:center;border-radius:50%;font-size:18px}.hb-home-back .hb-lbl{display:none}}</style>
 <a href="../index.html" class="hb-home-back" aria-label="חזרה לדף הבית">🏠<span class="hb-lbl">דף הבית</span></a>
+
 </body>
 </html>
