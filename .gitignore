@@ -1,0 +1,12 @@
+data/raw/*
+!data/raw/README.md
+modeling/outputs/
+modeling/*_outputs/
+modeling/__pycache__/
+*.py[cod]
+*.csv.gz
+*.parquet
+*.sav
+*.dta
+*.sqlite*
+*.db

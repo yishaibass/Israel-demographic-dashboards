@@ -1,0 +1,6359 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VE1ZYYW7TS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-VE1ZYYW7TS');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>סימולטור מנדטים – בחירות לכנסת</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --coalition:      #2a78d6;
+    --coalition-soft: #cde2fb;
+    --opposition:     #898781;
+    --opposition-soft:#e9e8e4;
+    --turnout-line:   #1baf7a;
+    --good:           #0ca30c;
+    --guidance:       #a8631f;
+    --guidance-soft:  #fbeedc;
+  }
+  * { box-sizing: border-box; }
+  html { direction: rtl; }
+  body {
+    font-family: "Segoe UI", "Arial Hebrew", Arial, sans-serif;
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    line-height: 1.45;
+    direction: rtl;
+    text-align: right;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+  header.page-head { margin-bottom: 18px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-secondary); font-size: 12.5px; max-width: 760px; }
+  .subtitle2 { color: var(--text-secondary); font-size: 12px; max-width: 760px; margin-top: 6px; }
+
+  h3.section-title { font-size: 14.5px; font-weight: 700; margin: 16px 0 4px; }
+  p.hint { font-size: 12px; color: var(--text-muted); margin: 0 0 10px; max-width: 720px; }
+
+  .card {
+    background: var(--surface-1);
+    --card-bg: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+
+  /* Tabs */
+  .tabs-bar { display: flex; gap: 6px; margin: 4px 0 16px; border-bottom: 1px solid var(--grid); }
+  button.tab-btn, a.tab-btn {
+    font-size: 13px; font-weight: 700; padding: 9px 16px; border: none; background: none;
+    color: var(--text-muted); cursor: pointer; border-bottom: 2.5px solid transparent; margin-bottom: -1px; text-decoration: none; display: inline-block;
+  }
+  button.tab-btn:hover, a.tab-btn:hover { color: var(--text-primary); }
+  button.tab-btn.active, a.tab-btn.active { color: var(--coalition); border-bottom-color: var(--coalition); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .hero-section { background: #ffffff; border: 1px solid var(--border); border-radius: 14px; padding: 4px 4px 2px; }
+  .hero-section .card { border: none; box-shadow: none; }
+  .reference-section .card { background: #f5f5f2; --card-bg: #f5f5f2; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 12.8px; }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Table scroll cue — mobile QA priority fix: soft edge fade + swipe hint
+     so an overflowing table never clips silently. .table-scroll-wrap is the
+     positioning context; --card-bg (set per .card variant above) keeps the
+     fade color matched to whichever card background it sits on. RTL: the
+     hint sits on the left (the edge that overflows first on initial load). */
+  .table-scroll-wrap { position: relative; }
+  .table-fade {
+    position: absolute; top: 0; bottom: 0; width: 26px; pointer-events: none;
+    opacity: 0; z-index: 2;
+  }
+  .table-fade-right { right: 0; background: linear-gradient(to right, rgba(0,0,0,0), var(--card-bg, var(--surface-1))); }
+  .table-fade-left  { left: 0;  background: linear-gradient(to left,  rgba(0,0,0,0), var(--card-bg, var(--surface-1))); }
+  .table-scroll-wrap.overflow-right .table-fade-right { opacity: 1; }
+  .table-scroll-wrap.overflow-left  .table-fade-left  { opacity: 1; }
+  .swipe-hint {
+    position: absolute; top: 3px; left: 8px; font-size: 11px; font-weight: 600;
+    color: var(--text-secondary); background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 2px 8px; z-index: 3; pointer-events: none; display: none;
+  }
+  @media (max-width: 480px) {
+    .table-scroll-wrap.has-overflow .swipe-hint { display: inline-block; }
+  }
+  th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--grid); vertical-align: middle; }
+  th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; text-align: right; }
+  th:first-child, td:first-child { text-align: right; }
+  tbody tr:last-child td { border-bottom: none; }
+  .num { font-variant-numeric: tabular-nums; }
+  .cell-stack { display: inline-flex; flex-direction: column; align-items: flex-end; line-height: 1.25; }
+  .cell-stack .v-bibi { color: var(--coalition); font-weight: 600; }
+  .cell-stack .v-turnout { color: var(--turnout-line); font-size: 11px; }
+  .legend-line { font-size: 11.5px; color: var(--text-muted); margin: 6px 0 12px; }
+  .legend-line .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-left: 4px; vertical-align: -1px; }
+
+  /* Group monogram badge — tasteful abstract initials, no caricature */
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 10.5px;
+    font-weight: 700; flex: none; margin-left: 8px; letter-spacing: -0.02em;
+  }
+
+  /* Light horizontal share bar (used for eligible-voter share) */
+  .share-bar-wrap { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+  .share-bar-track { flex: 1; height: 5px; border-radius: 3px; background: var(--opposition-soft); overflow: hidden; max-width: 130px; }
+  .share-bar-fill { height: 100%; border-radius: 3px; background: var(--baseline); }
+  .share-bar-val { font-size: 10.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 30px; }
+
+  /* Group scenario row */
+  .group-row {
+    display: grid; grid-template-columns: 168px 1fr 1fr; gap: 18px; align-items: center;
+    padding: 12px 4px; border-bottom: 1px solid var(--grid);
+  }
+  .group-row:last-child { border-bottom: none; }
+  .group-id { display: flex; align-items: center; }
+  .group-name { font-weight: 600; font-size: 13px; }
+
+  .control-block { min-width: 0; }
+  .control-label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; margin-bottom: 4px; }
+  .sd-buttons { display: inline-flex; border: 1px solid var(--baseline); border-radius: 20px; overflow: hidden; }
+  button.sd-btn {
+    font-size: 11px; font-weight: 600; padding: 5px 9px; border: none; background: var(--surface-1);
+    color: var(--text-secondary); cursor: pointer; border-left: 1px solid var(--baseline);
+  }
+  button.sd-btn:last-child { border-left: none; }
+  button.sd-btn:hover { background: var(--opposition-soft); }
+  button.sd-btn.active { background: var(--coalition); color: #fff; }
+  .control-readout { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .control-readout .val { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 42px; }
+  .control-readout .val.turnout-val { color: var(--turnout-line); }
+  .control-readout .val.coal-val { color: var(--coalition); }
+  .value-bar-track { flex: 1; height: 7px; border-radius: 4px; background: var(--opposition-soft); overflow: hidden; max-width: 150px; }
+  .value-bar-fill { height: 100%; border-radius: 4px; }
+  .guidance-mini { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+  .load-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 14px; }
+  .load-row span.lbl { font-size: 12px; color: var(--text-secondary); margin-left: 2px; font-weight: 600; }
+  button.load-btn, button.clear-btn {
+    font-size: 12px; padding: 6px 13px; border-radius: 20px; border: 1px solid var(--baseline);
+    background: var(--surface-1); color: var(--text-primary); cursor: pointer; font-weight: 600;
+  }
+  button.load-btn:hover, button.clear-btn:hover { border-color: var(--coalition); color: var(--coalition); }
+  button.load-btn.active { background: var(--coalition); color: #fff; border-color: var(--coalition); }
+  button.clear-btn { color: var(--text-secondary); font-weight: 500; }
+
+  .electorate-toggle-row {
+    display: flex; align-items: center; gap: 10px; margin: 0 0 14px;
+    padding: 8px 12px; background: var(--opposition-soft); border-radius: 8px;
+  }
+  .electorate-toggle-row span.lbl { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+  .toggle-group { display: inline-flex; border: 1px solid var(--baseline); border-radius: 20px; overflow: hidden; }
+  button.toggle-btn {
+    font-size: 12px; padding: 5px 12px; border: none; background: var(--surface-1);
+    color: var(--text-secondary); cursor: pointer; font-weight: 600;
+  }
+  button.toggle-btn.active { background: var(--coalition); color: #fff; }
+  .electorate-note { font-size: 11px; color: var(--text-muted); }
+
+  /* Threshold sub-block — folded into the same input card, no big header */
+  .threshold-block {
+    margin-top: 10px; padding: 12px 14px; background: var(--page); border: 1px solid var(--grid); border-radius: 8px;
+  }
+  .threshold-block .block-lbl { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .threshold-row { display: flex; gap: 24px; flex-wrap: wrap; }
+  .threshold-field { max-width: 260px; }
+  .threshold-field label { display: block; font-size: 11.5px; font-weight: 600; margin-bottom: 5px; }
+  input[type=number] {
+    width: 72px; font-size: 13px; padding: 5px 7px; border: 1px solid var(--baseline);
+    border-radius: 6px; background: var(--surface-1); color: var(--text-primary);
+    font-variant-numeric: tabular-nums; direction: ltr; text-align: center;
+  }
+  input[type=number]:focus { outline: 2px solid var(--coalition); outline-offset: 1px; }
+  .guidance-line {
+    display: inline-block; font-size: 10.5px; color: var(--guidance); margin-top: 4px; font-weight: 600;
+    background: var(--guidance-soft); border-radius: 5px; padding: 2px 6px; white-space: nowrap;
+  }
+
+  /* Output panel — the hero. */
+  .result-hero {
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    border: 1.5px solid var(--coalition-soft);
+  }
+
+  /* Callout explaining the SD scale, above the first (Haredi) group row.
+     Subtle: small font, muted tinted background. */
+  .group-callout {
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    background: var(--opposition-soft);
+    border-radius: 8px;
+    padding: 9px 13px;
+    margin: 2px 0 12px;
+  }
+  .output-grid { display: flex; gap: 28px; flex-wrap: wrap; align-items: stretch; }
+  .headline { display: flex; gap: 34px; align-items: baseline; }
+  .headline .stat { text-align: right; }
+  .headline .stat .n { font-size: 52px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; direction: ltr; }
+  .headline .stat.coalition .n { color: var(--coalition); }
+  .headline .stat.opposition .n { color: var(--opposition); }
+  .headline .stat .lbl { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; }
+  .majority-badge {
+    display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 20px;
+    font-size: 13.5px; font-weight: 700; border: 1px solid var(--border);
+  }
+  .majority-badge.yes { background: var(--coalition-soft); color: #184f95; }
+  .majority-badge.no  { background: var(--opposition-soft); color: var(--text-secondary); }
+  .sub-stats { display: flex; gap: 26px; margin-top: 16px; flex-wrap: wrap; }
+  .sub-stats .stat2 .n { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; direction: ltr; }
+  .sub-stats .stat2 .lbl { font-size: 11px; color: var(--text-muted); max-width: 220px; }
+  .sub-stats .stat2 .lbl small { display: block; font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+  .seat-bar-wrap { margin-top: 20px; }
+  .seat-bar-caption { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .empty-state { color: var(--text-muted); font-size: 13.5px; padding: 30px 6px; text-align: center; }
+
+  /* Party assignments tab */
+  .party-select-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .party-select-row label { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+  select#partyElection {
+    font-size: 13px; padding: 6px 10px; border: 1px solid var(--baseline); border-radius: 6px;
+    background: var(--surface-1); color: var(--text-primary);
+  }
+  .bloc-chip {
+    display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 10px;
+  }
+  .bloc-chip.coalition { background: var(--coalition-soft); color: #184f95; }
+  .bloc-chip.opposition { background: var(--opposition-soft); color: var(--text-secondary); }
+  .bloc-chip.niche { background: var(--opposition-soft); color: var(--text-muted); }
+
+  /* Worked-examples explorer (History tab) */
+  .demo-bar-wrap { margin: 4px 0 8px; }
+  .demo-bar { display: flex; height: 22px; border-radius: 5px; overflow: hidden; background: var(--opposition-soft); }
+  .demo-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 11.5px; color: var(--text-secondary); margin-bottom: 14px; }
+  .demo-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+  .demo-legend-item .badge { width: 16px; height: 16px; font-size: 9px; margin-left: 0; }
+  .example-modelactual { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; margin: 10px 0 6px; }
+  .ma-stat .ma-n { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; direction: ltr; }
+  .ma-stat .ma-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .ma-gap { font-size: 13px; font-weight: 700; color: var(--text-secondary); background: var(--opposition-soft); border-radius: 8px; padding: 5px 12px; }
+  .ma-gap-lbl { font-weight: 500; color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-right: 4px; }
+
+  footer.foot { margin-top: 32px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--grid); padding-top: 14px; }
+
+  /* Standalone LTR tokens (percentages, year ranges, seat counts) that must
+     not be visually reversed when embedded in RTL flow. */
+  .ltr-token { direction: ltr; unicode-bidi: embed; display: inline-block; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 18px 12px 40px; }
+    .card { padding: 14px 14px; }
+    table { font-size: 11.5px; }
+    th, td { padding: 6px 6px; }
+    .headline { gap: 18px; flex-wrap: wrap; }
+    .headline .stat .n { font-size: 36px; }
+    .group-row { grid-template-columns: 1fr; gap: 8px; }
+    .electorate-toggle-row { flex-wrap: wrap; row-gap: 8px; }
+    .sd-buttons { flex-wrap: wrap; }
+    .party-select-row { flex-wrap: wrap; row-gap: 6px; }
+    .threshold-field { max-width: 100%; }
+    .value-bar-track, .share-bar-track { max-width: 110px; }
+    .example-modelactual { gap: 16px; }
+    .ma-stat .ma-n { font-size: 20px; }
+
+    /* Touch targets: bump tappable controls to >=40px tall, and give the
+       number inputs 16px font to avoid iOS zoom-on-focus. Small gaps added
+       between separate tappable groups (tabs, load buttons). */
+    .tabs-bar { gap: 8px; }
+    button.tab-btn, button.load-btn, button.clear-btn, button.toggle-btn, button.sd-btn {
+      min-height: 40px; display: inline-flex; align-items: center; justify-content: center;
+    }
+    button.load-btn, button.clear-btn, button.toggle-btn { padding-top: 9px; padding-bottom: 9px; }
+    input[type=number] {
+      min-height: 40px; font-size: 16px; padding-top: 9px; padding-bottom: 9px;
+    }
+    .load-row { row-gap: 10px; }
+  }
+
+  @media (max-width: 400px) {
+    .headline .stat .n { font-size: 30px; }
+    .badge { width: 22px; height: 22px; }
+  }
+
+  /* Item 4 — no user-visible text below 11px on mobile. Overrides any
+     smaller sizes set above (declared last so it wins at equal specificity). */
+  @media (max-width: 430px) {
+    .badge { font-size: 11px; }
+    button.sd-btn { font-size: 11px; padding: 8px 8px; }
+    .share-bar-val { font-size: 11px; }
+    .guidance-mini { font-size: 11px; }
+    .guidance-line { font-size: 11px; }
+    .control-label { font-size: 11px; }
+  }
+  .demographics-frame { width: 100%; border: 0; display: block; min-height: 1500px; background: var(--page); }</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page-head">
+  <h1>סימולטור מנדטים &ndash; בחירות לכנסת</h1>
+  <div class="subtitle">
+    קבעו לכל קבוצה באוכלוסייה את אחוז ההצבעה ואת שיעור התמיכה בקואליציה, וראו כמה מנדטים מניב כל תרחיש.
+    כל הנתונים נלקחים ישירות מנתוני המודל; החישוב היחיד שנעשה בעמוד הוא נוסחת המנדטים &ndash; ללא כל גורם תיקון.
+  </div>
+  <div class="subtitle2">
+    קואליציה = הגוש בראשות נתניהו (ליכוד, ש"ס, יהדות התורה, הציונות הדתית). אופוזיציה = כל שאר המפלגות.
+    האחוזים מחושבים מתוך בעלי זכות הבחירה (לא מכלל האוכלוסייה).
+  </div>
+</header>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" data-tab="scenario">בניית תרחיש</button>
+  <button class="tab-btn" data-tab="history">דפוסי הצבעה <span class="ltr-token">2019&ndash;2022</span></button>
+  <button class="tab-btn" data-tab="parties">שיוך מפלגות</button>
+  <button class="tab-btn" data-tab="demographics">ניתוח דמוגרפי</button>
+</div>
+
+<section class="tab-panel active" id="tab-scenario">
+
+<div class="hero-section">
+<h3 class="section-title" style="margin: 4px 20px 4px;">תוצאה</h3>
+<div class="card result-hero" id="outputCard">
+  <p class="hint" id="resultCaption" style="margin:0 0 10px;font-weight:600;"></p>
+  <div id="emptyState" class="empty-state">קבעו הנחות למעלה, או טענו תוצאות בחירות, כדי לראות תוצאה.</div>
+  <div id="resultBody" style="display:none;">
+    <div class="output-grid">
+      <div>
+        <div class="headline">
+          <div class="stat coalition">
+            <div class="n" id="outCoalSeats">&mdash;</div>
+            <div class="lbl">מנדטים לקואליציה</div>
+          </div>
+          <div class="stat opposition">
+            <div class="n" id="outOppSeats">&mdash;</div>
+            <div class="lbl">מנדטים לאופוזיציה</div>
+          </div>
+        </div>
+        <div class="majority-badge" id="outMajority">&mdash;</div>
+        <div class="sub-stats">
+          <div class="stat2"><div class="n" id="outS">&mdash;</div><div class="lbl">חלק הקואליציה מכלל הקולות הכשרים</div></div>
+          <div class="stat2"><div class="n" id="outR">&mdash;</div><div class="lbl">חלק הקואליציה מהקולות שנספרים למנדטים<small>אחרי אחוז החסימה</small></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="seat-bar-wrap">
+      <svg id="seatBar" width="100%" height="34" viewBox="0 0 600 34" preserveAspectRatio="none"></svg>
+      <div class="seat-bar-caption"><span>0</span><span>61 (רוב)</span><span>120</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="electorate-toggle-row">
+    <span class="lbl">הרכב הבוחרים:</span>
+    <div class="toggle-group">
+      <button class="toggle-btn" id="baseBtn2022" data-base="2022">2022 (בפועל)</button>
+      <button class="toggle-btn active" id="baseBtn2026" data-base="2026">2026 (תחזית)</button>
+    </div>
+    <span class="electorate-note" id="baseNote"></span>
+  </div>
+
+  <div class="load-row">
+    <span class="lbl">טען תוצאות בחירות:</span>
+    <button class="load-btn" data-election="K25">2022</button>
+    <button class="load-btn" data-election="K24">2021</button>
+    <button class="load-btn" data-election="K23">2020</button>
+    <button class="load-btn" data-election="K22">ספטמבר 2019</button>
+    <button class="load-btn" data-election="K21">אפריל 2019</button>
+    <button class="clear-btn" id="clearBtn">איפוס לממוצע</button>
+  </div>
+
+  <div class="group-callout">כל קבוצה מתחילה בממוצע שלה לשנים <span dir="ltr">2019&ndash;2022</span>. לחצו על <span dir="ltr">&minus;/+</span> כדי להזיז אותה מעל או מתחת לממוצע: <span dir="ltr">+1</span> = סטיית תקן אחת (שינוי מתון וסביר), <span dir="ltr">+2</span> = שתי סטיות תקן (שינוי גדול ונדיר); <span dir="ltr">&minus;1/&minus;2</span> באותו אופן מתחת לממוצע.</div>
+
+  <div id="groupRows"></div>
+
+  <div class="threshold-block">
+    <div class="block-lbl">אחוז החסימה &middot; קולות שאבדו</div>
+    <div class="threshold-row">
+      <div class="threshold-field">
+        <label for="wc">קולות הקואליציה שאבדו מתחת לאחוז החסימה (<span class="ltr-token">3.25%</span>)</label>
+        <input type="number" id="wc" step="0.01">
+        <span class="guidance-line" id="wcGuidance"></span>
+      </div>
+      <div class="threshold-field">
+        <label for="wo">קולות האופוזיציה שאבדו מתחת לאחוז החסימה</label>
+        <input type="number" id="wo" step="0.01">
+        <span class="guidance-line" id="woGuidance"></span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</section>
+
+<section class="tab-panel" id="tab-history">
+<p class="hint">נתונים היסטוריים &ndash; לצפייה בלבד, לא לעריכה.</p>
+
+<div class="card" id="examplesCard">
+<h3 class="section-title" style="margin-top:0;">דוגמאות: מודל מול תוצאה בפועל</h3>
+<div class="party-select-row">
+  <label for="exampleSelect">יישוב:</label>
+  <select id="exampleSelect"></select>
+</div>
+
+<h4 id="exHeading" style="font-size:14px;font-weight:700;margin:14px 0 8px;"></h4>
+
+<h4 style="font-size:12.5px;font-weight:700;color:var(--text-secondary);margin:10px 0 4px;">הרכב דמוגרפי (קלט המודל)</h4>
+<div class="demo-bar-wrap">
+  <div class="demo-bar" id="exDemoBar"></div>
+</div>
+<div class="demo-legend" id="exDemoLegend"></div>
+
+<div class="example-modelactual">
+  <div class="ma-stat"><div class="ma-n" id="exPredicted">&mdash;</div><div class="ma-lbl">המודל חוזה</div></div>
+  <div class="ma-stat"><div class="ma-n" id="exActual">&mdash;</div><div class="ma-lbl">בפועל</div></div>
+  <div class="ma-gap"><span id="exGap">&mdash;</span><span class="ma-gap-lbl">פער</span></div>
+</div>
+
+<h4 style="font-size:13px;font-weight:700;margin:16px 0 6px;">החישוב</h4>
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
+<div class="table-scroll">
+<table id="exCalcTable">
+  <thead><tr><th>קבוצה</th><th>חלק מהזכאים</th><th>אחוז הצבעה</th><th>חלק מהמצביעים</th><th>תמיכה בקואליציה</th><th>תרומה</th></tr></thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+
+<h4 style="font-size:13px;font-weight:700;margin:16px 0 6px;">תוצאה בפועל &mdash; לפי מפלגה</h4>
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
+<div class="table-scroll">
+<table id="exPartyTable">
+  <thead><tr><th>מפלגה</th><th>גוש</th><th>אחוז</th></tr></thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div class="reference-section">
+<h3 class="section-title">דפוסי הצבעה לפי קבוצה, <span class="ltr-token">2019&ndash;2022</span></h3>
+<div class="legend-line"><span class="sw" style="background:var(--coalition)"></span>תמיכה בקואליציה &nbsp;&nbsp;<span class="sw" style="background:var(--turnout-line)"></span>אחוז הצבעה</div>
+<div class="card">
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
+<div class="table-scroll">
+<table id="groupsHistTable">
+  <thead>
+    <tr id="groupsHistHeadRow"><th>קבוצה</th><th>חלק מבעלי זכות הבחירה</th><th>מגמה</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<h3 class="section-title">תוצאות ארציות לפי מערכת בחירות</h3>
+<div class="card">
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
+<div class="table-scroll">
+<table id="actualsTable">
+  <thead>
+    <tr><th>בחירות</th><th>חלק הקואליציה מהקולות הכשרים</th><th>אחוז הצבעה</th><th>מנדטים בפועל לקואליציה</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<h3 class="section-title">בדיקת מודל: תחזית מול תוצאה בפועל</h3>
+<p class="hint">אותה נוסחת מנדטים כמו בבניית התרחיש, מיושמת על הנתונים שנרשמו בפועל בכל מערכת בחירות.</p>
+<div class="card">
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
+<div class="table-scroll">
+<table id="validationTable">
+  <thead>
+    <tr><th>בחירות</th><th>חלק הקואליציה מהקולות הכשרים</th><th>חלק מהקולות שנספרים</th><th>מנדטים חזויים</th><th>מנדטים בפועל</th><th>פער</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="tab-panel" id="tab-parties">
+<div class="party-select-row">
+  <label for="partyElection">בחירות:</label>
+  <select id="partyElection"></select>
+  <span class="hint" style="margin:0;">מפלגות קואליציה ואופוזיציה בלבד (מפלגות שוליות אינן מוצגות).</span>
+</div>
+<div class="card">
+<div class="table-scroll-wrap">
+<div class="table-fade table-fade-left"></div>
+<div class="table-fade table-fade-right"></div>
+<span class="swipe-hint">&#8644; החלק</span>
+<div class="table-scroll">
+<table id="partiesTable">
+  <thead>
+    <tr><th>מפלגה</th><th>גוש</th><th>אחוז קולות</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+
+<section class="tab-panel" id="tab-demographics">
+  <iframe id="demographicsFrame" class="demographics-frame" src="demographics.html?embed=1" title="ניתוח דפוסי הצבעה לפי דמוגרפיה ומפלגה"></iframe>
+</section>
+<footer class="foot">
+  איך זה עובד: אחוז ההצבעה (החלק מבעלי זכות הבחירה שהצביעו) ושיעור התמיכה בקואליציה (מבין מי שהצביעו, החלק שתמך בקואליציה) של כל קבוצה נאמדים בנפרד מתוצאות הקלפיות בחמש מערכות הבחירות שבין 2019 ל-2022, בשילוב נתוני מפקד האוכלוסין 2022 &ndash; שני מספרים נפרדים, לא מספר אחד שמשמש כפול.
+  מספר המנדטים נגזר ישירות מהנתונים לאחר הסרת מפלגות שלא עברו את אחוז החסימה (<span class="ltr-token">3.25%</span>) &ndash; ללא גורמי תיקון.
+  גדלי הקבוצות בתרחיש מוקרנים לשנת 2026.
+</footer>
+
+</div>
+
+<script>
+const DATA = {
+  "groups": {
+    "haredi": {
+      "label": "חרדים",
+      "eligible_share": 0.1002239702849948,
+      "eligible_share_2026": 0.1057661389027475,
+      "theta_bibi_mean": 0.9999999999999998,
+      "theta_bibi_sd": 1.1102230246251563e-16,
+      "theta_vote_mean": 0.7178894949904515,
+      "theta_vote_sd": 0.0159068100797883,
+      "theta_bibi_by_election": {
+        "K21": 1.0,
+        "K22": 1.0,
+        "K23": 1.0,
+        "K24": 1.0,
+        "K25": 1.0
+      },
+      "theta_vote_by_election": {
+        "K21": 0.729291161089751,
+        "K22": 0.7292155849905972,
+        "K23": 0.7213865841043406,
+        "K24": 0.6867388650928863,
+        "K25": 0.7228152796746824
+      }
+    },
+    "dati": {
+      "label": "דתי-לאומי",
+      "eligible_share": 0.1266073206688994,
+      "eligible_share_2026": 0.1291231701897964,
+      "theta_bibi_mean": 0.8878966362794039,
+      "theta_bibi_sd": 0.1073373370145969,
+      "theta_vote_mean": 0.7265612634106189,
+      "theta_vote_sd": 0.0158907965351216,
+      "theta_bibi_by_election": {
+        "K21": 0.9477542690227866,
+        "K22": 0.9356648637449958,
+        "K23": 0.9527797568245628,
+        "K24": 0.6738683491324459,
+        "K25": 0.9294159426722282
+      },
+      "theta_vote_by_election": {
+        "K21": 0.7497053181514912,
+        "K22": 0.7291372280793122,
+        "K23": 0.7334039126659655,
+        "K24": 0.7018147455403356,
+        "K25": 0.7187451126159898
+      }
+    },
+    "masorti": {
+      "label": "מסורתי",
+      "eligible_share": 0.2141300605916428,
+      "eligible_share_2026": 0.2131844186465337,
+      "theta_bibi_mean": 0.8057157071503406,
+      "theta_bibi_sd": 0.0418528877912537,
+      "theta_vote_mean": 0.555762903550975,
+      "theta_vote_sd": 0.027202380625579,
+      "theta_bibi_by_election": {
+        "K21": 0.8479704229687598,
+        "K22": 0.7308644535922806,
+        "K23": 0.8079384903598429,
+        "K24": 0.7996431551321127,
+        "K25": 0.8421620136987071
+      },
+      "theta_vote_by_election": {
+        "K21": 0.5447921433263972,
+        "K22": 0.5590656776578207,
+        "K23": 0.5802463322037137,
+        "K24": 0.5097535611124997,
+        "K25": 0.5849568034544435
+      }
+    },
+    "hiloni": {
+      "label": "חילוני",
+      "eligible_share": 0.4063768481198171,
+      "eligible_share_2026": 0.3976358942261687,
+      "theta_bibi_mean": 0.1945021355178594,
+      "theta_bibi_sd": 0.0299824045565977,
+      "theta_vote_mean": 0.6881180279430703,
+      "theta_vote_sd": 0.0151257916418041,
+      "theta_bibi_by_election": {
+        "K21": 0.2299044318783133,
+        "K22": 0.1920419211398402,
+        "K23": 0.2168868161875021,
+        "K24": 0.142305629532121,
+        "K25": 0.1913718788515206
+      },
+      "theta_vote_by_election": {
+        "K21": 0.7135531244489086,
+        "K22": 0.6919827994761506,
+        "K23": 0.6823615859238616,
+        "K24": 0.685614113798072,
+        "K25": 0.667078516068359
+      }
+    },
+    "arab": {
+      "label": "ערבים",
+      "eligible_share": 0.1330653632840706,
+      "eligible_share_2026": 0.1347804828400884,
+      "theta_bibi_mean": 1.1276161710537547e-09,
+      "theta_bibi_sd": 1.888824080977304e-09,
+      "theta_vote_mean": 0.5349389649941096,
+      "theta_vote_sd": 0.0811080694789284,
+      "theta_bibi_by_election": {
+        "K21": 4.460019943909085e-11,
+        "K22": 7.269130750654095e-10,
+        "K23": 7.429225361327212e-13,
+        "K24": 4.864717835293891e-09,
+        "K25": 1.1068229342490673e-12
+      },
+      "theta_vote_by_election": {
+        "K21": 0.4763165271198704,
+        "K22": 0.5905922847425209,
+        "K23": 0.6552810795404393,
+        "K24": 0.4263111123077838,
+        "K25": 0.5261938212599334
+      }
+    },
+    "druze": {
+      "label": "דרוזים",
+      "eligible_share": 0.0195964370505751,
+      "eligible_share_2026": 0.0195098951946651,
+      "theta_bibi_mean": 0.1410282930901609,
+      "theta_bibi_sd": 0.041041592351955,
+      "theta_vote_mean": 0.5272110122277713,
+      "theta_vote_sd": 0.043272011165454,
+      "theta_bibi_by_election": {
+        "K21": 0.1952947894057236,
+        "K22": 0.0999972657743322,
+        "K23": 0.1213328025935917,
+        "K24": 0.1853976123171538,
+        "K25": 0.1031189953600029
+      },
+      "theta_vote_by_election": {
+        "K21": 0.5371505024008392,
+        "K22": 0.5516287727013856,
+        "K23": 0.5866348187385863,
+        "K24": 0.4611022353021397,
+        "K25": 0.4995387319959053
+      }
+    }
+  },
+  "group_order": [
+    "haredi",
+    "dati",
+    "masorti",
+    "hiloni",
+    "arab",
+    "druze"
+  ],
+  "group_monogram": {
+    "haredi": "חר",
+    "dati": "דל",
+    "masorti": "מס",
+    "hiloni": "חי",
+    "arab": "ער",
+    "druze": "דר"
+  },
+  "group_color": {
+    "haredi": "#6b7fd7",
+    "dati": "#8a6fb0",
+    "masorti": "#4fa3a3",
+    "hiloni": "#8fa876",
+    "arab": "#d68c45",
+    "druze": "#b56576"
+  },
+  "elections": [
+    "K21",
+    "K22",
+    "K23",
+    "K24",
+    "K25"
+  ],
+  "election_labels": {
+    "K21": "אפריל 2019",
+    "K22": "ספטמבר 2019",
+    "K23": "2020",
+    "K24": "2021",
+    "K25": "2022"
+  },
+  "thresholds": {
+    "K21": {
+      "w_c": 0.0596,
+      "w_o": 0.0255999999999999
+    },
+    "K22": {
+      "w_c": 0.0188,
+      "w_o": 0.0094999999999999
+    },
+    "K23": {
+      "w_c": 0.0042,
+      "w_o": 0.0036
+    },
+    "K24": {
+      "w_c": 0.0,
+      "w_o": 0.0148
+    },
+    "K25": {
+      "w_c": 0.0119,
+      "w_o": 0.0757
+    }
+  },
+  "threshold_stats": {
+    "w_c": {
+      "mean": 0.0189,
+      "sd": 0.0213485362495886,
+      "min": 0.0,
+      "max": 0.0596
+    },
+    "w_o": {
+      "mean": 0.0258399999999999,
+      "sd": 0.0259598613247451,
+      "min": 0.0036,
+      "max": 0.0757
+    }
+  },
+  "actuals": {
+    "K21": {
+      "coalition_share_valid": 0.5143671665966626,
+      "turnout": 0.6846117554867093,
+      "actual_coalition_seats": 60
+    },
+    "K22": {
+      "coalition_share_valid": 0.4635891224452906,
+      "turnout": 0.6986539808952834,
+      "actual_coalition_seats": 55
+    },
+    "K23": {
+      "coalition_share_valid": 0.4879738007896189,
+      "turnout": 0.7151638979088848,
+      "actual_coalition_seats": 58
+    },
+    "K24": {
+      "coalition_share_valid": 0.421068050898266,
+      "turnout": 0.674415984958538,
+      "actual_coalition_seats": 52
+    },
+    "K25": {
+      "coalition_share_valid": 0.4956698599840243,
+      "turnout": 0.7062500257777364,
+      "actual_coalition_seats": 64
+    }
+  },
+  "validation": [
+    {
+      "election": "K21",
+      "implied_S": 0.5099009071586509,
+      "implied_R": 0.4922397323553245,
+      "implied_seats": 59,
+      "actual_seats": 60,
+      "gap": -1
+    },
+    {
+      "election": "K22",
+      "implied_S": 0.4606240168936413,
+      "implied_R": 0.4546917946831751,
+      "implied_seats": 55,
+      "actual_seats": 55,
+      "gap": 0
+    },
+    {
+      "election": "K23",
+      "implied_S": 0.4849660670726951,
+      "implied_R": 0.4845455221454294,
+      "implied_seats": 58,
+      "actual_seats": 58,
+      "gap": 0
+    },
+    {
+      "election": "K24",
+      "implied_S": 0.4209833515635658,
+      "implied_R": 0.4273075026020765,
+      "implied_seats": 51,
+      "actual_seats": 52,
+      "gap": -1
+    },
+    {
+      "election": "K25",
+      "implied_S": 0.4931162898534518,
+      "implied_R": 0.5274181168933053,
+      "implied_seats": 63,
+      "actual_seats": 64,
+      "gap": -1
+    }
+  ],
+  "parties": {
+    "K21": [
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.2646
+      },
+      {
+        "name": "כחול לבן",
+        "bloc": "Opposition",
+        "share": 0.2613
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.0599
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.0578
+      },
+      {
+        "name": "חדש-תע\"ל",
+        "bloc": "Opposition",
+        "share": 0.0449
+      },
+      {
+        "name": "עבודה-גשר",
+        "bloc": "Opposition",
+        "share": 0.0443
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.0401
+      },
+      {
+        "name": "האיחוד הלאומי",
+        "bloc": "Coalition",
+        "share": 0.03700000000000001
+      },
+      {
+        "name": "מרצ",
+        "bloc": "Opposition",
+        "share": 0.0363
+      },
+      {
+        "name": "כולנו",
+        "bloc": "Coalition",
+        "share": 0.0354
+      },
+      {
+        "name": "רע\"מ-בל\"ד",
+        "bloc": "Opposition",
+        "share": 0.0333
+      },
+      {
+        "name": "הימין החדש",
+        "bloc": "Coalition",
+        "share": 0.0322
+      },
+      {
+        "name": "זהות",
+        "bloc": "Coalition",
+        "share": 0.0274
+      },
+      {
+        "name": "גשר",
+        "bloc": "Opposition",
+        "share": 0.0173
+      }
+    ],
+    "K22": [
+      {
+        "name": "כחול לבן",
+        "bloc": "Opposition",
+        "share": 0.2595
+      },
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.251
+      },
+      {
+        "name": "הרשימה המשותפת",
+        "bloc": "Opposition",
+        "share": 0.106
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.07440000000000001
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.0699
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.06059999999999999
+      },
+      {
+        "name": "ימינה",
+        "bloc": "Coalition",
+        "share": 0.0587
+      },
+      {
+        "name": "עבודה-גשר",
+        "bloc": "Opposition",
+        "share": 0.048
+      },
+      {
+        "name": "מרצ",
+        "bloc": "Opposition",
+        "share": 0.0434
+      },
+      {
+        "name": "עוצמה יהודית",
+        "bloc": "Coalition",
+        "share": 0.0188
+      }
+    ],
+    "K23": [
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.2946
+      },
+      {
+        "name": "כחול לבן",
+        "bloc": "Opposition",
+        "share": 0.2659
+      },
+      {
+        "name": "הרשימה המשותפת",
+        "bloc": "Opposition",
+        "share": 0.1267
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.07690000000000001
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.05980000000000001
+      },
+      {
+        "name": "עבודה-גשר-מרצ",
+        "bloc": "Opposition",
+        "share": 0.0583
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.0574
+      },
+      {
+        "name": "ימינה",
+        "bloc": "Coalition",
+        "share": 0.0524
+      },
+      {
+        "name": "עוצמה יהודית",
+        "bloc": "Coalition",
+        "share": 0.0042
+      }
+    ],
+    "K24": [
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.2419
+      },
+      {
+        "name": "יש עתיד",
+        "bloc": "Opposition",
+        "share": 0.1393
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.0717
+      },
+      {
+        "name": "כחול לבן",
+        "bloc": "Opposition",
+        "share": 0.0663
+      },
+      {
+        "name": "ימינה",
+        "bloc": "Opposition",
+        "share": 0.0621
+      },
+      {
+        "name": "עבודה",
+        "bloc": "Opposition",
+        "share": 0.0609
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.0563
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.0563
+      },
+      {
+        "name": "הציונות הדתית",
+        "bloc": "Coalition",
+        "share": 0.0512
+      },
+      {
+        "name": "חדש-תע\"ל",
+        "bloc": "Opposition",
+        "share": 0.0482
+      },
+      {
+        "name": "תקווה חדשה",
+        "bloc": "Opposition",
+        "share": 0.0474
+      },
+      {
+        "name": "מרצ",
+        "bloc": "Opposition",
+        "share": 0.0459
+      },
+      {
+        "name": "רע\"מ",
+        "bloc": "Opposition",
+        "share": 0.0379
+      }
+    ],
+    "K25": [
+      {
+        "name": "הליכוד",
+        "bloc": "Coalition",
+        "share": 0.2341
+      },
+      {
+        "name": "יש עתיד",
+        "bloc": "Opposition",
+        "share": 0.1779
+      },
+      {
+        "name": "הציונות הדתית",
+        "bloc": "Coalition",
+        "share": 0.1084
+      },
+      {
+        "name": "המחנה הממלכתי",
+        "bloc": "Opposition",
+        "share": 0.0908
+      },
+      {
+        "name": "ש\"ס",
+        "bloc": "Coalition",
+        "share": 0.0825
+      },
+      {
+        "name": "יהדות התורה",
+        "bloc": "Coalition",
+        "share": 0.0588
+      },
+      {
+        "name": "ישראל ביתנו",
+        "bloc": "Opposition",
+        "share": 0.04480000000000001
+      },
+      {
+        "name": "רע\"מ",
+        "bloc": "Opposition",
+        "share": 0.0407
+      },
+      {
+        "name": "חדש-תע\"ל",
+        "bloc": "Opposition",
+        "share": 0.0375
+      },
+      {
+        "name": "עבודה",
+        "bloc": "Opposition",
+        "share": 0.0369
+      },
+      {
+        "name": "מרצ",
+        "bloc": "Opposition",
+        "share": 0.0316
+      },
+      {
+        "name": "בל\"ד",
+        "bloc": "Opposition",
+        "share": 0.0291
+      },
+      {
+        "name": "הבית היהודי",
+        "bloc": "Coalition",
+        "share": 0.0119
+      }
+    ]
+  },
+  "examples": [
+    {
+      "example_id": "haredi",
+      "label": "Mostly Haredi",
+      "locality_code": 6100,
+      "locality_name": "בני ברק",
+      "valid_votes": 87692.0,
+      "predicted_coalition_share": 0.9554271514042624,
+      "actual_coalition_share": 0.9795990512247412,
+      "diff_pp": 2.4171899820478626,
+      "share_haredi": 0.8803927776427518,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.887179639595918,
+      "contrib_haredi": 0.8871796395959178,
+      "share_dati": 0.0506701898993177,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0507732784807974,
+      "contrib_dati": 0.0471894944817898,
+      "share_masorti": 0.017401786330743,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.0141914051528413,
+      "contrib_masorti": 0.011951462340731,
+      "share_hiloni": 0.0511671548708365,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.0475856486359154,
+      "contrib_hiloni": 0.0091065549858234,
+      "share_arab": 0.0003680912563508,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0002700281345279,
+      "contrib_arab": 2.988733321880594e-16,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    },
+    {
+      "example_id": "dati",
+      "label": "Mostly Dati",
+      "locality_code": 3650,
+      "locality_name": "אפרת",
+      "valid_votes": 5783.0,
+      "predicted_coalition_share": 0.9004034239340638,
+      "actual_coalition_share": 0.8618364170845582,
+      "diff_pp": -3.8567006849505647,
+      "share_haredi": 0.0110902102921239,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0112957408182767,
+      "contrib_haredi": 0.0112957408182767,
+      "share_dati": 0.8977380636209042,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.9092266506595176,
+      "contrib_dati": 0.8450497446254283,
+      "share_masorti": 0.0537781348630035,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.04432789877433,
+      "contrib_masorti": 0.0373312724948222,
+      "share_hiloni": 0.0373935912239683,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.0351497097478757,
+      "contrib_hiloni": 0.0067266659955365,
+      "share_arab": 0.0,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0,
+      "contrib_arab": 0.0,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    },
+    {
+      "example_id": "hiloni",
+      "label": "Mostly Hiloni",
+      "locality_code": 2650,
+      "locality_name": "רמת השרון",
+      "valid_votes": 27275.0,
+      "predicted_coalition_share": 0.3372374832267572,
+      "actual_coalition_share": 0.2457561869844179,
+      "diff_pp": -9.148129624233928,
+      "share_haredi": 0.0215587961534468,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0237357448537393,
+      "contrib_haredi": 0.0237357448537393,
+      "share_dati": 0.0382773650901156,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0419052053544066,
+      "contrib_dati": 0.0389473659373391,
+      "share_masorti": 0.1654060572302642,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.14737582193032,
+      "contrib_masorti": 0.1241143189673403,
+      "share_hiloni": 0.7736728740432088,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.7861136880254964,
+      "contrib_hiloni": 0.1504400534683374,
+      "share_arab": 0.0010849074829641,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0008695398360376,
+      "contrib_arab": 9.624266327696602e-16,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    },
+    {
+      "example_id": "arab",
+      "label": "Mostly Arab",
+      "locality_code": 7300,
+      "locality_name": "נצרת",
+      "valid_votes": 28462.0,
+      "predicted_coalition_share": 0.0001773660294284,
+      "actual_coalition_share": 0.0260347129506008,
+      "diff_pp": 2.5857346921172377,
+      "share_haredi": 0.0,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0,
+      "contrib_haredi": 0.0,
+      "share_dati": 0.0,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0,
+      "contrib_dati": 0.0,
+      "share_masorti": 0.0001091880223356,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.0001213701072332,
+      "contrib_masorti": 0.0001022132939103,
+      "share_hiloni": 0.0003097966897803,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.0003927052128183,
+      "contrib_hiloni": 7.515273441182549e-05,
+      "share_arab": 0.999581015287884,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.9994859246799486,
+      "contrib_arab": 1.106253943894903e-12,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    },
+    {
+      "example_id": "druze",
+      "label": "Druze town",
+      "locality_code": 481,
+      "locality_name": "מגאר",
+      "valid_votes": 7377.0,
+      "predicted_coalition_share": 0.1031189953600029,
+      "actual_coalition_share": 0.1191541276941846,
+      "diff_pp": 1.6035132334181648,
+      "share_haredi": 0.0,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0,
+      "contrib_haredi": 0.0,
+      "share_dati": 0.0,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0,
+      "contrib_dati": 0.0,
+      "share_masorti": 0.0,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.0,
+      "contrib_masorti": 0.0,
+      "share_hiloni": 0.0,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.0,
+      "contrib_hiloni": 0.0,
+      "share_arab": 0.0,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0,
+      "contrib_arab": 0.0,
+      "share_druze": 1.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 1.0,
+      "contrib_druze": 0.1031189953600029
+    },
+    {
+      "example_id": "masorti",
+      "label": "Development town",
+      "locality_code": 2200,
+      "locality_name": "דימונה",
+      "valid_votes": 18471.0,
+      "predicted_coalition_share": 0.671866758705085,
+      "actual_coalition_share": 0.8169021709707108,
+      "diff_pp": 14.503541226562575,
+      "share_haredi": 0.0443254963650039,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0502080529302424,
+      "contrib_haredi": 0.0502080529302424,
+      "share_dati": 0.186342375501618,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.2098838295245888,
+      "contrib_dati": 0.195069377269253,
+      "share_masorti": 0.4806788466511779,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.440627151060558,
+      "contrib_masorti": 0.371079448827484,
+      "share_hiloni": 0.2774742995312258,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.2900628870408057,
+      "contrib_hiloni": 0.0555098796780954,
+      "share_arab": 0.011178981950974,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0092180794438048,
+      "contrib_arab": 1.0202781738133129e-14,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    },
+    {
+      "example_id": "periphery",
+      "label": "Mixed periphery",
+      "locality_code": 7100,
+      "locality_name": "אשקלון",
+      "valid_votes": 73602.0,
+      "predicted_coalition_share": 0.6319845198224571,
+      "actual_coalition_share": 0.6642210809488872,
+      "diff_pp": 3.223656112643014,
+      "share_haredi": 0.0447531200070402,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0498024931972707,
+      "contrib_haredi": 0.0498024931972707,
+      "share_dati": 0.2207255145786182,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.2442462388790649,
+      "contrib_dati": 0.2270063483519324,
+      "share_masorti": 0.3764908716835243,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.3390616644300604,
+      "contrib_masorti": 0.2855448540844549,
+      "share_hiloni": 0.3542794964990122,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.3638508677798998,
+      "contrib_hiloni": 0.0696308241887956,
+      "share_arab": 0.0037509972318048,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0030387357137041,
+      "contrib_arab": 3.363342379049469e-15,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    },
+    {
+      "example_id": "secular",
+      "label": "Secular city",
+      "locality_code": 8300,
+      "locality_name": "ראשון לציון",
+      "valid_votes": 139546.0,
+      "predicted_coalition_share": 0.4634459707065244,
+      "actual_coalition_share": 0.4843779112264056,
+      "diff_pp": 2.0931940519881174,
+      "share_haredi": 0.0166243074164871,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0186106027846571,
+      "contrib_haredi": 0.0186106027846571,
+      "share_dati": 0.0819578248474741,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0912336147534892,
+      "contrib_dati": 0.084793976059509,
+      "share_masorti": 0.321972039981509,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.2916966958521083,
+      "contrib_masorti": 0.2456558767680708,
+      "share_hiloni": 0.5785306914197738,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.5977132888110198,
+      "contrib_hiloni": 0.1143855150942864,
+      "share_arab": 0.0009151363347559,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0007457977987254,
+      "contrib_arab": 8.254661079417532e-16,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    },
+    {
+      "example_id": "mix_jlm",
+      "label": "Mixed (Jerusalem)",
+      "locality_code": 3000,
+      "locality_name": "ירושלים",
+      "valid_votes": 264700.0,
+      "predicted_coalition_share": 0.7498139907821528,
+      "actual_coalition_share": 0.7734265205893465,
+      "diff_pp": 2.361252980719364,
+      "share_haredi": 0.3741478256741722,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.4000784421325927,
+      "contrib_haredi": 0.4000784421325927,
+      "share_dati": 0.2168793727074422,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.2306044868913572,
+      "contrib_dati": 0.2143274865685762,
+      "share_masorti": 0.137278734842945,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.1187959581554368,
+      "contrib_masorti": 0.10004544333945,
+      "share_hiloni": 0.1872469463543638,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.1847848228991776,
+      "contrib_hiloni": 0.0353626187414611,
+      "share_arab": 0.0844471204210765,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0657362899214355,
+      "contrib_arab": 7.275843329749064e-14,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    },
+    {
+      "example_id": "mix_hfa",
+      "label": "Mixed (Haifa)",
+      "locality_code": 4000,
+      "locality_name": "חיפה",
+      "valid_votes": 139764.0,
+      "predicted_coalition_share": 0.367923273517378,
+      "actual_coalition_share": 0.3504407429667153,
+      "diff_pp": -1.7482530550662678,
+      "share_haredi": 0.0556775770565651,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0633888613747169,
+      "contrib_haredi": 0.0633888613747169,
+      "share_dati": 0.0632544595425548,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.0716096172627008,
+      "contrib_dati": 0.0665551199326106,
+      "share_masorti": 0.1674116310852032,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.1542462885109284,
+      "contrib_masorti": 0.1299003649379153,
+      "share_hiloni": 0.5375027025446297,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.56475866736841,
+      "contrib_hiloni": 0.1080789272719736,
+      "share_arab": 0.1761536297710467,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.1459965654832438,
+      "contrib_arab": 1.6159234699845e-13,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    },
+    {
+      "example_id": "mix_nty",
+      "label": "Mixed (Netanya)",
+      "locality_code": 7400,
+      "locality_name": "נתניה",
+      "valid_votes": 113043.0,
+      "predicted_coalition_share": 0.6276985135913525,
+      "actual_coalition_share": 0.6291765080544571,
+      "diff_pp": 0.1477994463104592,
+      "share_haredi": 0.0817897612551245,
+      "turnout_haredi": 0.7228152796746824,
+      "voter_share_haredi": 0.0903643839351976,
+      "contrib_haredi": 0.0903643839351976,
+      "share_dati": 0.2068928618316922,
+      "turnout_dati": 0.7187451126159898,
+      "voter_share_dati": 0.2272958145192117,
+      "contrib_dati": 0.2112523537168251,
+      "share_masorti": 0.3368058379649018,
+      "turnout_masorti": 0.5849568034544435,
+      "voter_share_masorti": 0.3011441521931958,
+      "contrib_masorti": 0.2536121656246117,
+      "share_hiloni": 0.3713896737455883,
+      "turnout_hiloni": 0.667078516068359,
+      "voter_share_hiloni": 0.3786847406715493,
+      "contrib_hiloni": 0.0724696103147152,
+      "share_arab": 0.0031218652026928,
+      "turnout_arab": 0.5261938212599334,
+      "voter_share_arab": 0.0025109086808454,
+      "contrib_arab": 2.779131313764816e-15,
+      "share_druze": 0.0,
+      "turnout_druze": 0.4995387319959053,
+      "voter_share_druze": 0.0,
+      "contrib_druze": 0.0
+    }
+  ],
+  "example_order": [
+    "haredi",
+    "dati",
+    "hiloni",
+    "arab",
+    "druze",
+    "masorti",
+    "periphery",
+    "secular",
+    "mix_jlm",
+    "mix_hfa",
+    "mix_nty"
+  ],
+  "example_parties": [
+    {
+      "example_id": "arab",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 12897.0,
+      "share_of_valid": 0.4531304897758414,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 7457.0,
+      "share_of_valid": 0.261998454079123,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 6094.0,
+      "share_of_valid": 0.2141100414587871,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 665.0,
+      "share_of_valid": 0.0233644859813084,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 470.0,
+      "share_of_valid": 0.0165132457311503,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 344.0,
+      "share_of_valid": 0.0120862904925866,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 148.0,
+      "share_of_valid": 0.005199915677043,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 78.0,
+      "share_of_valid": 0.0027404961000632,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 46.0,
+      "share_of_valid": 0.0016161900077296,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 26.0,
+      "share_of_valid": 0.000913498700021,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 26.0,
+      "share_of_valid": 0.000913498700021,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 25.0,
+      "share_of_valid": 0.0008783641346356,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 22.0,
+      "share_of_valid": 0.0007729604384793,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 16.0,
+      "share_of_valid": 0.0005621530461668,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 14.0,
+      "share_of_valid": 0.0004918839153959,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 14.0,
+      "share_of_valid": 0.0004918839153959,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "arab",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 12.0,
+      "share_of_valid": 0.0004216147846251,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 11.0,
+      "share_of_valid": 0.0003864802192396,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 9.0,
+      "share_of_valid": 0.0003162110884688,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 8.0,
+      "share_of_valid": 0.0002810765230834,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 7.0,
+      "share_of_valid": 0.0002459419576979,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 7.0,
+      "share_of_valid": 0.0002459419576979,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 0.0002108073923125,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 0.0002108073923125,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 0.0002108073923125,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 0.0002108073923125,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0001756728269271,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0001756728269271,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0001756728269271,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0001756728269271,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0001405382615417,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0001405382615417,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 0.0001054036961562,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 0.0001054036961562,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 7.026913077085236e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 7.026913077085236e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 7.026913077085236e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 3.513456538542618e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 3.513456538542618e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "arab",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 2779.0,
+      "share_of_valid": 0.4805464291890022,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 1146.0,
+      "share_of_valid": 0.1981670413280304,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 893.0,
+      "share_of_valid": 0.1544181220819643,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 397.0,
+      "share_of_valid": 0.0686494898841431,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 174.0,
+      "share_of_valid": 0.0300881895210098,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 123.0,
+      "share_of_valid": 0.0212692374200242,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 65.0,
+      "share_of_valid": 0.0112398409130209,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 43.0,
+      "share_of_valid": 0.0074355870655369,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 40.0,
+      "share_of_valid": 0.0069168251772436,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 39.0,
+      "share_of_valid": 0.0067439045478125,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 24.0,
+      "share_of_valid": 0.0041500951063461,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 16.0,
+      "share_of_valid": 0.0027667300708974,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 13.0,
+      "share_of_valid": 0.0022479681826041,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 7.0,
+      "share_of_valid": 0.0012104444060176,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0008646031471554,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 4.0,
+      "share_of_valid": 0.0006916825177243,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 0.0005187618882932,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 0.0003458412588621,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 0.0003458412588621,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 1.0,
+      "share_of_valid": 0.000172920629431,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 1.0,
+      "share_of_valid": 0.000172920629431,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "dati",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 0.000172920629431,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 0.000172920629431,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 0.000172920629431,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 0.000172920629431,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 0.000172920629431,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 0.000172920629431,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "dati",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 2053.0,
+      "share_of_valid": 0.278297410871628,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 1340.0,
+      "share_of_valid": 0.1816456554154805,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 982.0,
+      "share_of_valid": 0.1331164429985089,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 662.0,
+      "share_of_valid": 0.089738376033618,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 544.0,
+      "share_of_valid": 0.0737427138403144,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 435.0,
+      "share_of_valid": 0.0589670597803985,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 371.0,
+      "share_of_valid": 0.0502914463874203,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 274.0,
+      "share_of_valid": 0.0371424698386878,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 254.0,
+      "share_of_valid": 0.0344313406533821,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 199.0,
+      "share_of_valid": 0.0269757353937915,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 111.0,
+      "share_of_valid": 0.0150467669784465,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 64.0,
+      "share_of_valid": 0.0086756133929781,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 16.0,
+      "share_of_valid": 0.0021689033482445,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 15.0,
+      "share_of_valid": 0.0020333468889792,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 7.0,
+      "share_of_valid": 0.0009488952148569,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0006777822963264,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0006777822963264,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0006777822963264,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0006777822963264,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0005422258370611,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0005422258370611,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0005422258370611,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 0.0004066693777958,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 0.0004066693777958,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 0.0002711129185305,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 0.0002711129185305,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 0.0002711129185305,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 0.0002711129185305,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 1.0,
+      "share_of_valid": 0.0001355564592652,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "druze",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 0.0001355564592652,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 0.0001355564592652,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 0.0001355564592652,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "druze",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 52431.0,
+      "share_of_valid": 0.5978994663139169,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 26461.0,
+      "share_of_valid": 0.3017493043835241,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 3883.0,
+      "share_of_valid": 0.0442799799297541,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 2969.0,
+      "share_of_valid": 0.0338571363408292,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 626.0,
+      "share_of_valid": 0.0071386215390229,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 413.0,
+      "share_of_valid": 0.0047096656479496,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 305.0,
+      "share_of_valid": 0.0034780823792364,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 159.0,
+      "share_of_valid": 0.0018131642567166,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 138.0,
+      "share_of_valid": 0.0015736897322446,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 99.0,
+      "share_of_valid": 0.0011289513296537,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 36.0,
+      "share_of_valid": 0.0004105277562377,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 35.0,
+      "share_of_valid": 0.0003991242074533,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 31.0,
+      "share_of_valid": 0.0003535100123158,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 24.0,
+      "share_of_valid": 0.0002736851708251,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 9.0,
+      "share_of_valid": 0.0001026319390594,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 8.0,
+      "share_of_valid": 9.12283902750536e-05,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 8.0,
+      "share_of_valid": 9.12283902750536e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 7.0,
+      "share_of_valid": 7.98248414906719e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 5.70177439219085e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 5.70177439219085e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 4.56141951375268e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 4.56141951375268e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 4.56141951375268e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 4.56141951375268e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 4.56141951375268e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 3.0,
+      "share_of_valid": 3.42106463531451e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 3.42106463531451e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 3.42106463531451e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 2.28070975687634e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 2.28070975687634e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 2.28070975687634e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 1.14035487843817e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 1.14035487843817e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 1.14035487843817e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 1.14035487843817e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 1.14035487843817e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "haredi",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 11511.0,
+      "share_of_valid": 0.4220348304307974,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 4278.0,
+      "share_of_valid": 0.1568469294225481,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 3619.0,
+      "share_of_valid": 0.1326856095325389,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 2306.0,
+      "share_of_valid": 0.0845462878093492,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 1971.0,
+      "share_of_valid": 0.0722639780018331,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 1002.0,
+      "share_of_valid": 0.0367369385884509,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 829.0,
+      "share_of_valid": 0.0303941338221814,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 734.0,
+      "share_of_valid": 0.0269110907424381,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 420.0,
+      "share_of_valid": 0.0153987167736022,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 174.0,
+      "share_of_valid": 0.0063794683776351,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 112.0,
+      "share_of_valid": 0.0041063244729605,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 83.0,
+      "share_of_valid": 0.0030430797433547,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 56.0,
+      "share_of_valid": 0.0020531622364802,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 54.0,
+      "share_of_valid": 0.0019798350137488,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 40.0,
+      "share_of_valid": 0.0014665444546287,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 35.0,
+      "share_of_valid": 0.0012832263978001,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 8.0,
+      "share_of_valid": 0.0002933088909257,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 6.0,
+      "share_of_valid": 0.0002199816681943,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 0.0002199816681943,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0001833180568285,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0001466544454628,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0001466544454628,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 0.0001099908340971,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 0.0001099908340971,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 7.332722273143904e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 7.332722273143904e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 7.332722273143904e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 3.666361136571952e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 3.666361136571952e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 3.666361136571952e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 3.666361136571952e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 3.666361136571952e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 3.666361136571952e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "hiloni",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 9406.0,
+      "share_of_valid": 0.5092306859401223,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 2913.0,
+      "share_of_valid": 0.1577066753288939,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 2156.0,
+      "share_of_valid": 0.11672351253316,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 1121.0,
+      "share_of_valid": 0.0606897298467868,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 900.0,
+      "share_of_valid": 0.0487250284229332,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 836.0,
+      "share_of_valid": 0.0452601375128579,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 520.0,
+      "share_of_valid": 0.0281522386443614,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 179.0,
+      "share_of_valid": 0.0096908667641167,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 94.0,
+      "share_of_valid": 0.005089058524173,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 74.0,
+      "share_of_valid": 0.0040062801147745,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 69.0,
+      "share_of_valid": 0.0037355855124248,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 55.0,
+      "share_of_valid": 0.0029776406258459,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 41.0,
+      "share_of_valid": 0.0022196957392669,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 30.0,
+      "share_of_valid": 0.0016241676140977,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 23.0,
+      "share_of_valid": 0.0012451951708082,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 7.0,
+      "share_of_valid": 0.0003789724432894,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 7.0,
+      "share_of_valid": 0.0003789724432894,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 0.0002706946023496,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 4.0,
+      "share_of_valid": 0.0002165556818797,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0002165556818797,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0002165556818797,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 0.0002165556818797,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 0.0001624167614097,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 0.0001624167614097,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 2.0,
+      "share_of_valid": 0.0001082778409398,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 0.0001082778409398,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 0.0001082778409398,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 0.0001082778409398,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 5.413892046992583e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 5.413892046992583e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 5.413892046992583e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 5.413892046992583e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 5.413892046992583e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "masorti",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 0.0,
+      "share_of_valid": 0.0,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 36777.0,
+      "share_of_valid": 0.2631364299819696,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 29260.0,
+      "share_of_valid": 0.209352909189777,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 14168.0,
+      "share_of_valid": 0.1013708823445236,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 11364.0,
+      "share_of_valid": 0.0813084914570275,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 8792.0,
+      "share_of_valid": 0.0629060416130047,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 7974.0,
+      "share_of_valid": 0.0570533184511032,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 6654.0,
+      "share_of_valid": 0.0476088263072035,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 6417.0,
+      "share_of_valid": 0.0459131106722761,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 5258.0,
+      "share_of_valid": 0.0376205603732005,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 4425.0,
+      "share_of_valid": 0.0316605134369365,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 3912.0,
+      "share_of_valid": 0.0279900403537391,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 1244.0,
+      "share_of_valid": 0.0089007183537964,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 1147.0,
+      "share_of_valid": 0.0082066912795855,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 604.0,
+      "share_of_valid": 0.0043215706476632,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 486.0,
+      "share_of_valid": 0.0034772902893448,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 405.0,
+      "share_of_valid": 0.0028977419077874,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 179.0,
+      "share_of_valid": 0.0012807303740591,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 62.0,
+      "share_of_valid": 0.0004436049340316,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 60.0,
+      "share_of_valid": 0.0004292950974499,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 58.0,
+      "share_of_valid": 0.0004149852608683,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 56.0,
+      "share_of_valid": 0.0004006754242866,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 52.0,
+      "share_of_valid": 0.0003720557511233,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 50.0,
+      "share_of_valid": 0.0003577459145416,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 48.0,
+      "share_of_valid": 0.0003434360779599,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 44.0,
+      "share_of_valid": 0.0003148164047966,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 39.0,
+      "share_of_valid": 0.0002790418133424,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 38.0,
+      "share_of_valid": 0.0002718868950516,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 33.0,
+      "share_of_valid": 0.0002361123035974,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 31.0,
+      "share_of_valid": 0.0002218024670158,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 24.0,
+      "share_of_valid": 0.0001717180389799,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 17.0,
+      "share_of_valid": 0.0001216336109441,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 15.0,
+      "share_of_valid": 0.0001073237743624,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 13.0,
+      "share_of_valid": 9.301393778083054e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 12.0,
+      "share_of_valid": 8.585901948999742e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 10.0,
+      "share_of_valid": 7.154918290833118e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 10.0,
+      "share_of_valid": 7.154918290833118e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 10.0,
+      "share_of_valid": 7.154918290833118e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 10.0,
+      "share_of_valid": 7.154918290833118e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 2.8619673163332475e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_hfa",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 1.4309836581666236e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 63008.0,
+      "share_of_valid": 0.2380355119002644,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 50582.0,
+      "share_of_valid": 0.1910918020400453,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 48470.0,
+      "share_of_valid": 0.1831129580657348,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 37635.0,
+      "share_of_valid": 0.1421798262183604,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 19773.0,
+      "share_of_valid": 0.0746996599924442,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 13905.0,
+      "share_of_valid": 0.0525311673592746,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 7294.0,
+      "share_of_valid": 0.0275557234605213,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 6576.0,
+      "share_of_valid": 0.0248432187381941,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 5031.0,
+      "share_of_valid": 0.0190064223649414,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 4962.0,
+      "share_of_valid": 0.0187457499055534,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 2529.0,
+      "share_of_valid": 0.0095542123158292,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 1712.0,
+      "share_of_valid": 0.0064676992822062,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 749.0,
+      "share_of_valid": 0.0028296184359652,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 746.0,
+      "share_of_valid": 0.0028182848507744,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 498.0,
+      "share_of_valid": 0.0018813751416698,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 389.0,
+      "share_of_valid": 0.0014695882130714,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 266.0,
+      "share_of_valid": 0.0010049112202493,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 76.0,
+      "share_of_valid": 0.0002871174914998,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 55.0,
+      "share_of_valid": 0.0002077823951643,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 52.0,
+      "share_of_valid": 0.0001964488099735,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 46.0,
+      "share_of_valid": 0.0001737816395919,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 43.0,
+      "share_of_valid": 0.0001624480544012,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 39.0,
+      "share_of_valid": 0.0001473366074801,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 34.0,
+      "share_of_valid": 0.0001284472988288,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 31.0,
+      "share_of_valid": 0.000117113713638,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 30.0,
+      "share_of_valid": 0.0001133358519078,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 27.0,
+      "share_of_valid": 0.000102002266717,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 27.0,
+      "share_of_valid": 0.000102002266717,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 25.0,
+      "share_of_valid": 9.44465432565168e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 19.0,
+      "share_of_valid": 7.177937287495278e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 15.0,
+      "share_of_valid": 5.666792595391009e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 10.0,
+      "share_of_valid": 3.7778617302606726e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 10.0,
+      "share_of_valid": 3.7778617302606726e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 9.0,
+      "share_of_valid": 3.400075557234605e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 8.0,
+      "share_of_valid": 3.022289384208538e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 2.266717038156404e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 1.511144692104269e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 1.511144692104269e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 1.1333585190782018e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_jlm",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 7.555723460521345e-06,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 40142.0,
+      "share_of_valid": 0.355103810054581,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 19747.0,
+      "share_of_valid": 0.1746857390550498,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 13767.0,
+      "share_of_valid": 0.1217855152464106,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 12871.0,
+      "share_of_valid": 0.1138593278663871,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 9552.0,
+      "share_of_valid": 0.0844988190334651,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 7505.0,
+      "share_of_valid": 0.0663906654989694,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 3163.0,
+      "share_of_valid": 0.0279805029944357,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 2020.0,
+      "share_of_valid": 0.0178693063701423,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 1193.0,
+      "share_of_valid": 0.0105535061879107,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 1181.0,
+      "share_of_valid": 0.0104473518926426,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 390.0,
+      "share_of_valid": 0.0034500145962155,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 334.0,
+      "share_of_valid": 0.0029546278849641,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 323.0,
+      "share_of_valid": 0.0028573197809683,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 269.0,
+      "share_of_valid": 0.0023796254522615,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 55.0,
+      "share_of_valid": 0.0004865405199791,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 46.0,
+      "share_of_valid": 0.0004069247985279,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 46.0,
+      "share_of_valid": 0.0004069247985279,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 45.0,
+      "share_of_valid": 0.0003980786072556,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 43.0,
+      "share_of_valid": 0.0003803862247109,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 36.0,
+      "share_of_valid": 0.0003184628858045,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 36.0,
+      "share_of_valid": 0.0003184628858045,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 31.0,
+      "share_of_valid": 0.0002742319294427,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 30.0,
+      "share_of_valid": 0.0002653857381704,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 27.0,
+      "share_of_valid": 0.0002388471643533,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 24.0,
+      "share_of_valid": 0.0002123085905363,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 23.0,
+      "share_of_valid": 0.0002034623992639,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 22.0,
+      "share_of_valid": 0.0001946162079916,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 21.0,
+      "share_of_valid": 0.0001857700167193,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 15.0,
+      "share_of_valid": 0.0001326928690852,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 13.0,
+      "share_of_valid": 0.0001150004865405,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 12.0,
+      "share_of_valid": 0.0001061542952681,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 10.0,
+      "share_of_valid": 8.846191272347691e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 9.0,
+      "share_of_valid": 7.961572145112921e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 8.0,
+      "share_of_valid": 7.076953017878152e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 8.0,
+      "share_of_valid": 7.076953017878152e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 7.0,
+      "share_of_valid": 6.192333890643384e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 5.307714763408614e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 4.423095636173845e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 4.423095636173845e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "mix_nty",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 2.653857381704307e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 29212.0,
+      "share_of_valid": 0.3968913888209559,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 9762.0,
+      "share_of_valid": 0.1326322654275699,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 8992.0,
+      "share_of_valid": 0.1221705931904024,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 8649.0,
+      "share_of_valid": 0.1175103937393005,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 7785.0,
+      "share_of_valid": 0.1057715822939594,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 5323.0,
+      "share_of_valid": 0.0723214043096655,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 880.0,
+      "share_of_valid": 0.0119561968424771,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 788.0,
+      "share_of_valid": 0.0107062308089454,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 477.0,
+      "share_of_valid": 0.0064808021521154,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 446.0,
+      "share_of_valid": 0.0060596179451645,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 319.0,
+      "share_of_valid": 0.0043341213553979,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 209.0,
+      "share_of_valid": 0.0028395967500883,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 173.0,
+      "share_of_valid": 0.0023504796065324,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 172.0,
+      "share_of_valid": 0.0023368930192114,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 33.0,
+      "share_of_valid": 0.0004483573815928,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 32.0,
+      "share_of_valid": 0.0004347707942718,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 29.0,
+      "share_of_valid": 0.0003940110323089,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 29.0,
+      "share_of_valid": 0.0003940110323089,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 27.0,
+      "share_of_valid": 0.0003668378576669,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 27.0,
+      "share_of_valid": 0.0003668378576669,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 25.0,
+      "share_of_valid": 0.0003396646830249,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 24.0,
+      "share_of_valid": 0.0003260780957039,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 23.0,
+      "share_of_valid": 0.0003124915083829,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 22.0,
+      "share_of_valid": 0.0002989049210619,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "periphery",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 22.0,
+      "share_of_valid": 0.0002989049210619,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 21.0,
+      "share_of_valid": 0.0002853183337409,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 18.0,
+      "share_of_valid": 0.0002445585717779,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 15.0,
+      "share_of_valid": 0.0002037988098149,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 12.0,
+      "share_of_valid": 0.0001630390478519,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 8.0,
+      "share_of_valid": 0.0001086926985679,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 7.0,
+      "share_of_valid": 9.510611124697698e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 8.151952392598027e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 8.151952392598027e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 8.151952392598027e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 6.793293660498357e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 6.793293660498357e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 4.0,
+      "share_of_valid": 5.434634928398685e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 4.075976196299013e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 4.075976196299013e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "periphery",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 3.0,
+      "share_of_valid": 4.075976196299013e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "מחל",
+      "name": "הליכוד",
+      "bloc": "Coalition",
+      "votes": 45144.0,
+      "share_of_valid": 0.3235062273372221,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "פה",
+      "name": "יש עתיד",
+      "bloc": "Opposition",
+      "votes": 35166.0,
+      "share_of_valid": 0.2520029237670732,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "כן",
+      "name": "המחנה הממלכתי",
+      "bloc": "Opposition",
+      "votes": 19255.0,
+      "share_of_valid": 0.1379831740071374,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "ט",
+      "name": "הציונות הדתית",
+      "bloc": "Coalition",
+      "votes": 13561.0,
+      "share_of_valid": 0.0971794247058317,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "ל",
+      "name": "ישראל ביתנו",
+      "bloc": "Opposition",
+      "votes": 8777.0,
+      "share_of_valid": 0.0628968225531366,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "שס",
+      "name": "ש\"ס",
+      "bloc": "Coalition",
+      "votes": 6936.0,
+      "share_of_valid": 0.0497040402447938,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "אמת",
+      "name": "עבודה",
+      "bloc": "Opposition",
+      "votes": 3992.0,
+      "share_of_valid": 0.0286070543046737,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "מרצ",
+      "name": "מרצ",
+      "bloc": "Opposition",
+      "votes": 2209.0,
+      "share_of_valid": 0.0158299055508577,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ב",
+      "name": "הבית היהודי",
+      "bloc": "Coalition",
+      "votes": 1037.0,
+      "share_of_valid": 0.0074312413111088,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ג",
+      "name": "יהדות התורה",
+      "bloc": "Coalition",
+      "votes": 915.0,
+      "share_of_valid": 0.006556977627449,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "יז",
+      "name": "הכלכלית החדשה",
+      "bloc": "Niche",
+      "votes": 625.0,
+      "share_of_valid": 0.0044788098548149,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "אצ",
+      "name": "חופש כלכלי",
+      "bloc": "Niche",
+      "votes": 509.0,
+      "share_of_valid": 0.0036475427457612,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "קץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 467.0,
+      "share_of_valid": 0.0033465667235176,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "צ",
+      "name": "צעירים בוערים",
+      "bloc": "Niche",
+      "votes": 303.0,
+      "share_of_valid": 0.0021713270176142,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ום",
+      "name": "חדש-תע\"ל",
+      "bloc": "Opposition",
+      "votes": 82.0,
+      "share_of_valid": 0.0005876198529517,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "עם",
+      "name": "רע\"מ",
+      "bloc": "Opposition",
+      "votes": 54.0,
+      "share_of_valid": 0.000386969171456,
+      "passed_threshold": true
+    },
+    {
+      "example_id": "secular",
+      "letter": "ני",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 50.0,
+      "share_of_valid": 0.0003583047883851,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 48.0,
+      "share_of_valid": 0.0003439725968497,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 48.0,
+      "share_of_valid": 0.0003439725968497,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "רז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 45.0,
+      "share_of_valid": 0.0003224743095466,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ת",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 41.0,
+      "share_of_valid": 0.0002938099264758,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "קך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 40.0,
+      "share_of_valid": 0.0002866438307081,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ד",
+      "name": "בל\"ד",
+      "bloc": "Opposition",
+      "votes": 37.0,
+      "share_of_valid": 0.000265145543405,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "י",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 33.0,
+      "share_of_valid": 0.0002364811603342,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "קנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 31.0,
+      "share_of_valid": 0.0002221489687988,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "נק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 29.0,
+      "share_of_valid": 0.0002078167772634,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "נץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 24.0,
+      "share_of_valid": 0.0001719862984248,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 15.0,
+      "share_of_valid": 0.0001074914365155,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "נז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 13.0,
+      "share_of_valid": 9.315924498014992e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 11.0,
+      "share_of_valid": 7.882705344474224e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "יק",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 8.0,
+      "share_of_valid": 5.732876614163072e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "נף",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 8.0,
+      "share_of_valid": 5.732876614163072e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ז",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 4.299657460622304e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "נר",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 4.299657460622304e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "קי",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 6.0,
+      "share_of_valid": 4.299657460622304e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "זץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 3.58304788385192e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "ינ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 5.0,
+      "share_of_valid": 3.58304788385192e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "זך",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 1.433219153540768e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "זנ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 2.0,
+      "share_of_valid": 1.433219153540768e-05,
+      "passed_threshold": false
+    },
+    {
+      "example_id": "secular",
+      "letter": "יץ",
+      "name": "רשימה קטנה",
+      "bloc": "Niche",
+      "votes": 1.0,
+      "share_of_valid": 7.16609576770384e-06,
+      "passed_threshold": false
+    }
+  ],
+  "example_bloc_totals": [
+    {
+      "example_id": "haredi",
+      "bloc": "Coalition",
+      "votes": 85903.0,
+      "share_of_valid": 0.9795990512247412
+    },
+    {
+      "example_id": "haredi",
+      "bloc": "Opposition",
+      "votes": 1601.0,
+      "share_of_valid": 0.0182570816037951
+    },
+    {
+      "example_id": "haredi",
+      "bloc": "Niche",
+      "votes": 188.0,
+      "share_of_valid": 0.0021438671714637
+    },
+    {
+      "example_id": "dati",
+      "bloc": "Coalition",
+      "votes": 4984.0,
+      "share_of_valid": 0.8618364170845582
+    },
+    {
+      "example_id": "dati",
+      "bloc": "Opposition",
+      "votes": 698.0,
+      "share_of_valid": 0.1206985993429016
+    },
+    {
+      "example_id": "dati",
+      "bloc": "Niche",
+      "votes": 101.0,
+      "share_of_valid": 0.0174649835725402
+    },
+    {
+      "example_id": "hiloni",
+      "bloc": "Coalition",
+      "votes": 6703.0,
+      "share_of_valid": 0.2457561869844179
+    },
+    {
+      "example_id": "hiloni",
+      "bloc": "Opposition",
+      "votes": 20270.0,
+      "share_of_valid": 0.7431714023831347
+    },
+    {
+      "example_id": "hiloni",
+      "bloc": "Niche",
+      "votes": 302.0,
+      "share_of_valid": 0.0110724106324472
+    },
+    {
+      "example_id": "arab",
+      "bloc": "Coalition",
+      "votes": 741.0,
+      "share_of_valid": 0.0260347129506008
+    },
+    {
+      "example_id": "arab",
+      "bloc": "Opposition",
+      "votes": 27502.0,
+      "share_of_valid": 0.9662708172299908
+    },
+    {
+      "example_id": "arab",
+      "bloc": "Niche",
+      "votes": 219.0,
+      "share_of_valid": 0.0076944698194083
+    },
+    {
+      "example_id": "druze",
+      "bloc": "Coalition",
+      "votes": 879.0,
+      "share_of_valid": 0.1191541276941846
+    },
+    {
+      "example_id": "druze",
+      "bloc": "Opposition",
+      "votes": 6316.0,
+      "share_of_valid": 0.8561745967195337
+    },
+    {
+      "example_id": "druze",
+      "bloc": "Niche",
+      "votes": 182.0,
+      "share_of_valid": 0.0246712755862816
+    },
+    {
+      "example_id": "masorti",
+      "bloc": "Coalition",
+      "votes": 15089.0,
+      "share_of_valid": 0.8169021709707108
+    },
+    {
+      "example_id": "masorti",
+      "bloc": "Opposition",
+      "votes": 3157.0,
+      "share_of_valid": 0.1709165719235558
+    },
+    {
+      "example_id": "masorti",
+      "bloc": "Niche",
+      "votes": 225.0,
+      "share_of_valid": 0.0121812571057333
+    },
+    {
+      "example_id": "periphery",
+      "bloc": "Coalition",
+      "votes": 48888.0,
+      "share_of_valid": 0.6642210809488872
+    },
+    {
+      "example_id": "periphery",
+      "bloc": "Opposition",
+      "votes": 23502.0,
+      "share_of_valid": 0.3193119752180647
+    },
+    {
+      "example_id": "periphery",
+      "bloc": "Niche",
+      "votes": 1212.0,
+      "share_of_valid": 0.016466943833048
+    },
+    {
+      "example_id": "secular",
+      "bloc": "Coalition",
+      "votes": 67593.0,
+      "share_of_valid": 0.4843779112264056
+    },
+    {
+      "example_id": "secular",
+      "bloc": "Opposition",
+      "votes": 69572.0,
+      "share_of_valid": 0.4985596147506915
+    },
+    {
+      "example_id": "secular",
+      "bloc": "Niche",
+      "votes": 2381.0,
+      "share_of_valid": 0.0170624740229028
+    },
+    {
+      "example_id": "mix_jlm",
+      "bloc": "Coalition",
+      "votes": 204726.0,
+      "share_of_valid": 0.7734265205893465
+    },
+    {
+      "example_id": "mix_jlm",
+      "bloc": "Opposition",
+      "votes": 57500.0,
+      "share_of_valid": 0.2172270494899886
+    },
+    {
+      "example_id": "mix_jlm",
+      "bloc": "Niche",
+      "votes": 2474.0,
+      "share_of_valid": 0.0093464299206649
+    },
+    {
+      "example_id": "mix_hfa",
+      "bloc": "Coalition",
+      "votes": 48979.0,
+      "share_of_valid": 0.3504407429667153
+    },
+    {
+      "example_id": "mix_hfa",
+      "bloc": "Opposition",
+      "votes": 88413.0,
+      "share_of_valid": 0.6325877908474286
+    },
+    {
+      "example_id": "mix_hfa",
+      "bloc": "Niche",
+      "votes": 2372.0,
+      "share_of_valid": 0.0169714661858561
+    },
+    {
+      "example_id": "mix_nty",
+      "bloc": "Coalition",
+      "votes": 71124.0,
+      "share_of_valid": 0.6291765080544571
+    },
+    {
+      "example_id": "mix_nty",
+      "bloc": "Opposition",
+      "votes": 40129.0,
+      "share_of_valid": 0.3549888095680404
+    },
+    {
+      "example_id": "mix_nty",
+      "bloc": "Niche",
+      "votes": 1790.0,
+      "share_of_valid": 0.0158346823775023
+    }
+  ],
+  "example_label_he": {
+    "haredi": "רוב חרדי",
+    "dati": "רוב דתי-לאומי",
+    "hiloni": "רוב חילוני",
+    "arab": "רוב ערבי",
+    "druze": "יישוב דרוזי",
+    "masorti": "עיירת פיתוח",
+    "periphery": "פריפריה מעורבת",
+    "secular": "עיר חילונית",
+    "mix_jlm": "מעורב (ירושלים)",
+    "mix_hfa": "מעורב (חיפה)",
+    "mix_nty": "מעורב (נתניה)"
+  },
+  "config": {
+    "threshold_pct": 3.25,
+    "total_seats": 120,
+    "w_c_default": 0.0189,
+    "w_o_default": 0.025839999999999995,
+    "projection_years": 3.5,
+    "cagr": {
+      "haredi": 0.03,
+      "dati": 0.02,
+      "masorti": 0.013,
+      "hiloni": 0.008,
+      "arab": 0.018,
+      "druze": 0.013
+    },
+    "model_method": "CLEAN COALITION COEFFICIENT method (two linear regressions on eligible shares, no reduced-form vote-choice regression, no turnout double-count, no calibration constant, no Bader-Ofer). At the locality level (weighted by eligible voters), on the same six fractional share_ columns (share_haredi..share_druze, CONTINUOUS PUF-derived, rova-level granularity, see docs/session_census_microdata.md), two constrained weighted least-squares ecological-inference regressions (scipy lsq_linear) are fit per election, in order: Reg A (turnout) y=voted/eligible, bounds [0.20,0.95] -> a_g = P(voted|eligible); then Reg B (coalition per eligible) y=bibi_votes/eligible, bounds [0, a_g] per group (that election's own fitted a_g as the upper bound) -> b_g. Clean coalition support k_g = b_g / a_g = P(coalition|voted) is then in [0,1] BY CONSTRUCTION (the b<=a bound is a deliberate hard cap, not a fitted result): Haredi pins at k=1 because the bound binds, Arab pins at k=0. k_g is what the theta_bibi_* columns hold (names kept for downstream compatibility; the VALUES are the clean k, not a share of valid votes). This removes the prior model's turnout double-count, where theta_bibi was fit directly on coalition share OF VALID VOTES (a reduced-form coefficient that partly absorbed each group's turnout tendency) and was then re-multiplied by theta_vote downstream — b_g's own regression, bounded by a_g, means turnout is factored out exactly once. 200-resample NESTED bootstrap for k's CI: each resample refits Reg A, then refits Reg B bounded by that resample's a, then computes k=b/a, so the reported interval reflects both regressions' sampling variation jointly. Demographic merge: fresh party_mapping.xlsx-derived vote columns (model_input.csv) merged onto fractional demographics (model_input_v2.csv); rows with is_envelope==True, demog_source=='none', or null share_ are excluded from both regressions only (national actuals still use all votes incl. envelopes). Seat logic (unchanged): Stage1 V=sum(E*t), CV=sum(E*t*k), S=CV/V; Stage2 S_c=S-w_c, S_o=(1-S)-w_o, R=S_c/(S_c+S_o); Stage3 seats=round(120*R). 2026 projection (eligible_share_2026): raw_2026_g = eligible_share_g (2022 census) * (1 + cagr_g)^projection_years, then renormalized to sum to 1.0. projection_years=3.5 (2022 census / K25 Nov-2022 -> mid-2026 election). CAGR per group (annual, source: IDI/CBS reference values): haredi 3.0%, dati 2.0%, masorti 1.3%, hiloni 0.8%, arab 1.8%, druze 1.3%. The Stage 1-3 seat regression/validation above is unchanged and still uses the 2022 eligible_share only; eligible_share_2026 is used only by the scenario simulator when the 2026-projected electorate base is selected."
+  }
+};
+
+function pct(x, d) {
+  if (d === undefined) d = 1;
+  return '<span class="ltr-token">' + (x * 100).toFixed(d) + '%' + '</span>';
+}
+function elecLabel(e) { return DATA.election_labels[e] || e; }
+
+// Guidance-range helper — purely formatting of numbers already computed in
+// analysis.py and passed through in DATA. No new arithmetic beyond
+// mean +/- 2*SD and clamping to a valid percent range.
+function guidanceMeanSd(meanFrac, sdFrac) {
+  const mean = meanFrac * 100;
+  const sd = sdFrac * 100;
+  let lo = mean - 2 * sd;
+  let hi = mean + 2 * sd;
+  lo = Math.max(0, lo);
+  hi = Math.min(100, hi);
+  return 'ממוצע ' + '<span class="ltr-token">' + mean.toFixed(0) + '%' + '</span>' +
+    ' · טווח אופייני ' + '<span class="ltr-token">' + lo.toFixed(0) + '–' + hi.toFixed(0) + '%' + '</span>';
+}
+function guidanceMinMax(meanFrac, minFrac, maxFrac) {
+  const mean = meanFrac * 100;
+  const lo = Math.max(0, minFrac * 100);
+  const hi = Math.max(0, maxFrac * 100);
+  return 'ממוצע ' + '<span class="ltr-token">' + mean.toFixed(2) + '%' + '</span>' +
+    ' · טווח שנצפה ' + '<span class="ltr-token">' + lo.toFixed(2) + '–' + hi.toFixed(2) + '%' + '</span>';
+}
+function clampPct(x) { return Math.max(0, Math.min(100, x)); }
+
+// ---------------------------------------------------------------------
+// Tabs
+// ---------------------------------------------------------------------
+document.querySelectorAll('.tab-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.getAttribute('data-tab')).classList.add('active');
+  });
+});
+
+// ---------------------------------------------------------------------
+// History tab — purely descriptive tables, no calculation beyond formatting.
+// ---------------------------------------------------------------------
+function sparkline(bibiVals, turnoutVals) {
+  const w = 120, h = 34, pad = 3;
+  const xStep = (w - pad * 2) / (bibiVals.length - 1);
+  function pathFor(vals) {
+    return vals.map((v, i) => {
+      const x = pad + i * xStep;
+      const y = h - pad - v * (h - pad * 2);
+      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+  }
+  const bibiPath = pathFor(bibiVals);
+  const turnoutPath = pathFor(turnoutVals);
+  return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="מגמה על פני מערכות הבחירות">' +
+    '<path d="' + turnoutPath + '" fill="none" stroke="var(--turnout-line)" stroke-width="1.6"/>' +
+    '<path d="' + bibiPath + '" fill="none" stroke="var(--coalition)" stroke-width="1.8"/>' +
+    '</svg>';
+}
+
+const headRow = document.getElementById('groupsHistHeadRow');
+DATA.elections.forEach(function (e) {
+  const th = document.createElement('th');
+  th.innerHTML = '<span class="ltr-token">' + elecLabel(e) + '</span>';
+  headRow.insertBefore(th, headRow.lastElementChild);
+});
+
+const histBody = document.querySelector('#groupsHistTable tbody');
+DATA.group_order.forEach(function (g) {
+  const gd = DATA.groups[g];
+  const bibiVals = DATA.elections.map(function (e) { return gd.theta_bibi_by_election[e]; });
+  const turnoutVals = DATA.elections.map(function (e) { return gd.theta_vote_by_election[e]; });
+  let cells = '<td class="group-cell">' + gd.label + '</td>' +
+    '<td class="num">' + pct(gd.eligible_share) + '</td>';
+  DATA.elections.forEach(function (e) {
+    cells += '<td><span class="cell-stack">' +
+      '<span class="v-bibi num">' + pct(gd.theta_bibi_by_election[e]) + '</span>' +
+      '<span class="v-turnout num">' + pct(gd.theta_vote_by_election[e]) + '</span>' +
+      '</span></td>';
+  });
+  cells += '<td>' + sparkline(bibiVals, turnoutVals) + '</td>';
+  const tr = document.createElement('tr');
+  tr.innerHTML = cells;
+  histBody.appendChild(tr);
+});
+
+const actualsBody = document.querySelector('#actualsTable tbody');
+DATA.elections.forEach(function (e) {
+  const a = DATA.actuals[e];
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><span class="ltr-token">' + elecLabel(e) + '</span></td>' +
+    '<td class="num">' + pct(a.coalition_share_valid, 1) + '</td>' +
+    '<td class="num">' + pct(a.turnout, 1) + '</td>' +
+    '<td class="num"><span class="ltr-token">' + a.actual_coalition_seats + '</span></td>';
+  actualsBody.appendChild(tr);
+});
+
+const validationBody = document.querySelector('#validationTable tbody');
+DATA.validation.forEach(function (v) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><span class="ltr-token">' + elecLabel(v.election) + '</span></td>' +
+    '<td class="num">' + pct(v.implied_S, 2) + '</td>' +
+    '<td class="num">' + pct(v.implied_R, 2) + '</td>' +
+    '<td class="num"><span class="ltr-token">' + v.implied_seats + '</span></td>' +
+    '<td class="num"><span class="ltr-token">' + v.actual_seats + '</span></td>' +
+    '<td class="num"><span class="ltr-token">' + (v.gap >= 0 ? '+' : '') + v.gap + '</span></td>';
+  validationBody.appendChild(tr);
+});
+
+
+// ---------------------------------------------------------------------
+// Worked examples explorer (History tab) — pure display of the
+// examples_summary / examples_parties / examples_bloc_totals CSVs, already
+// embedded verbatim in DATA.examples / DATA.example_parties /
+// DATA.example_bloc_totals. No model math is performed here: contribution
+// values and predicted/actual shares are read as-is from the CSVs; theta_g
+// (support) values come from DATA.groups[g].theta_bibi_by_election.K25,
+// the same lookup used by the history table above. Identical logic to
+// build_html.py (English) — only display strings and RTL number wrapping
+// differ.
+// ---------------------------------------------------------------------
+function exampleById(eid) { return DATA.examples.find(function (e) { return e.example_id === eid; }); }
+function examplePartiesFor(eid) { return DATA.example_parties.filter(function (p) { return p.example_id === eid; }); }
+function exampleBlocTotalsFor(eid) {
+  const out = {};
+  DATA.example_bloc_totals.filter(function (t) { return t.example_id === eid; }).forEach(function (t) { out[t.bloc] = t; });
+  return out;
+}
+
+function renderExample(eid) {
+  const ex = exampleById(eid);
+  if (!ex) return;
+
+  document.getElementById('exHeading').innerHTML =
+    ex.locality_name + ' &mdash; <span class="ltr-token">' + Math.round(ex.valid_votes).toLocaleString('en-US') + '</span> קולות כשרים';
+
+  // Demographics bar — six share_* fields, colors from DATA.group_color
+  // (same map used everywhere else). Segments below ~0.05% are skipped to
+  // avoid invisible slivers; the legend row labels every visible segment.
+  const bar = document.getElementById('exDemoBar');
+  const legend = document.getElementById('exDemoLegend');
+  bar.innerHTML = '';
+  legend.innerHTML = '';
+  DATA.group_order.forEach(function (g) {
+    const share = ex['share_' + g];
+    if (share <= 0.0005) return;
+    const seg = document.createElement('div');
+    seg.style.width = (share * 100) + '%';
+    seg.style.background = DATA.group_color[g];
+    seg.title = DATA.groups[g].label + ': ' + (share * 100).toFixed(1) + '%';
+    bar.appendChild(seg);
+    const item = document.createElement('span');
+    item.className = 'demo-legend-item';
+    item.innerHTML = '<span class="badge" style="background:' + DATA.group_color[g] + '">' + DATA.group_monogram[g] + '</span>' +
+      DATA.groups[g].label + ' ' + pct(share, 1);
+    legend.appendChild(item);
+  });
+
+  // Model vs actual — gap is styled neutrally (no green-good/red-bad).
+  document.getElementById('exPredicted').innerHTML = pct(ex.predicted_coalition_share, 1);
+  document.getElementById('exActual').innerHTML = pct(ex.actual_coalition_share, 1);
+  const gap = ex.diff_pp;
+  document.getElementById('exGap').innerHTML =
+    '<span class="ltr-token">' + (gap >= 0 ? '+' : '') + gap.toFixed(1) + '</span> נק\' אחוז';
+
+  // Calculation table — one row per group with nonzero eligible share,
+  // walking eligible share -> turnout -> share of voters -> coalition
+  // support -> contribution. All values (turnout_*, voter_share_*,
+  // contrib_*) are read as-is from the CSV; no model math is performed
+  // here. Contributions sum to predicted_coalition_share (turnout-weighted).
+  // Numbers wrapped via pct() (uses ltr-token, direction:ltr) so digits
+  // read left-to-right inside the RTL layout.
+  const calcBody = document.querySelector('#exCalcTable tbody');
+  calcBody.innerHTML = '';
+  DATA.group_order.forEach(function (g) {
+    const share = ex['share_' + g];
+    if (share <= 0.0005) return;
+    const turnout = ex['turnout_' + g];
+    const voterShare = ex['voter_share_' + g];
+    const theta = DATA.groups[g].theta_bibi_by_election.K25;
+    const contrib = ex['contrib_' + g];
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td class="group-cell">' + DATA.groups[g].label + '</td>' +
+      '<td class="num">' + pct(share, 1) + '</td>' +
+      '<td class="num">' + pct(turnout, 0) + '</td>' +
+      '<td class="num">' + pct(voterShare, 1) + '</td>' +
+      '<td class="num">' + pct(theta, 0) + '</td>' +
+      '<td class="num">' + pct(contrib, 1) + '</td>';
+    calcBody.appendChild(tr);
+  });
+  const totalTr = document.createElement('tr');
+  totalTr.innerHTML = '<td style="font-weight:700;" colspan="5">חלק חזוי לקואליציה</td>' +
+    '<td class="num" style="font-weight:700;">' + pct(ex.predicted_coalition_share, 1) + '</td>';
+  calcBody.appendChild(totalTr);
+
+  // Party breakdown — grouped by bloc (Coalition, then Opposition, then
+  // Niche/other), sorted by share within each bloc, bold bloc-total rows
+  // from examples_bloc_totals.csv. Same .bloc-chip markup/classes as the
+  // Party assignments tab, Hebrew bloc labels.
+  const partyBody = document.querySelector('#exPartyTable tbody');
+  partyBody.innerHTML = '';
+  const parties = examplePartiesFor(eid).slice().sort(function (a, b) { return b.share_of_valid - a.share_of_valid; });
+  const totals = exampleBlocTotalsFor(eid);
+  const blocOrder = [
+    { key: 'Coalition', cls: 'coalition', label: 'קואליציה', totalLabel: 'סה"כ קואליציה' },
+    { key: 'Opposition', cls: 'opposition', label: 'אופוזיציה', totalLabel: 'סה"כ אופוזיציה' },
+    { key: 'Niche', cls: 'niche', label: 'אחר', totalLabel: 'אחר' },
+  ];
+  blocOrder.forEach(function (b) {
+    if (b.key === 'Niche') {
+      // גוש 'אחר' (מפלגות שוליים) מוצג כשורה מאוחדת אחת ולא מפלגה-מפלגה:
+      // האחוז הוא סך הגוש מתוך examples_bloc_totals.csv, בעיצוב הצ'יפ הקיים.
+      const t = totals[b.key];
+      if (t) {
+        const tr = document.createElement('tr');
+        tr.style.fontWeight = '700';
+        tr.innerHTML = '<td colspan="2"><span class="bloc-chip ' + b.cls + '">' + b.totalLabel + '</span></td>' +
+          '<td class="num">' + pct(t.share_of_valid, 1) + '</td>';
+        partyBody.appendChild(tr);
+      }
+      return;
+    }
+    parties.filter(function (p) { return p.bloc === b.key; }).forEach(function (p) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td class="group-cell">' + p.name + '</td>' +
+        '<td><span class="bloc-chip ' + b.cls + '">' + b.label + '</span></td>' +
+        '<td class="num">' + pct(p.share_of_valid, 2) + '</td>';
+      partyBody.appendChild(tr);
+    });
+    const t = totals[b.key];
+    if (t) {
+      const tr = document.createElement('tr');
+      tr.style.fontWeight = '700';
+      tr.innerHTML = '<td colspan="2">' + b.totalLabel + '</td>' +
+        '<td class="num">' + pct(t.share_of_valid, 1) + '</td>';
+      partyBody.appendChild(tr);
+    }
+  });
+  // Note: no refreshAllTableFades() call here — this function runs once at
+  // parse time (before the table-scroll-wrap setup further down defines
+  // tableScrollWraps), same as the Party-assignments tab's initial
+  // renderParties('K25') call below. The bottom-of-script
+  // refreshAllTableFades() call covers the initial state for all tables;
+  // the 'change' listener below calls it again for later selections.
+}
+
+const exampleSelect = document.getElementById('exampleSelect');
+DATA.example_order.forEach(function (eid) {
+  const ex = exampleById(eid);
+  const opt = document.createElement('option');
+  opt.value = eid;
+  opt.textContent = (DATA.example_label_he[eid] || ex.label) + ' — ' + ex.locality_name;
+  exampleSelect.appendChild(opt);
+});
+exampleSelect.addEventListener('change', function () {
+  renderExample(exampleSelect.value);
+  refreshAllTableFades();
+});
+exampleSelect.value = DATA.example_order[0];
+renderExample(DATA.example_order[0]);
+
+// ---------------------------------------------------------------------
+// Party assignments tab — Coalition/Opposition only (Niche excluded at
+// build time in build_html_he.py), dropdown selects election, dates shown.
+// ---------------------------------------------------------------------
+const partySelect = document.getElementById('partyElection');
+DATA.elections.slice().reverse().forEach(function (e) {
+  const opt = document.createElement('option');
+  opt.value = e;
+  opt.textContent = elecLabel(e);
+  partySelect.appendChild(opt);
+});
+function renderParties(e) {
+  const body = document.querySelector('#partiesTable tbody');
+  body.innerHTML = '';
+  (DATA.parties[e] || []).forEach(function (p) {
+    const tr = document.createElement('tr');
+    const blocClass = p.bloc === 'Coalition' ? 'coalition' : 'opposition';
+    const blocLabel = p.bloc === 'Coalition' ? 'קואליציה' : 'אופוזיציה';
+    tr.innerHTML = '<td class="group-cell">' + p.name + '</td>' +
+      '<td><span class="bloc-chip ' + blocClass + '">' + blocLabel + '</span></td>' +
+      '<td class="num">' + pct(p.share, 2) + '</td>';
+    body.appendChild(tr);
+  });
+}
+partySelect.addEventListener('change', function () { renderParties(partySelect.value); });
+partySelect.value = 'K25';
+renderParties('K25');
+
+// ---------------------------------------------------------------------
+// Scenario builder — SD-based "higher/lower than average" controls.
+// DEFAULT = Average (0 SD) for every group's Turnout and Coalition support,
+// so the tool opens on a live "average election" result.
+// ---------------------------------------------------------------------
+let activeReference = null; // set when a past election is loaded (drives sd-state clearing only)
+let electorateBase = '2026'; // '2022' or '2026' — DEFAULT = 2026 projected
+const SD_STEPS = [-2, -1, 0, 1, 2];
+const SD_LABELS = ['הרבה פחות', 'פחות', 'ממוצע', 'יותר', 'הרבה יותר'];
+const SD_FACES = ['-2', '-1', 'ממוצע', '+1', '+2'];
+// current SD position per group per control (0 = Average, the default); null once a
+// past-election load or hand-typed value has moved the control off a discrete SD step.
+const sdState = {};
+DATA.group_order.forEach(function (g) { sdState['t_' + g] = 0; sdState['k_' + g] = 0; });
+
+function eShare(g) {
+  return electorateBase === '2026' ? DATA.groups[g].eligible_share_2026 : DATA.groups[g].eligible_share;
+}
+
+function sdFracValue(meanFrac, sdFrac, n) {
+  return Math.max(0, Math.min(1, meanFrac + n * sdFrac));
+}
+
+function buildControl(prefix, g, meanFrac, sdFrac, colorVar) {
+  let btns = '';
+  SD_STEPS.forEach(function (n, i) {
+    btns += '<button type="button" class="sd-btn" data-n="' + n + '" title="' + SD_LABELS[i] + ' (' + (n > 0 ? '+' : '') + n + ' SD)">' +
+      SD_FACES[i] + '</button>';
+  });
+  return (
+    '<div class="sd-buttons" id="' + prefix + '_' + g + '_btns">' + btns + '</div>' +
+    '<div class="control-readout">' +
+      '<span class="val ' + colorVar + '" id="' + prefix + '_' + g + '_val">&mdash;</span>' +
+      '<div class="value-bar-track"><div class="value-bar-fill" id="' + prefix + '_' + g + '_bar" style="background:var(--' + (colorVar === 'turnout-val' ? 'turnout-line' : 'coalition') + ')"></div></div>' +
+    '</div>' +
+    '<div class="guidance-mini">' + guidanceMeanSd(meanFrac, sdFrac) + '</div>'
+  );
+}
+
+const groupRowsEl = document.getElementById('groupRows');
+DATA.group_order.forEach(function (g) {
+  const gd = DATA.groups[g];
+  const mono = DATA.group_monogram[g];
+  const color = DATA.group_color[g];
+  const row = document.createElement('div');
+  row.className = 'group-row';
+  row.innerHTML =
+    '<div class="group-id">' +
+      '<span class="badge" style="background:' + color + '">' + mono + '</span>' +
+      '<div><div class="group-name">' + gd.label + '</div>' +
+        '<div class="share-bar-wrap">' +
+          '<div class="share-bar-track"><div class="share-bar-fill" id="e_' + g + '_bar" style="background:' + color + '"></div></div>' +
+          '<span class="share-bar-val num" id="e_' + g + '_col">' + pct(eShare(g)) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="control-block">' +
+      '<div class="control-label">אחוז הצבעה</div>' +
+      buildControl('t', g, gd.theta_vote_mean, gd.theta_vote_sd, 'turnout-val') +
+    '</div>' +
+    '<div class="control-block">' +
+      '<div class="control-label">תמיכה בקואליציה</div>' +
+      buildControl('k', g, gd.theta_bibi_mean, gd.theta_bibi_sd, 'coal-val') +
+    '</div>';
+  groupRowsEl.appendChild(row);
+});
+
+// Hidden per-group current value store (fraction 0-1), read by computeSeats.
+const currentVal = {};
+
+function setControlValue(prefix, g, valFrac, activeN) {
+  currentVal[prefix + '_' + g] = valFrac;
+  document.getElementById(prefix + '_' + g + '_val').innerHTML = pct(valFrac, 1);
+  document.getElementById(prefix + '_' + g + '_bar').style.width = clampPct(valFrac * 100) + '%';
+  const btnGroup = document.getElementById(prefix + '_' + g + '_btns');
+  btnGroup.querySelectorAll('.sd-btn').forEach(function (b) {
+    b.classList.toggle('active', activeN !== null && b.getAttribute('data-n') === String(activeN));
+  });
+}
+
+function wireControl(prefix, g, meanFrac, sdFrac) {
+  const btnGroup = document.getElementById(prefix + '_' + g + '_btns');
+  btnGroup.querySelectorAll('.sd-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const n = parseInt(btn.getAttribute('data-n'), 10);
+      sdState[prefix + '_' + g] = n;
+      setControlValue(prefix, g, sdFracValue(meanFrac, sdFrac, n), n);
+      computeSeats();
+    });
+  });
+  // DEFAULT = Average (0 SD)
+  setControlValue(prefix, g, sdFracValue(meanFrac, sdFrac, 0), 0);
+}
+
+DATA.group_order.forEach(function (g) {
+  const gd = DATA.groups[g];
+  wireControl('t', g, gd.theta_vote_mean, gd.theta_vote_sd);
+  wireControl('k', g, gd.theta_bibi_mean, gd.theta_bibi_sd);
+});
+
+function updateElectorateCol() {
+  let maxShare = 0;
+  DATA.group_order.forEach(function (g) { maxShare = Math.max(maxShare, eShare(g)); });
+  DATA.group_order.forEach(function (g) {
+    document.getElementById('e_' + g + '_col').innerHTML = pct(eShare(g));
+    document.getElementById('e_' + g + '_bar').style.width = clampPct((eShare(g) / maxShare) * 100) + '%';
+  });
+  document.getElementById('baseNote').innerHTML =
+    electorateBase === '2026'
+      ? 'בשימוש: הרכב 2026 (תחזית) (' + '<span class="ltr-token">' + DATA.config.projection_years + '</span>' + ' שנים ממפקד 2022)'
+      : 'בשימוש: הרכב 2022 (בפועל)';
+}
+
+document.getElementById('baseBtn2022').addEventListener('click', function () {
+  electorateBase = '2022';
+  document.getElementById('baseBtn2022').classList.add('active');
+  document.getElementById('baseBtn2026').classList.remove('active');
+  updateElectorateCol();
+  computeSeats();
+});
+document.getElementById('baseBtn2026').addEventListener('click', function () {
+  electorateBase = '2026';
+  document.getElementById('baseBtn2026').classList.add('active');
+  document.getElementById('baseBtn2022').classList.remove('active');
+  updateElectorateCol();
+  computeSeats();
+});
+updateElectorateCol();
+
+// Threshold guidance lines: average + observed K21-K25 min-max, preferred
+// over mean +/- 2SD here since these values are skewed and a symmetric
+// range would go negative (e.g. w_c ran 0%-6%).
+document.getElementById('wcGuidance').innerHTML =
+  guidanceMinMax(DATA.threshold_stats.w_c.mean, DATA.threshold_stats.w_c.min, DATA.threshold_stats.w_c.max);
+document.getElementById('woGuidance').innerHTML =
+  guidanceMinMax(DATA.threshold_stats.w_o.mean, DATA.threshold_stats.w_o.min, DATA.threshold_stats.w_o.max);
+
+// Threshold inputs default to the historical MEAN.
+document.getElementById('wc').value = (DATA.config.w_c_default * 100).toFixed(2);
+document.getElementById('wo').value = (DATA.config.w_o_default * 100).toFixed(2);
+
+document.querySelectorAll('.load-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    const e = btn.getAttribute('data-election');
+    activeReference = e;
+    DATA.group_order.forEach(function (g) {
+      const gd = DATA.groups[g];
+      sdState['t_' + g] = null;
+      sdState['k_' + g] = null;
+      setControlValue('t', g, gd.theta_vote_by_election[e], null);
+      setControlValue('k', g, gd.theta_bibi_by_election[e], null);
+    });
+    // Loading an election also loads THAT election's threshold (wasted-vote)
+    // shares, so the simulator reproduces the election's actual outcome
+    // (e.g. 2022 -> 64 with the 2022 electorate base).
+    document.getElementById('wc').value = (DATA.thresholds[e].w_c * 100).toFixed(2);
+    document.getElementById('wo').value = (DATA.thresholds[e].w_o * 100).toFixed(2);
+    document.querySelectorAll('.load-btn').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    computeSeats();
+  });
+});
+
+document.getElementById('clearBtn').addEventListener('click', function () {
+  activeReference = null;
+  DATA.group_order.forEach(function (g) {
+    const gd = DATA.groups[g];
+    sdState['t_' + g] = 0;
+    sdState['k_' + g] = 0;
+    setControlValue('t', g, sdFracValue(gd.theta_vote_mean, gd.theta_vote_sd, 0), 0);
+    setControlValue('k', g, sdFracValue(gd.theta_bibi_mean, gd.theta_bibi_sd, 0), 0);
+  });
+  document.getElementById('wc').value = (DATA.config.w_c_default * 100).toFixed(2);
+  document.getElementById('wo').value = (DATA.config.w_o_default * 100).toFixed(2);
+  document.querySelectorAll('.load-btn').forEach(function (b) { b.classList.remove('active'); });
+  computeSeats();
+});
+
+// ---------------------------------------------------------------------
+// THE interactive engine: Stage 1-3 seat formula. This is the ONLY
+// arithmetic performed in this page. No calibration constant, no Bader-Ofer.
+// Identical math to build_html.py (English) — only display strings differ.
+// ---------------------------------------------------------------------
+function computeSeats() {
+  const E = {}, t = {}, k = {};
+  DATA.group_order.forEach(function (g) {
+    E[g] = eShare(g); // from CSV, per selected electorate base (2022 or 2026)
+    t[g] = currentVal['t_' + g];
+    k[g] = currentVal['k_' + g];
+  });
+  const wcRaw = parseFloat(document.getElementById('wc').value);
+  const woRaw = parseFloat(document.getElementById('wo').value);
+  const w_c = (isNaN(wcRaw) ? 0 : wcRaw) / 100;
+  const w_o = (isNaN(woRaw) ? 0 : woRaw) / 100;
+
+  // Stage 1 — demographics -> bloc votes
+  let V = 0, CV = 0;
+  DATA.group_order.forEach(function (g) {
+    V += E[g] * t[g];
+    CV += E[g] * t[g] * k[g];
+  });
+
+  const emptyState = document.getElementById('emptyState');
+  const resultBody = document.getElementById('resultBody');
+  const caption = document.getElementById('resultCaption');
+  caption.innerHTML = 'הרכב הבוחרים: ' + (electorateBase === '2026' ? '2026 (תחזית)' : '2022 (בפועל)');
+
+  if (V <= 0) {
+    emptyState.style.display = '';
+    resultBody.style.display = 'none';
+    return;
+  }
+
+  const S = CV / V;
+
+  // Stage 2 — apply threshold via wasted-vote shares
+  const S_c = S - w_c;
+  const S_o = (1 - S) - w_o;
+  const D = S_c + S_o;
+
+  if (D <= 0) {
+    emptyState.style.display = '';
+    resultBody.style.display = 'none';
+    return;
+  }
+
+  const R = S_c / D;
+
+  // Stage 3 — seats (flat proportional, 120)
+  const totalSeats = DATA.config.total_seats;
+  const coalitionSeats = Math.round(totalSeats * R);
+  const oppositionSeats = totalSeats - coalitionSeats;
+  const majority = coalitionSeats >= 61;
+
+  emptyState.style.display = 'none';
+  resultBody.style.display = '';
+
+  document.getElementById('outS').innerHTML = pct(S, 2);
+  document.getElementById('outR').innerHTML = pct(R, 2);
+  document.getElementById('outCoalSeats').innerHTML = '<span class="ltr-token">' + coalitionSeats + '</span>';
+  document.getElementById('outOppSeats').innerHTML = '<span class="ltr-token">' + oppositionSeats + '</span>';
+  const majEl = document.getElementById('outMajority');
+  majEl.textContent = majority ? 'רוב (61 מנדטים ומעלה)' : 'אין רוב (פחות מ-61)';
+  majEl.className = 'majority-badge ' + (majority ? 'yes' : 'no');
+
+  // 120-seat bar, inline SVG. Single measure (coalition vs opposition), one
+  // axis. RTL: coalition fill starts from the RIGHT edge (x anchored at the
+  // right, growing leftward) so the bar reads naturally in RTL layout.
+  const svg = document.getElementById('seatBar');
+  const w = 600, h = 34;
+  const coalW = (coalitionSeats / totalSeats) * w;
+  const majorityX = w - (61 / totalSeats) * w;
+  svg.innerHTML =
+    '<rect x="0" y="8" width="' + w + '" height="18" rx="3" fill="var(--opposition-soft)"></rect>' +
+    '<rect x="' + (w - coalW).toFixed(1) + '" y="8" width="' + coalW.toFixed(1) + '" height="18" rx="3" fill="var(--coalition)"></rect>' +
+    '<line x1="' + majorityX.toFixed(1) + '" y1="2" x2="' + majorityX.toFixed(1) + '" y2="32" stroke="var(--text-primary)" stroke-width="1.5" stroke-dasharray="3,2"></line>';
+}
+
+document.getElementById('wc').addEventListener('input', computeSeats);
+document.getElementById('wo').addEventListener('input', computeSeats);
+computeSeats();
+
+// ---------------------------------------------------------------------
+// Table-scroll overflow cue (mobile QA) — pure UI affordance, no data or
+// logic change. Identical to build_html.py; works for RTL tables too
+// (spec-compliant scrollLeft is negative in RTL, handled below).
+// ---------------------------------------------------------------------
+function updateTableFade(wrap) {
+  const scroller = wrap.querySelector('.table-scroll');
+  if (!scroller) return;
+  const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+  if (maxScroll <= 1) {
+    wrap.classList.remove('has-overflow', 'overflow-left', 'overflow-right');
+    return;
+  }
+  wrap.classList.add('has-overflow');
+  const rtl = getComputedStyle(scroller).direction === 'rtl';
+  const sl = scroller.scrollLeft;
+  if (!rtl) {
+    wrap.classList.toggle('overflow-right', sl < maxScroll - 1);
+    wrap.classList.toggle('overflow-left', sl > 1);
+  } else {
+    // Spec-compliant RTL: scrollLeft ranges from 0 (start/right) down to
+    // -maxScroll (end/left).
+    wrap.classList.toggle('overflow-left', sl > -(maxScroll - 1));
+    wrap.classList.toggle('overflow-right', sl < -1);
+  }
+}
+const tableScrollWraps = Array.prototype.slice.call(document.querySelectorAll('.table-scroll-wrap'));
+function refreshAllTableFades() { tableScrollWraps.forEach(updateTableFade); }
+tableScrollWraps.forEach(function (wrap) {
+  const scroller = wrap.querySelector('.table-scroll');
+  if (scroller) scroller.addEventListener('scroll', function () { updateTableFade(wrap); });
+});
+window.addEventListener('resize', refreshAllTableFades);
+// A ResizeObserver re-checks each scroller whenever it gains/changes size —
+// this fires when a hidden tab panel becomes visible and the table finally
+// lays out, so the cue appears without any manual resize/scroll.
+if (typeof ResizeObserver !== 'undefined') {
+  tableScrollWraps.forEach(function (wrap) {
+    const scroller = wrap.querySelector('.table-scroll');
+    if (scroller) new ResizeObserver(function () { updateTableFade(wrap); }).observe(scroller);
+  });
+}
+refreshAllTableFades();
+// Hidden tab panels report 0 width until shown — recheck on every tab switch.
+// Defer with a real timer (not rAF) so the just-shown panel has reflowed and
+// the table reports its true width before we measure overflow.
+document.querySelectorAll('.tab-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    refreshAllTableFades();
+    setTimeout(refreshAllTableFades, 60);
+  });
+});
+</script>
+<style>.hb-home-back{position:fixed;top:14px;left:14px;z-index:99999;background:#0f172a;color:#fff;padding:9px 16px;border-radius:999px;text-decoration:none;font-family:'Heebo',system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.28);display:inline-flex;align-items:center;gap:6px}.hb-home-back .hb-lbl{display:inline}@media(max-width:480px){.hb-home-back{padding:0;width:40px;height:40px;gap:0;justify-content:center;border-radius:50%;font-size:18px}.hb-home-back .hb-lbl{display:none}}</style>
+<a href="../index.html" class="hb-home-back" aria-label="חזרה לדף הבית">🏠<span class="hb-lbl">דף הבית</span></a>
+
+<script>
+(function () {
+  var frame = document.getElementById('demographicsFrame');
+  if (!frame) return;
+  function resizeDemographicsFrame() {
+    try {
+      var doc = frame.contentDocument;
+      if (!doc) return;
+      var height = Math.max(doc.documentElement.scrollHeight, doc.body ? doc.body.scrollHeight : 0);
+      if (height) frame.style.height = height + 'px';
+    } catch (e) {}
+  }
+  frame.addEventListener('load', function () {
+    resizeDemographicsFrame();
+    try { new ResizeObserver(resizeDemographicsFrame).observe(frame.contentDocument.body); } catch (e) {}
+  });
+  window.addEventListener('resize', resizeDemographicsFrame);
+  document.querySelector('[data-tab="demographics"]').addEventListener('click', function () {
+    setTimeout(resizeDemographicsFrame, 80);
+  });
+})();
+</script></body>
+</html>
