@@ -1,0 +1,330 @@
+catalog_version: 1
+last_reviewed: 2026-09-27
+rules:
+  - Raw and licensed microdata stay outside Git.
+  - Resolve local_subpath relative to data_root unless a specific root overrides it.
+  - Verify accepted filenames before every production build.
+  - Preserve source vintages; do not silently replace a file with a newer release.
+
+datasets:
+  - id: cbs_hes_2021_2023
+    title: Household Expenditure Survey pooled microdata
+    years: [2021, 2022, 2023]
+    role: Canonical household, person, income and expenditure inputs.
+    publisher: Israel Central Bureau of Statistics
+    public_availability: licensed_public_use_file
+    official_url: https://www.cbs.gov.il/he/publications/Pages/2015/%D7%AA%D7%95%D7%A6%D7%A8%D7%99-Public-Use-Files-PUF-%D7%A0%D7%AA%D7%95%D7%A0%D7%99-%D7%A4%D7%A8%D7%98-%D7%91%D7%9C%D7%AA%D7%99-%D7%9E%D7%96%D7%95%D7%94%D7%99%D7%9D-%D7%9C%D7%9E%D7%97%D7%A7%D7%A8.aspx
+    access_restrictions: CBS PUF terms; no redistribution or re-identification.
+    local_subpath: "סקרי למס/סקר הוצאות משקי בית 2016 - 2023"
+    accepted_files:
+      - H20211021/H20211021datamb.csv
+      - H20211021/H20211021dataprat.csv
+      - H20211021/H20211021dataincmissim.csv
+      - H20211021/h20211021DataEdu.csv
+      - H20211021/h20211021DataComOther.csv
+      - H20221021/H20221021datamb.csv
+      - H20221021/H20221021dataprat.csv
+      - H20221021/H20221021dataincmissim.csv
+      - H20221021/h20221021DataEdu.csv
+      - H20221021/h20221021DataComOther.csv
+      - H20231021/H20231021datamb.csv
+      - H20231021/H20231021dataprat.csv
+      - H20231021/H20231021dataincmissim.csv
+      - H20231021/h20231021DataEdu.csv
+      - H20231021/h20231021DataComOther.csv
+    required_columns:
+      household: [S_Seker, MisparMb, weight]
+      person: [S_Seker, MisparMb, y_kalkali, Min]
+      income: [S_Seker, MisparMb]
+      expenditure: [S_Seker, MisparMb]
+    checksums:
+      H20211021/H20211021datamb.csv: 7175AC82AFE4E38E216DA5F922831CE6FE216677E79F71727ABACCD0419F775F
+      H20221021/H20221021datamb.csv: 6F9D97CE13DCFD458BF53B3D23DABF70091EFA6D174DDD7BB9ECD0853E3D7E31
+      H20231021/H20231021datamb.csv: 4BC1FBFD8B71EDFAD9DC5A0935FFF13CE3BC071317B9F0B09ADB53F6B7E21519
+    owners: [shared_hes, hh_fiscal_balance]
+
+  - id: cbs_longitudinal_2012_2023
+    title: Longitudinal Survey of Households
+    years: [2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020, 2021, 2023]
+    role: Household assets, liabilities, housing and income used by the equity and balance-sheet models.
+    publisher: Israel Central Bureau of Statistics
+    public_availability: licensed_public_use_file
+    official_url: https://www.cbs.gov.il/he/publications/Pages/2015/%D7%AA%D7%95%D7%A6%D7%A8%D7%99-Public-Use-Files-PUF-%D7%A0%D7%AA%D7%95%D7%A0%D7%99-%D7%A4%D7%A8%D7%98-%D7%91%D7%9C%D7%AA%D7%99-%D7%9E%D7%96%D7%95%D7%94%D7%99%D7%9D-%D7%9C%D7%9E%D7%97%D7%A7%D7%A8.aspx
+    access_restrictions: CBS PUF terms; no redistribution or record linkage to identified data.
+    local_subpath: "סקרי למס/סקר ארוך טווח 2012 - 2023"
+    accepted_files:
+      - H20121284/H20121284DataMb.csv
+      - H20121284/H20121284dataprat.csv
+      - H20131282/H20131282datamb.csv
+      - H20131282/H20131282dataprat.csv
+      - H201420151283/H201420151283datamb.csv
+      - H201420151283/H201420151283dataPrat.csv
+      - H20161281/h20161281datamb.csv
+      - H20161281/h20161281dataprat.csv
+      - H20171281/h20171281datamb.csv
+      - H20171281/h20171281dataprat.csv
+      - H20181281/h20181281datamb.csv
+      - H20181281/h20181281dataprat.csv
+      - H20181281/h20181281datapkida.csv
+      - H20191281/H20191281DATAMB.csv
+      - H20191281/H20191281DATAPRAT.csv
+      - H20191281/H20191281DATAPKIDA.csv
+      - H20201281/H20201281DataMb.csv
+      - H20201281/H20201281DataPrat.csv
+      - H20201281/H20201281datapkida.csv
+      - H202120221281/h202120221281datamb.csv
+      - H202120221281/H202120221281dataprat.csv
+      - H202120221281/H202120221281datapkida.csv
+      - H20231281/H20231281DataMb.csv
+      - H20231281/H20231281dataprat.csv
+      - H20231281/H20231281datapkida.csv
+    required_columns:
+      household: [siduri, weight_hh]
+      person: [siduri]
+      interviewer: [siduri]
+    owners: [household_equity, hh_balance_sheet, hh_fiscal_balance]
+
+  - id: cbs_census_puf_2022
+    title: Census 2022 household and person public-use files
+    years: [2022]
+    role: Microdata base for voting-propensity estimation and demographic validation.
+    publisher: Israel Central Bureau of Statistics
+    public_availability: licensed_public_use_file
+    official_url: https://www.cbs.gov.il/he/publications/Pages/2015/%D7%AA%D7%95%D7%A6%D7%A8%D7%99-Public-Use-Files-PUF-%D7%A0%D7%AA%D7%95%D7%A0%D7%99-%D7%A4%D7%A8%D7%98-%D7%91%D7%9C%D7%AA%D7%99-%D7%9E%D7%96%D7%95%D7%94%D7%99%D7%9D-%D7%9C%D7%9E%D7%97%D7%A7%D7%A8.aspx
+    access_restrictions: CBS PUF terms; no redistribution or re-identification.
+    local_subpath: "סקרי למס/Census Israel 2022/H20221511"
+    accepted_files: [H20221511datamb.csv, H20221511dataprat.csv]
+    required_columns:
+      household: [Household identifier, survey weight]
+      person: [Household identifier, age, sex, religion, locality or published geography]
+    checksums:
+      H20221511datamb.csv: 6095327E7DD65CB4D5768959CCE982F3D28A24B5896A3E172BE17F9F668E7D48
+      H20221511dataprat.csv: B9668142F4B05D20C425DC51F650A24CEADAEE75D000E0360854E9B6C8A4E9A1
+    owners: [voting_propensity]
+
+  - id: cbs_census_selected_areas_2022
+    title: Census 2022 selected statistical-area indicators
+    years: [2022]
+    role: Statistical-area and locality demographic features.
+    publisher: Israel Central Bureau of Statistics
+    public_availability: public_download
+    official_url: https://data.gov.il/he/datasets/lamas/2022/9a9e085f-3bc8-41df-b15f-be0daaf99e30
+    access_restrictions: Aggregate disclosure-protected statistics; preserve attribution.
+    local_subpath: Israel demographic dashboards/elections/census
+    accepted_files:
+      - census2022_table1_sa_selected.xlsx
+      - census2022_population_by_locality.xlsx
+      - census2022_population_by_religion_age.xlsx
+    required_columns: [LocalityCode, StatArea, pop_approx, religion, hh_MidatDatiyut_Name, employeesAnnual_medWage]
+    owners: [voting_propensity, coalition_simulator]
+
+  - id: knesset_ballots_k21_k25
+    title: Knesset ballot-box results
+    years: [2019, 2020, 2021, 2022]
+    role: Election outcomes at ballot-box level.
+    publisher: Israel Central Elections Committee via data.gov.il
+    public_availability: public_api
+    official_url: https://data.gov.il/api/3/action/datastore_search
+    resource_ids:
+      K21: f79f9ba5-fe12-4b90-96cc-916f1b7c1c34
+      K22: 22f3a195-3a79-436c-be23-cb606bc7b398
+      K23: 3b9e911a-2e90-4587-b209-84171664056b
+      K24: 419be3b0-fd30-455a-afc0-034ec36be990
+      K25: cc223336-07bc-485d-b160-62df92967c0a
+    access_restrictions: Public aggregate election results; retain source metadata.
+    local_subpath: Israel demographic dashboards/elections/ballots
+    accepted_files:
+      - K21 Kalpi.csv
+      - K22 Kalpi.csv
+      - K23 Kalpi.csv
+      - K24 Kalpi.csv
+      - K25 Kalpi.csv
+    required_columns: [locality code, ballot id, eligible voters, valid votes, party vote columns]
+    owners: [voting_propensity, coalition_simulator]
+
+  - id: election_party_mapping
+    title: Election-specific party and bloc crosswalk
+    years: [2019, 2020, 2021, 2022]
+    role: Reviewed mapping from ballot letters to modeled party families and blocs.
+    publisher: Project-maintained crosswalk based on official election results.
+    public_availability: project_authored
+    official_url: https://votes25.bechirot.gov.il/
+    access_restrictions: Review changes against official party lists before use.
+    local_subpath: Israel demographic dashboards/elections
+    accepted_files: [party_mapping.xlsx, party_bloc_coding.xlsx]
+    required_columns: [election, party letters, party name, modeled family or bloc]
+    owners: [voting_propensity, coalition_simulator]
+
+  - id: cbs_ballot_statistical_area_crosswalks
+    title: Ballot-box to 2011 statistical-area crosswalks and boundary conversion
+    years: [2013, 2015, 2019, 2020, 2021, 2022]
+    role: Geographic linkage of ballot results to Census statistical areas.
+    publisher: Israel Central Bureau of Statistics
+    public_availability: public_download
+    official_url: https://www.cbs.gov.il/he/cbsNewBrand/Pages/%D7%9E%D7%A4%D7%AA%D7%97%D7%95%D7%AA-%D7%9E%D7%A2%D7%91%D7%A8.aspx
+    access_restrictions: Public aggregate geography; preserve vintage and split weights.
+    local_subpath: Israel demographic dashboards/elections/cbs_classification
+    accepted_files:
+      - __kalpi2013_stat2011.xlsx
+      - kalpi2015_stat2011.xlsx
+      - kalpi_April2019_stat2011.xlsx
+      - kalpi_September2019_stat2011.xlsx
+      - kalpi_March2020_stat2011.xlsx
+      - kalpi_March2021_stat2011.xlsx
+      - kalpi_November2022_stat2011.xlsx
+      - מפתח מעבר אס 2011 לאס 2022.xlsx
+    required_columns: [locality code, ballot id, statistical area]
+    owners: [voting_propensity]
+
+  - id: cbs_statistical_area_geography_2022
+    title: Statistical-area boundaries
+    years: [2022]
+    role: Spatial joins and map geometry.
+    publisher: Israel Central Bureau of Statistics
+    public_availability: public_download
+    official_url: https://www.cbs.gov.il/he/publications/DocLib/2022/%D7%A7%D7%98%D7%9C%D7%95%D7%92/1.%20%D7%99%D7%99%D7%A9%D7%95%D7%91%D7%99%D7%9D%20%D7%95%D7%97%D7%9C%D7%95%D7%A7%D7%95%D7%AA%20%D7%92%D7%90%D7%95%D7%92%D7%A8%D7%A4%D7%99%D7%95%D7%AA/statistical_areas_2022.gdb.zip
+    access_restrictions: Public aggregate geography.
+    local_subpath: Israel demographic dashboards/elections/over_sources_2026-09-27/cbs_statistical_areas_2022
+    accepted_files: [statistical_areas_2022.gdb.zip]
+    required_columns: [SEMEL_YISHUV, STAT_2022, YISHUV_STAT_2022, geometry]
+    owners: [voting_propensity]
+
+  - id: fiscal_state_revenue_2023
+    title: State Revenue Administration annual report tables
+    years: [2023, 2024]
+    role: National tax control totals by tax component.
+    publisher: Israel State Revenue Administration
+    public_availability: public_download
+    official_url: https://www.gov.il/he/departments/publications/reports/state-revenues-report
+    access_restrictions: Public administrative aggregates.
+    local_subpath: Israel demographic dashboards/administrative/tax
+    accepted_files:
+      - A1c_state_revenue_2023-2024_chapter1_data.xlsx
+      - A1c_state_revenue_2023-2024_chapter2_data.xlsx
+      - A1c_state_revenue_2023-2024_chapter3_data.xlsx
+      - A1c_state_revenue_2023-2024_chapter4_data.xlsx
+      - A1c_state_revenue_2023-2024_chapter5_data.xlsx
+      - A1c_state_revenue_2023-2024_chapter6_data.xlsx
+      - A1c_state_revenue_2023-2024_chapter7_data.xlsx
+      - A1c_state_revenue_2023-2024_chapter8_data.xlsx
+      - A1c_state_revenue_2023-2024_chapter9_data.xlsx
+      - A1c_state_revenue_2023-2024_chapter10_data.xls
+      - A1c_state_revenue_2023-2024_chapter11_data.xlsx
+    required_columns: [tax category, year, NIS amount]
+    owners: [hh_fiscal_balance]
+
+  - id: nii_annual_review_2023
+    title: National Insurance annual review benefit chapters
+    years: [2023]
+    role: Benefit-specific cash and in-kind control totals and recipient profiles.
+    publisher: National Insurance Institute of Israel
+    public_availability: public_download
+    official_url: https://www.btl.gov.il/Publications/Skira_shnatit/2023/Pages/default.aspx
+    access_restrictions: Public administrative aggregates; retain suppressed cells.
+    local_subpath: Israel demographic dashboards/administrative/nii_transfers
+    accepted_files:
+      - chap-01.pdf
+      - chap-3-01-havtachat-hachnasa.pdf
+      - chap-3-02-mezonot.pdf
+      - chap-3-03-zikna.pdf
+      - chap-3-04-siud.pdf
+      - chap-3-05-children.pdf
+      - chap-3-06-imahut.pdf
+      - chap-3-07-nehut-clalit.pdf
+      - chap-3-08-avoda.pdf
+      - chap-3-10-shikum.pdf
+      - chap-3-11-avtala.pdf
+      - chap-3-13-miluim.pdf
+    required_columns: [benefit branch, annual payments, recipients]
+    owners: [hh_fiscal_balance]
+
+  - id: welfare_annual_reports_2023
+    title: Welfare statistical and freedom-of-information reports
+    years: [2023]
+    role: Welfare budget controls and recipient profiles by administration and population group.
+    publisher: Ministry of Welfare and Social Affairs
+    public_availability: public_download
+    official_url: https://www.gov.il/BlobFolder/reports/molsa-publications-statistoc-report-2023/he/Documents_Publications_statisric-report-2023.pdf
+    secondary_url: https://www.gov.il/BlobFolder/reports/molsa-freedom_of_information-report-2023/he/FreeInfo_freedom_of_information-report-2023.pdf
+    access_restrictions: Public administrative aggregates.
+    local_subpath: Israel demographic dashboards/administrative/welfare
+    accepted_files: [welfare_statistical_report_2023.pdf, welfare_foi_report_2023.pdf]
+    required_columns: [administration or program, budget, recipients, sector, socioeconomic cluster]
+    owners: [hh_fiscal_balance]
+
+  - id: health_capitation_formula
+    title: National Health Insurance capitation coefficients
+    years: [current_consolidated]
+    role: Age-sex allocation key for public health expenditure.
+    publisher: Ministry of Health; consolidated regulations hosted by Nevo
+    public_availability: public_reference
+    official_url: https://www.nevo.co.il/law_html/law00/74472.htm
+    access_restrictions: Public legal reference; verify the applicable vintage.
+    local_subpath: Israel demographic dashboards/administrative/health
+    accepted_files: [B1b_capitation_formula_official.md]
+    required_columns: [age bracket, sex, non-periphery coefficient, periphery coefficient]
+    owners: [hh_fiscal_balance]
+
+  - id: education_transparency_2023
+    title: Education transparency methodology and macro funding summary
+    years: [2023]
+    role: Funding per student by education stage and supervision; education validation only until the cell gate passes.
+    publisher: Ministry of Education
+    public_availability: public_download
+    official_url: https://meyda.education.gov.il/files/MinhalCalcala/shkifut2023.pdf
+    access_restrictions: Public aggregate report. The underlying school-level extract is not available here.
+    local_subpath: Israel demographic dashboards/administrative/education
+    accepted_files: [B2b_MoE_education_transparency_2023.pdf]
+    required_columns: [education stage, supervision or sector, students, expenditure per student]
+    owners: [hh_fiscal_balance]
+
+  - id: ministry_school_registry_2011_2015
+    title: Ministry of Education school registry
+    years: [2011, 2012, 2013, 2014, 2015]
+    role: Historical school metadata; not valid as a 2018 or 2023 allocation input.
+    publisher: Ministry of Education via data.gov.il
+    public_availability: public_download
+    official_url: https://data.gov.il/he/datasets/ministry_of_education/mosdot/5548fd63-5868-4053-ad81-98caddc5e232
+    access_restrictions: Public administrative records; verify year coverage.
+    local_subpath: Israel demographic dashboards/administrative/education
+    accepted_files: [B2d_MoE_mosdot_school_registry_2011-2015_downloaded_2026-09-27.xlsx]
+    required_columns: [institution id, school year, education stage, supervision, sector, students]
+    checksum: E2F64487C1969BB6AA865A46E271BEB268D1FB4A13AF2A5447299E2131A408B4
+    owners: [hh_fiscal_balance]
+
+  - id: balance_sheet_macro_controls_2023
+    title: Household balance-sheet validation controls
+    years: [2023]
+    role: Macro validation for deposits, debt, dwelling prices and long-term savings.
+    publishers: [Bank of Israel, Israel Central Bureau of Statistics, Capital Market Insurance and Savings Authority]
+    public_availability: mixed_public_download
+    official_urls:
+      bank_of_israel: https://www.boi.org.il/en/economic-roles/statistics/money-and-debt-aggregates/debt-and-credit/
+      cbs_price_index_api: https://api.cbs.gov.il/index/catalog/tree?format=json&download=false&lang=en
+      gemelnet: https://data.gov.il/dataset/5265b154-c2e2-4f3d-a22e-fba593240d9a
+      pensionnet: https://data.gov.il/dataset/3a1ca8fa-738b-4890-b52f-e8f7ce1e6145
+      insurancenet: https://data.gov.il/dataset/b5dd1f5e-0566-42fd-8db9-ae12e10c445b
+    access_restrictions: Aggregate only. InsuranceNet redistribution terms were not stated in the retrieved metadata.
+    local_subpath: Israel demographic dashboards/balance_sheet_reference
+    accepted_files:
+      - boi_household_controls/raw/boi_household_investments_2024.pdf
+      - cbs_housing_price_index/raw/cbs_dwelling_price_index_40010_2012_2017.csv
+      - cbs_housing_price_index/raw/cbs_dwelling_price_index_40010_2018_2023.csv
+      - cmisa_long_term_savings/raw/gemelnet_2023.csv
+      - cmisa_long_term_savings/raw/pensionnet_2023.csv
+      - cmisa_long_term_savings/raw/insurancenet_2023.csv
+    required_columns:
+      price_index: [series id, year, period, index value]
+      long_term_savings: [REPORT_PERIOD, FUND_ID, FUND_CLASSIFICATION, TOTAL_ASSETS]
+    owners: [household_equity, hh_balance_sheet]
+
+unresolved:
+  - id: education_school_level_2018_2023
+    issue: No validated school-level funding and enrollment extract for both validation and production years.
+    consequence: Education remains on the existing method until every material sector-by-decile cell meets the validation gate.
+  - id: over_tax_authority_transactions_reuse
+    issue: The OVER mirror did not state explicit redistribution terms.
+    consequence: Keep detailed transaction extracts local; publish only methods and disclosure-safe aggregates.
+  - id: insurancenet_redistribution
+    issue: Retrieved portal metadata had a blank license field.
+    consequence: Link to the source; do not commit the raw file.

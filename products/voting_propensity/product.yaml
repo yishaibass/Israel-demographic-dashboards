@@ -1,0 +1,5 @@
+name: voting_propensity
+public_routes:
+  - voting-simulator/demographics.html
+build: python products/voting_propensity/build.py
+status: migrated

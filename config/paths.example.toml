@@ -1,0 +1,21 @@
+# Copy this file to config/paths.toml. The copied file is ignored by Git.
+# Use absolute paths on your machine. Do not commit personal paths.
+
+data_root = ""
+hes_root = ""
+longitudinal_root = ""
+census_root = ""
+elections_root = ""
+administrative_root = ""
+balance_sheet_reference_root = ""
+cache_root = ""
+output_root = ""
+
+# Required by the current publication builds; set each to its local source-project root.
+# Fiscal position and coalition simulator are Increment-1 source adapters that require
+# their legacy projects. The current balance-sheet and voting-propensity adapters also
+# read their publication artifacts from these configured source paths.
+balance_sheet_project = ""
+fiscal_position_project = ""
+coalition_simulator_project = ""
+voting_propensity_project = ""

@@ -1,0 +1,7 @@
+name: fiscal_position
+public_routes:
+  - fiscal-position/index.html
+build: python products/fiscal_position/build.py
+status: source_adapter
+requires_legacy_project: fiscal_position_project
+limitation: Publication is reproducible, but the analytical pipeline is not yet independently runnable from this repository.

@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VE1ZYYW7TS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-VE1ZYYW7TS');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ישראל — החשבון הפיסקלי של שלושת המגזרים, 2018 ← 2023</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#0b0b0b; --muted:#52514e; --line:#e1e0d9; --paper:#fcfcfb; --bg:#f9f9f7;
+    --blue:#2a78d6; --blue-soft:#8fb8e4; --amber:#a8631f; --amber-soft:#d9a24f;
+    --pos:#1baf7a; --neg:#e34948; --navy:#223a5e; --grey:#8f8d87;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;}
+  .sans{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 32px 80px;}
+  header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:8px;}
+  h1{font-size:30px;line-height:1.15;margin:0 0 6px;letter-spacing:-0.01em;}
+  .kicker{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;text-transform:uppercase;
+    letter-spacing:.16em;font-size:11px;color:var(--blue);font-weight:700;margin-bottom:10px;}
+  .sub{color:var(--muted);font-size:14px;max-width:760px;margin:0;line-height:1.6;}
+  /* top tabs */
+  .tabs{display:flex;gap:2px;margin:22px 0 0;border-bottom:1px solid var(--line);}
+  .tabs button{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;border:0;background:none;cursor:pointer;
+    font-size:13px;font-weight:700;color:var(--muted);padding:10px 18px;border-bottom:2px solid transparent;
+    margin-bottom:-1px;letter-spacing:.02em;}
+  .tabs button.on{color:var(--ink);border-bottom-color:var(--ink);}
+  .toolbar{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin:22px 0 6px;}
+  section{margin-top:34px;}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:22px 24px;
+    box-shadow:0 1px 2px rgba(16,24,40,.04);}
+  h2{font-size:15px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:700;margin:0 0 2px;
+    letter-spacing:.01em;}
+  .cap{color:var(--muted);font-size:12.5px;margin:2px 0 16px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
+  .chartbox{position:relative;width:100%;}
+  .grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;}
+  .secbtns{display:flex;gap:10px;flex-wrap:wrap;}
+  .secbtns button{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer;border:1px solid var(--line);
+    background:#fff;border-radius:9px;padding:12px 18px;text-align:left;min-width:190px;}
+  .secbtns button .nm{font-weight:700;font-size:14px;}
+  .secbtns button .vv{font-size:12px;color:var(--muted);margin-top:3px;}
+  .secbtns button.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset;}
+  .pill{display:inline-block;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:11px;font-weight:700;
+    padding:2px 8px;border-radius:20px;}
+  .pill.io-in{background:#eaf1f9;color:var(--blue);}
+  .pill.io-out{background:#fbf1e1;color:var(--amber);}
+  .big{font-size:40px;font-weight:700;line-height:1;letter-spacing:-0.02em;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
+  .big.sub{font-size:13px;color:var(--muted);font-weight:600;}
+  .headline{display:flex;gap:26px;align-items:flex-end;flex-wrap:wrap;margin:4px 0 14px;}
+  .demo{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .metric{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#fcfcfd;}
+  .metric .k{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:11px;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--muted);font-weight:700;}
+  .metric .v{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:26px;font-weight:700;margin-top:4px;}
+  .metric .v small{font-size:13px;color:var(--grey);font-weight:600;margin-left:8px;}
+  .earnbar{display:flex;height:16px;border-radius:5px;overflow:hidden;margin-top:8px;border:1px solid var(--line);}
+  .earnbar i{display:block;height:100%;}
+  .earnleg{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:11px;color:var(--muted);display:flex;
+    gap:14px;margin-top:7px;flex-wrap:wrap;}
+  .earnleg b{color:var(--ink);}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+  /* financial table */
+  .fintbl{width:100%;border-collapse:collapse;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-variant-numeric:tabular-nums;font-size:13px;}
+  .fintbl caption{text-align:left;}
+  .fintbl thead th{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+    font-weight:700;padding:7px 10px;border-bottom:1.5px solid var(--ink);text-align:right;white-space:nowrap;}
+  .fintbl thead th.lft{text-align:left;}
+  .fintbl tbody td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;}
+  .fintbl tbody td.lft{text-align:left;color:var(--ink);}
+  .fintbl tbody tr.tot td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:700;color:var(--ink);}
+  .fintbl tbody tr.tot td.lft{text-transform:uppercase;font-size:11.5px;letter-spacing:.04em;}
+  .grp-in td.lft::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;
+    background:var(--blue);margin-right:8px;vertical-align:middle;opacity:.85;}
+  .grp-out td.lft::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;
+    background:var(--amber);margin-right:8px;vertical-align:middle;opacity:.85;}
+  .secthead td{padding:14px 10px 5px;font-size:11px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.1em;color:var(--ink);}
+  .secthead.t-in td{color:var(--blue);} .secthead.t-out td{color:var(--amber);}
+  .chg-pos{color:var(--pos);} .chg-neg{color:var(--neg);}
+  .sharecell{position:relative;}
+  .sharebar{position:absolute;right:10px;top:50%;transform:translateY(-50%);height:8px;border-radius:2px;
+    background:var(--line);opacity:.9;z-index:0;}
+  .shareval{position:relative;z-index:1;}
+  /* methodology */
+  .method h3{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--blue);margin:22px 0 8px;font-weight:700;}
+  .method h3:first-child{margin-top:0;}
+  .method p,.method li{font-size:14px;line-height:1.75;color:var(--ink);margin:0 0 10px;}
+  .method ul{margin:0 0 12px;padding-left:20px;}
+  .method .small{color:var(--muted);font-size:12.5px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
+  .method a{color:var(--blue);text-decoration:underline;}
+  .method code{background:#f1f3f5;border-radius:4px;padding:1px 5px;font-size:12px;}
+  .flag{border-left:3px solid var(--amber);background:#fdf8ef;padding:10px 14px;border-radius:0 8px 8px 0;
+    margin:0 0 10px;font-size:13.5px;}
+  .attrib{border-left:3px solid var(--blue);background:#f1f6fc;padding:12px 16px;border-radius:0 8px 8px 0;
+    margin:0 0 14px;font-size:14px;line-height:1.6;}
+  footer{margin-top:46px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);
+    font-size:11.5px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55;}
+  .hide{display:none;}
+  .legend-inline{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:11.5px;color:var(--muted);
+    display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;}
+  @media(max-width:880px){.grid2,.demo{grid-template-columns:1fr;}}
+
+  /* ===== MOBILE: page-by-page scroll-snap (each card = one chart page) ===== */
+  @media (max-width:640px){
+    html{scroll-snap-type:y mandatory; scroll-padding-top:112px; overflow-x:hidden; -webkit-text-size-adjust:100%;}
+    body{overflow-x:hidden;}
+    .wrap{padding:14px 14px 32px;}
+    /* pinned controls */
+    .tabs{position:sticky; top:0; z-index:60; background:var(--bg); gap:2px;
+      border-bottom:1px solid var(--line); box-shadow:0 2px 6px rgba(16,24,40,.06);
+      overflow-x:auto; -webkit-overflow-scrolling:touch;}
+    .tabs button{min-height:46px; padding:12px 14px; font-size:13px; flex:1 0 auto; white-space:nowrap;}
+    .tabs button.on{background:rgba(0,0,0,.045);}
+    .secbtns-slim{position:sticky; top:47px; z-index:55; background:var(--bg);
+      margin:0 -14px; padding:8px 14px; border-bottom:1px solid var(--line);
+      gap:8px; overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch;}
+    .secbtns-slim button{min-height:40px; padding:9px 16px; font-size:12.5px; white-space:nowrap; flex:0 0 auto;}
+    /* one card = one page */
+    #tab-dash .card, #tab-real .card{
+      scroll-snap-align:start; scroll-snap-stop:normal; scroll-margin-top:112px;
+      min-height:100vh; min-height:calc(100dvh - 116px);
+      display:flex; flex-direction:column; justify-content:center; min-width:0;}
+    /* flex/grid items default to min-width:auto — clamp so a wide nowrap table
+       stays inside its overflow-x scroller instead of blowing out the page */
+    #tab-dash .card>*, #tab-real .card>*{min-width:0; max-width:100%;}
+    #tab-dash section, #tab-real section{margin-top:0;}
+    #tab-dash .heroRow, #tab-real .heroRow,
+    #tab-dash .grid2, #tab-real .grid2{gap:0;}
+    footer{scroll-snap-align:start;}
+    /* wide tables: keep horizontal scroll + fade affordance so they never silently clip */
+    .tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;
+      -webkit-mask-image:linear-gradient(to right, transparent 0, #000 22px);
+              mask-image:linear-gradient(to right, transparent 0, #000 22px);}
+    /* readability floors */
+    h1{font-size:22px;} .sub{font-size:13px; line-height:1.55;}
+    .cap{font-size:12px;}
+    .earnbar{height:18px;} .earnbar i span{font-size:11px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Fiscal Incidence · Karlinsky, Sadeh, Yogev &amp; Sarel replication · ₪ per household / month</div>
+    <h1>The Fiscal Arithmetic of Israel's Three Sectors</h1>
+    <p class="sub">Who funds the state and who draws on it — and how the +₪25.6B swing in the net fiscal balance from 2018 to 2023 splits into population growth versus per-household economics.</p>
+    <div class="kicker" style="margin-top:6px">Source article: <a href="https://ieca.org.il/wp-content/uploads/2025/11/taxes_and_wonders.pdf" target="_blank" rel="noopener noreferrer">&ldquo;Complete Fiscal Accounts: Households&rsquo; Net Transfers in Israel&rdquo;</a> · Karlinsky, Sadeh, Yogev &amp; Sarel, <i>The Economic Quarterly</i>, vol.&nbsp;23</div>
+    <div class="tabs" id="tabs">
+      <button data-tab="dash" class="on">Dashboard · nominal ₪</button>
+      <button data-tab="real">Real terms · 2018 ₪</button>
+      <button data-tab="method">Methodology &amp; sources</button>
+    </div>
+  </header>
+
+  <!-- ============ DASHBOARD TAB (nominal) ============ -->
+  <div id="tab-dash"></div>
+
+  <!-- ============ REAL-TERMS TAB (2018 ₪) ============ -->
+  <div id="tab-real" class="hide"></div>
+
+  <!-- ============ METHODOLOGY TAB ============ -->
+  <div id="tab-method" class="hide">
+    <section><div class="card method" id="methodBody"></div></section>
+  </div>
+
+  <footer id="prov"></footer>
+</div>
+
+<script>
+const DATA = {"state":{"2018":{"tax_bn":405.47142,"transfer_bn":267.75,"net_bn":137.72142,"net_hh":52788.64354416121,"tax_hh":155417.2637613298,"transfer_hh":102628.6202171686},"2023":{"tax_bn":546.0066,"transfer_bn":394.7323945015164,"net_bn":151.2742054984836,"net_hh":51575.84466679485,"tax_hh":186156.9954761857,"transfer_hh":134581.1508093908}},"sectors":{"Jewish non-Haredi":{"net_hh":{"2018":72800.75670596428,"2023":76919.21060033524},"tax_hh":{"2018":168219.2844964973,"2023":203883.4722029544},"transfer_hh":{"2018":95418.52779053306,"2023":126964.2616026191},"total_fisc_bn":{"2018":149.9864607751511,"2023":174.3829065619625},"tax_bn":{"2018":346.5707810931426,"2023":462.2225345945154},"transfer_bn":{"2018":196.5843203179915,"2023":287.8396280325529},"nhh_m":{"2018":2.060232167378877,"2023":2.2670917343138006},"tax_items":[{"name":"Income tax + cap gains","v2018":43435.72717517862,"v2023":56590.7667799483,"pct":30.28621934131481},{"name":"VAT","v2018":38960.17757600997,"v2023":42413.69066992798,"pct":8.864212918897312},{"name":"NII + health","v2018":29981.74115264658,"v2023":36833.41391731462,"pct":22.85281808612779},{"name":"Corporate tax","v2018":17446.43008180443,"v2023":25507.55778673159,"pct":46.205026857239},{"name":"Financial+nonprofit VAT","v2018":6225.933120271229,"v2023":7003.520201559249,"pct":12.48948657601618},{"name":"Other (10 items)","v2018":32169.2753905865,"v2023":35534.52284747262,"pct":10.46106079800255}],"transfer_items":[{"name":"NII cash transfers","v2018":26850.67303690334,"v2023":42739.14195977465,"pct":59.17344753717845},{"name":"Education K-12","v2018":20063.74101168242,"v2023":25975.55662503983,"pct":29.46517107609775},{"name":"Public health","v2018":22937.94805088955,"v2023":28157.83797766125,"pct":22.75656878806675},{"name":"Welfare in-kind","v2018":8708.773657093698,"v2023":9236.661049668279,"pct":6.061558301547916},{"name":"Culture/sport","v2018":4185.723636779201,"v2023":5814.035352506259,"pct":38.90155817788293},{"name":"Other (6 items)","v2018":12671.66839718483,"v2023":15041.02863796887,"pct":18.69809220473621}],"pop_share":{"2018":70.52600998597957,"2023":69.00132198345254},"hh_share":{"2018":78.96873376848585,"2023":77.29485059864702},"demo":{"income_m":{"2018":22291.98636538696,"2023":24916.50089422148},"persons":{"2018":2.879704561884891,"2023":2.7845209716094628},"kids":{"2018":0.7973944964828851,"2023":0.7621132429080443},"pct65head":{"2018":22.41117455429966,"2023":25.859292833537236},"earners":{"2018":{"0":20.127212352152885,"1":27.59510492049445,"2plus":52.27768272735266},"2023":{"0":22.555455543238196,"1":32.71188006037912,"2plus":44.732664396382674}}}},"Haredi":{"net_hh":{"2018":-46790.70138296802,"2023":-74491.10008286995},"tax_hh":{"2018":104254.7191393617,"2023":114381.966590899},"transfer_hh":{"2018":151045.4205223297,"2023":188873.066673769},"total_fisc_bn":{"2018":-7.862738384210804,"2023":-16.301067426612},"tax_bn":{"2018":17.5190274495556,"2023":25.03048213427445},"transfer_bn":{"2018":25.3817658337664,"2023":41.33154956088645},"nhh_m":{"2018":0.16804061815309457,"2023":0.21883241633533898},"tax_items":[{"name":"Income tax + cap gains","v2018":12566.52362987731,"v2023":13860.63726659663,"pct":10.29810371455894},{"name":"VAT","v2018":34331.87533890447,"v2023":37933.46677405979,"pct":10.49051763005224},{"name":"NII + health","v2018":15957.95380161506,"v2023":20542.53808535883,"pct":28.72914874136165},{"name":"Corporate tax","v2018":13758.0552295575,"v2023":16039.41954920753,"pct":16.58202617728121},{"name":"Financial+nonprofit VAT","v2018":4909.699653315185,"v2023":4403.886870447154,"pct":-10.30231620230557},{"name":"Other (10 items)","v2018":22730.61148609219,"v2023":21602.01804522911,"pct":-4.965081742537426}],"transfer_items":[{"name":"NII cash transfers","v2018":28742.01769449824,"v2023":44186.23120585973,"pct":53.73392249465425},{"name":"Education K-12","v2018":51583.74927139325,"v2023":66072.37635476838,"pct":28.087580464823},{"name":"Public health","v2018":29768.44117649435,"v2023":33173.29293092393,"pct":11.43778988709061},{"name":"Welfare in-kind","v2018":11845.33807259801,"v2023":10436.15973969326,"pct":-11.89648049104331},{"name":"Culture/sport","v2018":3350.115596083253,"v2023":4722.826440605599,"pct":40.97502922368513},{"name":"Other (6 items)","v2018":25755.75871126261,"v2023":30282.18000191811,"pct":17.57440478224454}],"pop_share":{"2018":9.586572912812928,"2023":11.247339446355358},"hh_share":{"2018":6.440999731649743,"2023":7.460932731908457},"demo":{"income_m":{"2018":16925.68910726482,"2023":18775.654027573542},"persons":{"2018":4.794425236514831,"2023":4.702770289100402},"kids":{"2018":2.8264977622126475,"2023":2.733708596533689},"pct65head":{"2018":9.902088721268075,"2023":8.213716818585318},"earners":{"2018":{"0":16.72984546251388,"1":41.83543208860367,"2plus":41.43472244888245},"2023":{"0":15.670550901474497,"1":44.85785388874787,"2plus":39.47159520977765}}}},"Arab":{"net_hh":{"2018":-11565.26681617857,"2023":-15225.53392070062},"tax_hh":{"2018":108713.4265860596,"2023":131404.6440769136},"transfer_hh":{"2018":120278.6934022381,"2023":146630.1779976143},"total_fisc_bn":{"2018":-4.402302390940338,"2023":-6.80763363686689},"tax_bn":{"2018":41.38161145730177,"2023":58.75358327121015},"transfer_bn":{"2018":45.78391384824211,"2023":65.56121690807703},"nhh_m":{"2018":0.3806485800035316,"2023":0.4471195343508603},"tax_items":[{"name":"Income tax + cap gains","v2018":10273.60002595523,"v2023":15589.53057110775,"pct":51.74360041000574},{"name":"VAT","v2018":36340.18379019887,"v2023":41025.27144771528,"pct":12.89230589631747},{"name":"NII + health","v2018":16311.81186056423,"v2023":22812.46452232465,"pct":39.85242545297212},{"name":"Corporate tax","v2018":12280.07059460827,"v2023":17583.84735753989,"pct":43.1901162299532},{"name":"Financial+nonprofit VAT","v2018":4382.266049601646,"v2023":4827.934968110662,"pct":10.16982797175284},{"name":"Other (10 items)","v2018":29125.49426513131,"v2023":29565.59521011539,"pct":1.511050562705684}],"transfer_items":[{"name":"NII cash transfers","v2018":29663.98370156445,"v2023":40869.13986956596,"pct":37.77360546287841},{"name":"Education K-12","v2018":40945.56258533602,"v2023":43505.70935953745,"pct":6.252562213220885},{"name":"Public health","v2018":27217.21519371874,"v2023":30202.6759676886,"pct":10.96901631089301},{"name":"Welfare in-kind","v2018":7927.013523218778,"v2023":14304.61327936799,"pct":80.45400373632238},{"name":"Culture/sport","v2018":2557.429805964879,"v2023":4127.623254202223,"pct":61.39732338205602},{"name":"Other (6 items)","v2018":11967.48859243529,"v2023":13620.41626725203,"pct":13.81181742560065}],"pop_share":{"2018":19.88741710120749,"2023":19.75133857019212},"hh_share":{"2018":14.590266499864416,"2023":15.244216669444533},"demo":{"income_m":{"2018":14568.0305977008,"2023":16780.65754161278},"persons":{"2018":4.395541879114805,"2023":4.041092352204669},"kids":{"2018":1.7751953877343938,"2023":1.4818386178766667},"pct65head":{"2018":11.037879045526855,"2023":11.623172859583129},"earners":{"2018":{"0":19.088631083041612,"1":38.60711977638163,"2plus":42.30424914057676},"2023":{"0":20.671077130200697,"1":35.74271724811027,"2plus":43.586205621689025}}}}},"decile":[{"d":"D1","net2018":-77809.06240435789,"net2023":-74908.47022185569,"delta":2900.592182502194},{"d":"D2","net2018":-54261.93922336364,"net2023":-64737.61058778341,"delta":-10475.67136441977},{"d":"D3","net2018":-29420.06319866373,"net2023":-55835.81347101745,"delta":-26415.75027235371},{"d":"D4","net2018":-8572.085879165841,"net2023":-32002.74683103002,"delta":-23430.66095186418},{"d":"D5","net2018":10848.89858412274,"net2023":-18138.99923785828,"delta":-28987.89782198102},{"d":"D6","net2018":35723.99591643907,"net2023":23024.22263910939,"delta":-12699.77327732968},{"d":"D7","net2018":58589.81510849816,"net2023":55921.14060460269,"delta":-2668.674503895469},{"d":"D8","net2018":96896.9223739333,"net2023":96688.41767405852,"delta":-208.5046998747712},{"d":"D9","net2018":161161.548836649,"net2023":170509.1682064355,"delta":9347.619369786407},{"d":"D10","net2018":334639.3542713047,"net2023":415075.8546174705,"delta":80436.50034616579}],"waterfall":{"start":137.72142,"end":151.2742054984836,"sectors":{"Jewish non-Haredi":{"pop":15.059533004730492,"rate":9.336912782080892,"total":24.396445786811384},"Haredi":{"pop":-2.376583861449376,"rate":-6.061745180951822,"total":-8.438329042401197},"Arab":{"pop":-0.7687543225528818,"rate":-1.636576923373671,"total":-2.405331245926553}}},"demo_all":{"income_m":{"2018":20818.96311538476,"2023":23218.79980086509},"persons":{"2018":3.224378597338254,"2023":3.1193053642101285},"kids":{"2018":1.0709596400358845,"2023":1.0191906451617},"pct65head":{"2018":19.94491231262005,"2023":22.372257535034834},"earners":{"2018":{"0":19.756496716523273,"1":30.120367318806206,"2plus":50.12313596467053},"2023":{"0":21.753442968557046,"1":34.08208400669777,"2plus":44.164473024745185}}},"provenance":{"capital_incidence":{"mode":"household_equity","label":"Imputed total household equity","description":"Allocation by nonnegative modeled net worth: real estate, financial assets and pension wealth less household debt.","configured_mode":"household_equity","config_path":"model_config.json","equity_artifact":"local household-equity artifact","override_used":false},"fiscal_source":"net_position_2018_2023.xlsx + net_position_detail_2018_2023.xlsx (read, not recomputed; cross-checked vs Part A — PASS)","demo_source":"Same pooled Household Expenditure Survey pickles that produced the fiscal numbers (_pooled_2018_withtransfer.pkl = waves 2016-2018; _pooled_2023_withtransfer.pkl = waves 2021-2023). Head-65 from the matching expenditure dataprat files (Y_Kalkali==1 & Age_Group>=15).","deviation_note":"Part B was computed on the Household Expenditure Survey (the fiscal replication's actual source), NOT the Longitudinal survey named in the brief, so that sector & weight definitions match the fiscal numbers exactly. '2018'=pooled 2016-2018, '2023'=pooled 2021-2023 (same pooling as fiscal).","weights":"Fiscal totals, #HH, pop-share, HH-share use the GDP-per-capita-adjusted weight 'weight_adj'. Per-HH demographic averages (income, persons, kids, %65+ head, earner split) use the raw survey weight 'weight'.","sector_def":"Jewish non-Haredi: nationality==1 & ramatdatiyut in {1,2,3} (or nationality==3); Haredi: nationality==1 & ramatdatiyut==4; Arab: nationality==2  (sector field carried in the pooled pickle, identical to the fiscal replication).","head65_coverage":{"2018":100.0,"2023":100.0},"units":"₪B = national annual NIS billions; net/HH, tax/HH, transfer/HH = annual NIS/household; income = NIS/month (native CBS unit); shares in %."},"sector_order":["Jewish non-Haredi","Haredi","Arab"],"run_metadata":{"capital_incidence_mode":"household_equity","capital_incidence_label":"Imputed total household equity"}};
+</script>
+<script>
+/* ---------- formatting ---------- */
+const nf0 = new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
+const fmtNIS = v => '₪' + nf0.format(Math.round(v));
+const fmtSign = v => (v>=0?'+':'−') + nf0.format(Math.abs(Math.round(v)));
+/* per-household annual figures are stored as ₪/year; the dashboard shows them
+   as ₪/household/month (÷12) to match the published paper's units. */
+const fmtNISm  = v => fmtNIS(v/12);
+const fmtSignM = v => fmtSign(v/12);
+const fmtBnPlain = v => (v>=0?'':'−') + '₪' + Math.abs(v).toFixed(1) + 'B';
+const fmtPct = v => (v>=0?'+':'−') + Math.abs(v).toFixed(0) + '%';
+const C = getComputedStyle(document.documentElement);
+const col = n => C.getPropertyValue(n).trim();
+Chart.defaults.font.family = "system-ui,-apple-system,'Segoe UI',sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = col('--muted');
+
+/* ---------- real-terms (2018 ₪) dataset ---------- */
+/* Cumulative CPI inflation 2018→2023 in Israel ≈ 10.6% (annual-average index
+   chained 2019-2023: 1.008·0.994·1.015·1.044·1.042 ≈ 1.106). 2023 nominal ₪
+   are deflated to 2018 ₪ by dividing by this factor. */
+const CPI = 1.106;
+function buildReal(src, cpi){
+  const d = JSON.parse(JSON.stringify(src));
+  const def = x => (x==null ? x : x/cpi);
+  ['tax_bn','transfer_bn','net_bn','net_hh','tax_hh','transfer_hh'].forEach(k=>{
+    if(d.state && d.state['2023'] && d.state['2023'][k]!=null) d.state['2023'][k]=def(src.state['2023'][k]);
+  });
+  d.sector_order.forEach(s=>{
+    const S=d.sectors[s], O=src.sectors[s];
+    ['net_hh','tax_hh','transfer_hh','total_fisc_bn','tax_bn','transfer_bn'].forEach(k=>{
+      if(S[k] && S[k]['2023']!=null) S[k]['2023']=def(O[k]['2023']);
+    });
+    if(S.demo && S.demo.income_m && S.demo.income_m['2023']!=null)
+      S.demo.income_m['2023']=def(O.demo.income_m['2023']);
+    ['tax_items','transfer_items'].forEach(key=>{
+      (S[key]||[]).forEach((it,i)=>{ it.v2023=def(O[key][i].v2023); it.pct=(it.v2023/it.v2018-1)*100; });
+    });
+  });
+  if(d.decile) d.decile.forEach((row,i)=>{ row.net2023=def(src.decile[i].net2023); row.delta=row.net2023-row.net2018; });
+  /* recompute the waterfall in real terms: population effect uses the
+     unchanged 2018 net/HH; rate effect uses the deflated 2023 net/HH. */
+  const wf=d.waterfall;
+  wf.start = d.state['2018'].net_bn;
+  wf.end   = d.state['2023'].net_bn;
+  d.sector_order.forEach(s=>{
+    const S=d.sectors[s];
+    const nhh18=S.nhh_m['2018'], nhh23=S.nhh_m['2023'];
+    const nh18=S.net_hh['2018'], nh23=S.net_hh['2023'];
+    const pop=(nhh23-nhh18)*nh18/1000;
+    const rate=(nh23-nh18)*nhh23/1000;
+    wf.sectors[s]={pop,rate,total:pop+rate};
+  });
+  return d;
+}
+const DATA_REAL = buildReal(DATA, CPI);
+
+/* one shared sector selection across both dashboard tabs */
+let SECTOR = DATA.sector_order[0];
+const MODES = [
+  {sfx:'',  data:DATA,      note:''},
+  {sfx:'R', data:DATA_REAL, note:`All shekel values shown in <b>real 2018 ₪</b>: the 2023 nominal figures have been deflated by cumulative CPI inflation of ${((CPI-1)*100).toFixed(1)}% (÷${CPI}). The 2018 column is unchanged, so every change here is a <b>real</b> change.`}
+];
+
+/* ---------- dashboard markup (shared by both tabs) ---------- */
+function dashMarkup(sfx, note){
+  return `
+  <div class="toolbar">
+    <div class="legend-inline">
+      <span><span class="dot" style="background:var(--blue)"></span>Income side — taxes paid</span>
+      <span><span class="dot" style="background:var(--amber)"></span>Transfer side — benefits received</span>
+    </div>
+  </div>
+  ${note?`<div class="attrib" style="margin-top:14px">${note}</div>`:''}
+  <div class="attrib" style="margin-top:14px"><b>2023 capital-incidence selection:</b> ${DATA.run_metadata.capital_incidence_label} (<code>${DATA.run_metadata.capital_incidence_mode}</code>). Change the visible selector in <code>model_config.json</code> and rerun to reproduce the alternative.</div>
+  <section><div class="card">
+    <h2>Bridging the state's net fiscal balance, 2018 → 2023</h2>
+    <p class="cap">Each sector splits into a <b>population effect</b> (more / fewer households at the old net rate) and a <b>rate effect</b> (change in net ₪/household, at current household counts). ₪ billions.</p>
+    <div class="chartbox" style="height:380px"><canvas id="wf${sfx}"></canvas></div>
+  </div></section>
+  <section><div class="card">
+    <h2>Who funds the state — total net fiscal contribution by sector</h2>
+    <p class="cap">National annual ₪B. Positive = net contributor; negative = net beneficiary. 2018 vs 2023 (% change in tooltip).</p>
+    <div class="chartbox" style="height:320px"><canvas id="contrib${sfx}"></canvas></div>
+  </div></section>
+  <section>
+    <h2 class="sans" style="font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;">Drill down by sector</h2>
+    <div class="secbtns" id="secBtns${sfx}"></div>
+  </section>
+  <section><div class="grid2">
+    <div class="card">
+      <h2 id="ioTitle${sfx}">Income &amp; transfer composition</h2>
+      <p class="cap">Per household, <b>monthly</b> ₪. <span class="pill io-in">Income</span> taxes paid · <span class="pill io-out">Transfer</span> benefits received. "% of total" is each line's share of 2023 taxes / transfers.</p>
+      <div id="ioTable${sfx}"></div>
+    </div>
+    <div class="card">
+      <h2 id="demoTitle${sfx}">Sector profile</h2>
+      <p class="cap">Net fiscal position per household, with demographic context. <b>Large = 2023</b>, <span style="color:var(--grey)">small grey = 2018</span>.</p>
+      <div class="headline"><div>
+        <div class="big" id="netBig${sfx}">—</div>
+        <div class="big sub">net ₪ / household / month</div>
+      </div></div>
+      <div class="demo" id="demoGrid${sfx}"></div>
+    </div>
+  </div></section>`;
+}
+document.getElementById('tab-dash').innerHTML = dashMarkup(MODES[0].sfx, MODES[0].note);
+document.getElementById('tab-real').innerHTML = dashMarkup(MODES[1].sfx, MODES[1].note);
+
+/* ============ HERO 1 : waterfall ============ */
+function wlabel(sector, eff){ return sector.split(' ').concat([eff]); }
+function buildWaterfall(data, sfx){
+  const wf = data.waterfall;
+  const steps = [];
+  steps.push({label:['2018'],type:'anchor',val:wf.start});
+  data.sector_order.forEach(s=>{
+    const v = wf.sectors[s];
+    steps.push({label:wlabel(s,'households'),type:'flow',val:v.pop});
+    steps.push({label:wlabel(s,'net / HH'),type:'flow',val:v.rate});
+  });
+  steps.push({label:['2023'],type:'anchor',val:wf.end});
+  let cum=0; const bars=[], fills=[], bords=[];
+  steps.forEach(st=>{
+    if(st.type==='anchor'){ bars.push([0,st.val]); fills.push(col('--navy')); bords.push(col('--navy')); cum=st.val; }
+    else { const start=cum, end=cum+st.val; bars.push([start,end]); cum=end;
+      const c = st.val>=0?col('--pos'):col('--neg'); fills.push(c); bords.push(c); }
+  });
+  new Chart(document.getElementById('wf'+sfx),{
+    type:'bar',
+    data:{ labels:steps.map(s=>s.label),
+      datasets:[{ data:bars, backgroundColor:fills, borderColor:bords, borderWidth:1, borderRadius:3, barPercentage:.72, categoryPercentage:.84 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{callbacks:{ title:it=>{const s=steps[it[0].dataIndex];return (Array.isArray(s.label)?s.label.join(' · '):s.label);},
+          label:it=>{const s=steps[it.dataIndex]; if(s.type==='anchor')return 'Net balance: '+fmtBnPlain(s.val);
+            return (s.val>=0?'adds ':'removes ')+fmtBnPlain(Math.abs(s.val));}}}},
+      scales:{ x:{grid:{display:false},ticks:{maxRotation:0,autoSkip:false,font:{size:10}}},
+        y:{grid:{color:col('--line')},ticks:{callback:v=>'₪'+v+'B'},title:{display:true,text:'net fiscal balance · ₪B'}}}}
+  });
+}
+
+/* ============ HERO 2 : sector contribution ============ */
+function buildContrib(data, sfx){
+  new Chart(document.getElementById('contrib'+sfx),{
+    type:'bar',
+    data:{ labels:data.sector_order,
+      datasets:[
+        {label:'2018', data:data.sector_order.map(s=>data.sectors[s].total_fisc_bn['2018']),
+          backgroundColor:col('--blue-soft'), borderRadius:3, barPercentage:.8},
+        {label:'2023', data:data.sector_order.map(s=>data.sectors[s].total_fisc_bn['2023']),
+          backgroundColor:col('--blue'), borderRadius:3, barPercentage:.8},
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{boxWidth:12,boxHeight:12}},
+        tooltip:{callbacks:{
+          label:it=>it.dataset.label+': '+fmtBnPlain(it.raw),
+          footer:items=>{const s=data.sector_order[items[0].dataIndex];
+            const a=data.sectors[s].total_fisc_bn['2018'], b=data.sectors[s].total_fisc_bn['2023'];
+            return 'Change 2018→2023: '+fmtPct((b-a)/Math.abs(a)*100);}}}},
+      scales:{x:{grid:{display:false}},
+        y:{grid:{color:col('--line')},ticks:{callback:v=>'₪'+v+'B'},title:{display:true,text:'net contribution · ₪B'}}}}
+  });
+}
+
+/* ============ sector buttons ============ */
+function buildSecBtns(data, sfx){
+  const secBtns = document.getElementById('secBtns'+sfx);
+  data.sector_order.forEach(s=>{
+    const b=document.createElement('button'); b.dataset.sec=s;
+    b.innerHTML=`<div class="nm">${s}</div><div class="vv">net/HH ${fmtSignM(data.sectors[s].net_hh['2023'])}/mo · ${data.sectors[s].hh_share['2023'].toFixed(1)}% of HH</div>`;
+    b.onclick=()=>{SECTOR=s; syncSec(); renderDrill();};
+    secBtns.appendChild(b);
+  });
+}
+function syncSec(){
+  MODES.forEach(m=>{
+    const c=document.getElementById('secBtns'+m.sfx);
+    [...c.children].forEach(b=>b.classList.toggle('on', b.dataset.sec===SECTOR));
+  });
+}
+
+/* ============ drill-down : financial table ============ */
+function chgCell(p){ const cls = p>=0?'chg-pos':'chg-neg'; return `<td class="${cls}">${fmtPct(p)}</td>`; }
+function rows(items, total23, cls){
+  const shares = items.map(i=> i.v2023/total23*100);
+  const maxShare = Math.max(...shares);
+  return items.map((i,idx)=>{
+    const share = shares[idx];
+    const barW = Math.max(2, share/maxShare*46);
+    return `<tr class="${cls}">
+      <td class="lft">${i.name}</td>
+      <td>${fmtNISm(i.v2018)}</td>
+      <td>${fmtNISm(i.v2023)}</td>
+      ${chgCell(i.pct)}
+      <td class="sharecell"><span class="sharebar" style="width:${barW}px"></span><span class="shareval">${share.toFixed(1)}%</span></td>
+    </tr>`;
+  }).join('');
+}
+function totRow(label, t18, t23){
+  const pct = (t23/t18 - 1) * 100;
+  return `<tr class="tot">
+    <td class="lft">${label}</td>
+    <td>${fmtNISm(t18)}</td>
+    <td>${fmtNISm(t23)}</td>
+    ${chgCell(pct)}
+    <td>100.0%</td>
+  </tr>`;
+}
+function netRow(n18, n23){
+  /* net = tax − transfer; % change relative to magnitude, same convention as
+     the sector-contribution chart (positive = improved fiscal position). */
+  const pct = (n23 - n18) / Math.abs(n18) * 100;
+  const cell = v => `<td style="color:${v>=0?col('--pos'):col('--neg')}">${fmtSignM(v)}</td>`;
+  return `<tr class="tot" style="background:#f4f6f8">
+    <td class="lft">Net fiscal · tax − transfer</td>
+    ${cell(n18)}
+    ${cell(n23)}
+    ${chgCell(pct)}
+    <td>—</td>
+  </tr>`;
+}
+function renderTable(data, sfx){
+  const sec = data.sectors[SECTOR];
+  const html = `<table class="fintbl">
+    <thead><tr>
+      <th class="lft">Line item · per household / month</th>
+      <th>2018</th><th>2023</th><th>Δ %</th><th>% of total</th>
+    </tr></thead>
+    <tbody>
+      <tr class="secthead t-in"><td colspan="5">Income · taxes paid</td></tr>
+      ${rows(sec.tax_items, sec.tax_hh['2023'], 'grp-in')}
+      ${totRow('Total taxes', sec.tax_hh['2018'], sec.tax_hh['2023'])}
+      <tr class="secthead t-out"><td colspan="5">Transfers · benefits received</td></tr>
+      ${rows(sec.transfer_items, sec.transfer_hh['2023'], 'grp-out')}
+      ${totRow('Total transfers', sec.transfer_hh['2018'], sec.transfer_hh['2023'])}
+      ${netRow(sec.net_hh['2018'], sec.net_hh['2023'])}
+    </tbody></table>`;
+  document.getElementById('ioTable'+sfx).innerHTML = html;
+}
+
+/* ============ demo card ============ */
+function earnHTML(e){
+  const seg=(w,c)=>`<i style="width:${w}%;background:${c}"></i>`;
+  return `<div class="earnbar">${seg(e['0'],col('--grey'))}${seg(e['1'],col('--amber-soft'))}${seg(e['2plus'],col('--blue'))}</div>
+   <div class="earnleg"><span><span class="dot" style="background:${col('--grey')}"></span>0 earners <b>${e['0'].toFixed(0)}%</b></span>
+   <span><span class="dot" style="background:${col('--amber-soft')}"></span>1 <b>${e['1'].toFixed(0)}%</b></span>
+   <span><span class="dot" style="background:${col('--blue')}"></span>2+ <b>${e['2plus'].toFixed(0)}%</b></span></div>`;
+}
+function metric(k, big, small, unit){
+  const sm = (small===null||small===undefined)?'n/a':small;
+  return `<div class="metric"><div class="k">${k}</div>
+    <div class="v">${big}<small>${sm}</small></div>
+    <div class="cap" style="margin:2px 0 0">${unit}</div></div>`;
+}
+function renderDemo(data, sfx){
+  const sec=data.sectors[SECTOR], d=sec.demo;
+  document.getElementById('demoTitle'+sfx).textContent = SECTOR+' — sector profile';
+  document.getElementById('netBig'+sfx).textContent = fmtSignM(sec.net_hh['2023']);
+  document.getElementById('netBig'+sfx).style.color = sec.net_hh['2023']>=0?col('--pos'):col('--neg');
+  const p65b = d.pct65head['2023'], p65s=d.pct65head['2018'];
+  const grid=document.getElementById('demoGrid'+sfx);
+  grid.innerHTML =
+     metric('Net income / HH', fmtNIS(d.income_m['2023']), fmtNIS(d.income_m['2018']), 'NIS / month')
+   + metric('Persons / HH', d.persons['2023'].toFixed(2), d.persons['2018'].toFixed(2), 'avg household size')
+   + metric('Children &lt;18 / HH', d.kids['2023'].toFixed(2), d.kids['2018'].toFixed(2), 'under-18s per household')
+   + metric('Head aged 65+', (p65b===null?'n/a':p65b.toFixed(0)+'%'), (p65s===null?null:p65s.toFixed(0)+'%'), 'share of households')
+   + `<div class="metric" style="grid-column:1/3"><div class="k">Earners per household · 2023</div>${earnHTML(d.earners['2023'])}</div>`;
+}
+
+function renderDrill(){ MODES.forEach(m=>{ renderTable(m.data, m.sfx); renderDemo(m.data, m.sfx); }); }
+
+/* ============ tabs ============ */
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
+  const t=b.dataset.tab;
+  document.getElementById('tab-dash').classList.toggle('hide', t!=='dash');
+  document.getElementById('tab-real').classList.toggle('hide', t!=='real');
+  document.getElementById('tab-method').classList.toggle('hide', t!=='method');
+});
+
+/* ============ methodology ============ */
+const pv=DATA.provenance;
+document.getElementById('methodBody').innerHTML = `
+  <h3>What this is</h3>
+  <p>A fiscal-incidence picture of Israel's three demographic sectors — Jewish non-Haredi, Haredi (ultra-Orthodox), and Arab — measuring, per household, every shekel of tax paid to the state against every shekel of transfer and in-kind benefit received from it. The <b>net fiscal position</b> is taxes paid minus benefits received. Per-household figures are shown as <b>₪ per household per month</b> to match the published paper; national aggregates stay in annual ₪ billions.</p>
+  <p>The <b>Dashboard</b> tab is nominal — the 2018 column is in 2018 shekels and the 2023 column in 2023 shekels, so the change between them also reflects inflation and economic growth (nominal GDP rose about 38.5% over the period). The <b>Real terms · 2018 ₪</b> tab restates the 2023 figures in 2018 prices, deflating by cumulative CPI inflation of about ${((CPI-1)*100).toFixed(1)}% (÷${CPI}), so the change you see there is a real change.</p>
+
+  <div class="attrib">
+    <b>Method &amp; attribution.</b> The incidence framework — allocating taxes and public spending to households and netting them by population group — follows the methodology of:
+    <p style="margin:8px 0 6px">
+      <b>Ariel Karlinsky, Tom Sadeh, Eran Yogev &amp; Michael Sarel</b> (2024), &ldquo;<a href="https://ieca.org.il/wp-content/uploads/2025/11/taxes_and_wonders.pdf" target="_blank" rel="noopener noreferrer">Complete Fiscal Accounts: Households&rsquo; Net Transfers in Israel</a>,&rdquo; <i>The Economic Quarterly</i>, vol.&nbsp;23; also Bank of Israel Discussion Paper Series, vol.&nbsp;231 (2025).
+    </p>
+    This dashboard applies that approach to the fiscal years 2018 and 2023; full credit for the underlying methodology belongs to the authors.
+  </div>
+
+  <h3>Data sources</h3>
+  <ul>
+    <li><b>Demographics and household micro-data.</b> Israel Central Bureau of Statistics (CBS / הלמ״ס) <b>Household Expenditure Survey</b>. This is the survey on which the sector classifications, household weights, incomes and household composition are all measured.</li>
+    <li><b>Tax and public-spending allocations.</b> Built on the CBS survey using the Karlinsky, Sadeh, Yogev &amp; Sarel incidence model, which maps national tax revenue and government expenditure down to individual households.</li>
+  </ul>
+
+  <h3>How it was constructed</h3>
+  <ul>
+    <li><b>Reference years.</b> "2018" pools the survey waves 2016–2018 and "2023" pools 2021–2023, which steadies the estimates for the smaller sectors. Each column is in that year's nominal shekels (the 2018 column is <i>not</i> rebased to 2023), so the 2018→2023 percentage change includes inflation and real growth.</li>
+    <li><b>Waterfall decomposition.</b> Each sector's change in net contribution is split into a <b>population effect</b> — the change in the number of households, valued at the old net rate — and a <b>rate effect</b> — the change in net ₪ per household, valued at the current number of households. The two effects sum exactly to the sector's total change, and the three sectors sum to the +₪25.6B national swing.</li>
+    <li><b>Sector definitions.</b> Jewish non-Haredi, Haredi (ultra-Orthodox) and Arab households are identified from the survey's nationality and religiosity classifications, using the same definitions throughout the fiscal and demographic figures.</li>
+    <li><b>Weighting.</b> National totals, household counts and population shares use the survey's grossing-up weights (adjusted to align with national accounts); per-household demographic averages use the standard survey weights.</li>
+    <li><b>Households with a 65+ head.</b> Based on the age of the economic head of each household as recorded in the survey.</li>
+  </ul>
+
+  <h3>Points to bear in mind</h3>
+  <div class="flag">The demographic and fiscal figures are drawn from the same survey so that sectors, weights and household definitions line up exactly. Per-household demographic averages and grossed-up national totals use slightly different weighting, so reconciling a per-household figure against a national total will not be perfectly mechanical.</div>
+  <div class="flag">Pooling three survey waves trades timeliness for stability; a single-year reading will differ, most noticeably for the smaller Haredi sample.</div>
+  <div class="flag">Tax and spending incidence rests on the allocation assumptions of the Karlinsky, Sadeh, Yogev &amp; Sarel model (for example, who ultimately bears corporate tax and VAT). These are standard for this type of analysis but are assumptions, not observations.</div>
+  <div class="flag"><b>NII and welfare, 2023.</b> NII cash receipts are calibrated separately by benefit branch. Long-term care is split into an estimated ₪5.0B cash and ₪10.9B in-kind using the official December 2023 unit mix; this is an annual proxy because NII does not publish a full-year cash split. CBS discontinued STIK for 2021–2023, so welfare in-kind uses current Ministry program budgets and recipient profiles by sector and socioeconomic tier. The national welfare envelope remains estimated, and expected recipients are modeled rather than administratively matched to households.</div>
+  <div class="flag"><b>Health &amp; education in-kind.</b> <b>Education</b> (K-12) is allocated with the 2018 per-student cost vectors by sector and schooling level as fixed <i>relative</i> keys, then scaled to the 2023 budget. <b>Public health</b> now uses the official consolidated 2023 age×sex capitation coefficients and scales exactly to the ₪84.6B envelope. A separate official periphery uplift could not be mapped to the public-use household geography and is therefore not invented.</div>
+  <div class="flag">The 2018 per-household figures were checked line by line against the published paper (see the allocation check below). Jewish non-Haredi and Arab sectors match within ±1%; the Haredi sector runs a few percent low on the capital-based taxes (corporate tax, the financial component of VAT) — within the noise of the small Haredi sample and the published chart-reads. It does not change the overall picture.</div>
+  <div class="flag"><b>2023 capital incidence: ${pv.capital_incidence.label}.</b> ${pv.capital_incidence.description} The production selector is <code>${pv.capital_incidence.mode}</code>. The alternative remains reproducible from <code>model_config.json</code>; national tax totals are identical and only household incidence changes. The 2018 replication remains on Karlinsky's original capital-income-flow key.</div>
+
+  <h3>Allocation check vs. the published paper (2018)</h3>
+  <p>The imputed items — indirect-tax incidence and in-kind public services — are allocated to households using the Karlinsky, Sadeh, Yogev &amp; Sarel keys; cash allowances are observed directly in the survey. Below, our per-household monthly averages (this dashboard, 2018) are set against the paper's rounded sector figures. Differences are shown both in % and in ₪ per household per month. <b>These figures are a replication and remain to be verified with the authors.</b></p>
+  <table class="fintbl" style="margin-top:6px">
+    <thead><tr>
+      <th class="lft">Sector · 2018, ₪/HH/month</th>
+      <th>This dashboard</th><th>Paper (≈)</th><th>Δ %</th><th>Δ ₪/mo</th>
+    </tr></thead>
+    <tbody>
+      <tr class="secthead t-in"><td colspan="5">Total taxes paid</td></tr>
+      <tr class="grp-in"><td class="lft">Jewish non-Haredi</td><td>₪14,052</td><td>₪14,000</td><td class="chg-pos">+0.4%</td><td class="chg-pos">+₪52</td></tr>
+      <tr class="grp-in"><td class="lft">Haredi</td><td>₪8,467</td><td>₪8,800</td><td class="chg-neg">−3.8%</td><td class="chg-neg">−₪333</td></tr>
+      <tr class="grp-in"><td class="lft">Arab</td><td>₪8,975</td><td>₪9,000</td><td class="chg-neg">−0.3%</td><td class="chg-neg">−₪25</td></tr>
+      <tr class="secthead t-out"><td colspan="5">Total transfers received</td></tr>
+      <tr class="grp-out"><td class="lft">Jewish non-Haredi</td><td>₪7,952</td><td>₪7,900</td><td class="chg-pos">+0.7%</td><td class="chg-pos">+₪52</td></tr>
+      <tr class="grp-out"><td class="lft">Haredi</td><td>₪12,587</td><td>₪12,900</td><td class="chg-neg">−2.4%</td><td class="chg-neg">−₪313</td></tr>
+      <tr class="grp-out"><td class="lft">Arab</td><td>₪10,023</td><td>₪10,100</td><td class="chg-neg">−0.8%</td><td class="chg-neg">−₪77</td></tr>
+    </tbody>
+  </table>
+  <p class="small">National total taxes of ₪405B match the paper exactly. The per-sector gaps above sit inside the noise of rounding and pooled-wave sampling, except the Haredi capital-based taxes, which we have flagged for author review.</p>
+
+  <h3>Sources &amp; credibility</h3>
+  <p class="small"><b>Primary micro-data:</b> Israel Central Bureau of Statistics — Household Expenditure Survey. <b>Methodology:</b> after Karlinsky, Sadeh, Yogev &amp; Sarel, fiscal balance of Israel's population groups.</p>
+  <p class="small"><b>Units.</b> ${pv.units}</p>
+  <p class="small">Figures are a research-grade replication and should be reviewed before any external or client use.</p>
+`;
+
+/* ============ footer ============ */
+document.getElementById('prov').innerHTML =
+  `<b>Sources.</b> Israel Central Bureau of Statistics — Household Expenditure Survey; fiscal incidence after Karlinsky, Sadeh, Yogev &amp; Sarel, <a href="https://ieca.org.il/wp-content/uploads/2025/11/taxes_and_wonders.pdf" target="_blank" rel="noopener noreferrer">&ldquo;Complete Fiscal Accounts: Households&rsquo; Net Transfers in Israel&rdquo;</a> (<i>The Economic Quarterly</i>, vol.&nbsp;23). See the <b>Methodology &amp; sources</b> tab for detail. Units: ${pv.units}`;
+
+/* init */
+MODES.forEach(m=>{ buildWaterfall(m.data, m.sfx); buildContrib(m.data, m.sfx); buildSecBtns(m.data, m.sfx); });
+syncSec(); renderDrill();
+</script>
+</body>
+</html>

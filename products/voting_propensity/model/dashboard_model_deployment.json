@@ -1,0 +1,23 @@
+{
+  "dashboard_cells": 5675,
+  "eligible_population_weight": 6252726.80190089,
+  "max_mass_error": 0.00019972115842392668,
+  "probability_source": "modeling\\party_family_context_outputs\\individual_probabilities_party_family_context.csv.gz",
+  "source_label": "all-context five-election model",
+  "full_puf_population_weight": 6252726.80190089,
+  "max_national_party_share_error": 5.551115123125783e-17,
+  "exact_fiscal_cells": 5518,
+  "imputed_fiscal_cells": 157,
+  "national_party_shares": {
+    "likud": 0.27935455374375195,
+    "national_religious": 0.08093712332041932,
+    "shas": 0.07859807027397586,
+    "utj": 0.06254226635275903,
+    "arab": 0.11016264281358434,
+    "center": 0.24933707643783234,
+    "zionist_left": 0.07085309517701027,
+    "secular_national_right": 0.05681058728819857,
+    "other": 0.01140458459246816
+  },
+  "dashboard_updated": true
+}

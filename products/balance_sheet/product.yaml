@@ -1,0 +1,6 @@
+name: balance_sheet
+public_routes:
+  - balance-sheet/index.html
+  - balance-sheet/index-en.html
+build: python products/balance_sheet/build.py
+status: migrated

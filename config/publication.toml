@@ -1,0 +1,10 @@
+[analytics]
+measurement_id = "G-VE1ZYYW7TS"
+enabled_routes = [
+  "index.html",
+  "balance-sheet/index.html",
+  "balance-sheet/index-en.html",
+  "fiscal-position/index.html",
+  "voting-simulator/index.html",
+  "feedback/index.html",
+]

@@ -1,0 +1,4 @@
+party,likud_ballot_pearson,center_ballot_pearson,likud_ballot_spearman,center_ballot_spearman,likud_adjusted_pearson,center_adjusted_pearson,likud_locality_pearson,center_locality_pearson,assigned_family
+Kulanu,0.468,0.127,0.619,0.260,0.227,-0.003,0.440,-0.101,likud
+Gesher,0.302,0.443,0.375,0.579,0.101,0.096,0.212,0.263,liberal_center
+Zehut,0.498,-0.028,0.603,0.088,0.268,-0.205,0.301,-0.271,likud
