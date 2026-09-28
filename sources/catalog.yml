@@ -318,6 +318,21 @@ datasets:
       long_term_savings: [REPORT_PERIOD, FUND_ID, FUND_CLASSIFICATION, TOTAL_ASSETS]
     owners: [household_equity, hh_balance_sheet]
 
+  - id: fiscal_household_equity_controls_2018
+    title: End-2018 household balance-sheet controls for fiscal incidence
+    years: [2018]
+    role: Component calibration and scope sensitivity for the 2018 household-equity capital key.
+    publishers: [Israel Central Bureau of Statistics, Bank of Israel]
+    public_availability: public_download
+    official_urls:
+      cbs_national_balance_sheet: https://www.cbs.gov.il/he/publications/doclib/2024/1922/e_print.pdf
+      boi_household_debt_q4_2018: https://www.boi.org.il/en/communication-and-publications/press-releases/debt-developments-in-the-nonfinancial-private-sector-fourth-quarter-of-2018/
+      boi_deposit_sensitivity: https://www.boi.org.il/boi_files/Pikuah/e020.xls
+    access_restrictions: Aggregate public statistics only; no household records are redistributed.
+    accepted_files:
+      - products/fiscal_position/controls/household_equity_controls_2018.csv
+    owners: [household_equity, hh_fiscal_balance]
+
 unresolved:
   - id: education_school_level_2018_2023
     issue: No validated school-level funding and enrollment extract for both validation and production years.

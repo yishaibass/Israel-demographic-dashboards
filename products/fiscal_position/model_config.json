@@ -1,0 +1,17 @@
+{
+  "capital_incidence": {
+    "selected": "household_equity",
+    "applies_to_years": [2018, 2023],
+    "options": {
+      "karlinsky_flow": "Capital-income flow including imputed rent in both years",
+      "household_equity": "Nonnegative modeled household net worth using a separately dated artifact for each year"
+    },
+    "artifact_vintages": {"2018": 2018, "2023": 2023},
+    "publication_snapshots": {
+      "karlinsky_flow": "data/karlinsky_flow.json",
+      "household_equity": "data/household_equity.json"
+    },
+    "refresh_contract": "Run the selected mode for both analysis years, then capture its aggregate dashboard with build.py --capital-mode MODE --capture-source PATH.",
+    "mixed_year_modes_allowed": false
+  }
+}
