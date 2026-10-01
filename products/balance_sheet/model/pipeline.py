@@ -28,6 +28,7 @@ Financial Assets, Total Assets, Total Liabilities, Net Worth, full Total Real
 Estate) is emitted as null with a note -- never fabricated or zero-filled.
 """
 
+import argparse
 import csv
 import hashlib
 import json
@@ -41,9 +42,7 @@ from home_transaction_prior import (
 )
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PROCESSED_DIR = os.path.join(HERE, "..", "processed")
 FIGURES_DIR = os.path.join(HERE, "..", "figures")
-CSV_IN = os.path.join(PROCESSED_DIR, "cbs_longitudinal_panel_full.csv")
 
 LATEST_WAVE = 10
 
@@ -781,7 +780,7 @@ def top_share(values, weights, pct=0.90):
     return float((values[top_mask] * weights[top_mask]).sum() / total)
 
 
-def build_household_frame(p=0.99, home_prior_config=None):
+def build_household_frame(longitudinal_panel, p=0.99, home_prior_config=None):
     """Read the panel CSV, apply the models, and return a per-household display
     DataFrame with the same semantics as build_balance_sheet_data.py's `cols`
     (winsorized/imputed amounts, modelled home & pension, remapped
@@ -792,7 +791,9 @@ def build_household_frame(p=0.99, home_prior_config=None):
     builds a second frame at p=0.995 used ONLY for the net-worth distribution
     figure (Gini/top-share/percentiles) -- see fig_networth_distribution call
     site and rationale there. All other figures keep the default p=0.99."""
-    df = pd.read_csv(CSV_IN, low_memory=False)
+    if longitudinal_panel is None:
+        raise ValueError("longitudinal_panel is required")
+    df = pd.read_csv(os.fspath(longitudinal_panel), low_memory=False)
     for c in NUMERIC:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
@@ -1467,14 +1468,23 @@ def fig_meta(hh, diags):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--longitudinal-panel",
+        default=os.environ.get("IDD_LONGITUDINAL_PANEL"),
+        help="Path to the locally built cbs_longitudinal_panel_full.csv",
+    )
+    args = parser.parse_args()
+    if not args.longitudinal_panel:
+        parser.error("provide --longitudinal-panel or set IDD_LONGITUDINAL_PANEL")
     # Explicit opt-in only. With no environment flag this is an exact no-op and
     # preserves the stage-1 baseline outputs.
     home_prior_config = HomeTransactionPriorConfig.from_env()
     print("Reading panel + applying models ...")
-    hh, diags = build_household_frame(home_prior_config=home_prior_config)
+    hh, diags = build_household_frame(args.longitudinal_panel, home_prior_config=home_prior_config)
     print(f"  {len(hh)} household-wave rows")
     print("  building p=0.995 frame for the net-worth distribution figure only ...")
-    hh_dist, _ = build_household_frame(p=0.995, home_prior_config=home_prior_config)
+    hh_dist, _ = build_household_frame(args.longitudinal_panel, p=0.995, home_prior_config=home_prior_config)
 
     print("Building figures ...")
     fig_national_balance_sheet(hh)

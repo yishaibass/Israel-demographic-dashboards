@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -93,6 +94,7 @@ def weighted_mean(f, col):
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cells", required=True)
+    ap.add_argument("--longitudinal-panel", default=os.environ.get("IDD_LONGITUDINAL_PANEL"), required="IDD_LONGITUDINAL_PANEL" not in os.environ)
     ap.add_argument("--manifest")
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--label", default="home_prior_experiment")
@@ -110,7 +112,7 @@ def main() -> None:
     cells = load_transaction_cells(cells_path)
     config = HomeTransactionPriorConfig(True, str(cells_path), args.blend_weight,
                                         args.min_transactions)
-    raw = pd.read_csv(pipeline.CSV_IN, low_memory=False)
+    raw = pd.read_csv(Path(args.longitudinal_panel).resolve(), low_memory=False)
     for c in pipeline.NUMERIC:
         if c in raw: raw[c] = pd.to_numeric(raw[c], errors="coerce")
     raw = raw[raw.weight_hh > 0].reset_index(drop=True)
@@ -191,8 +193,8 @@ def main() -> None:
         (base_full[eligible & ~match] - cand_full[eligible & ~match]).abs().max() or 0)
 
     # Wave-10 aggregate movement from the complete balance-sheet frame.
-    hh0, _ = pipeline.build_household_frame(home_prior_config=HomeTransactionPriorConfig())
-    hh1, _ = pipeline.build_household_frame(home_prior_config=config)
+    hh0, _ = pipeline.build_household_frame(args.longitudinal_panel, home_prior_config=HomeTransactionPriorConfig())
+    hh1, _ = pipeline.build_household_frame(args.longitudinal_panel, home_prior_config=config)
     m10 = hh0.wave.eq(10)
     agg = {}
     for col in ("home", "tot_re", "nw"):

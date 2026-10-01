@@ -1,0 +1,27 @@
+{
+  "contract_version": 1,
+  "spines": [
+    {
+      "spine_id": "hes",
+      "label": "Household Expenditure Survey",
+      "population_role": "Canonical economic household spine",
+      "primary_uses": ["income", "consumption", "fiscal_allocation", "equity_imputation", "household_pnl"],
+      "tables": ["canonical_household", "canonical_person", "household_component_fact"]
+    },
+    {
+      "spine_id": "longitudinal",
+      "label": "Longitudinal Survey of Households",
+      "population_role": "Wealth evidence and model-development spine",
+      "primary_uses": ["asset_observation", "debt_observation", "model_training", "longitudinal_validation"],
+      "tables": ["canonical_household", "canonical_person", "household_component_fact"]
+    },
+    {
+      "spine_id": "census",
+      "label": "Population Census",
+      "population_role": "Population and geography spine",
+      "primary_uses": ["demographic_population", "geography", "voting_probability", "fiscal_transport"],
+      "tables": ["canonical_household", "canonical_person", "household_component_fact"]
+    }
+  ],
+  "linkage_rule": "Keys are stable only within a spine and reference year. No record-level cross-spine linkage is implied or permitted."
+}

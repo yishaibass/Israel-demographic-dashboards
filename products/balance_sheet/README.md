@@ -30,10 +30,17 @@ From the repository root:
 set IDD_LONGITUDINAL_ROOT=PATH_TO_LONGITUDINAL_RELEASES
 set IDD_HES_ROOT=PATH_TO_HES_RELEASES
 python products/balance_sheet/model/build_cbs_panel.py
-python products/balance_sheet/model/pipeline.py
-python products/balance_sheet/model/build_household_pnl.py --hes-root PATH_TO_HES_RELEASES
+python products/balance_sheet/model/pipeline.py --longitudinal-panel PATH_TO_PRIVATE_DATA/cbs_longitudinal_panel_full.csv
+python products/balance_sheet/model/build_household_pnl.py `
+  --hes-root PATH_TO_HES_RELEASES `
+  --longitudinal-panel PATH_TO_PRIVATE_DATA/cbs_longitudinal_panel_full.csv `
+  --market-export PATH_TO_PRIVATE_OUTPUT/hes_market_pnl_households_2023.pkl
 python products/balance_sheet/model/build_dashboard.py
 ```
+
+`--longitudinal-panel` and `--market-export` may instead be provided through
+`IDD_LONGITUDINAL_PANEL` and `IDD_HES_MARKET_EXPORT`. The household export must
+resolve outside this Git worktree.
 
 The dashboard builder writes:
 

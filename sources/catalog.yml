@@ -7,9 +7,9 @@ rules:
   - Preserve source vintages; do not silently replace a file with a newer release.
 
 datasets:
-  - id: cbs_hes_2021_2023
+  - id: cbs_hes_2016_2018_2021_2023
     title: Household Expenditure Survey pooled microdata
-    years: [2021, 2022, 2023]
+    years: [2016, 2017, 2018, 2021, 2022, 2023]
     role: Canonical household, person, income and expenditure inputs.
     publisher: Israel Central Bureau of Statistics
     public_availability: licensed_public_use_file
@@ -17,6 +17,21 @@ datasets:
     access_restrictions: CBS PUF terms; no redistribution or re-identification.
     local_subpath: "סקרי למס/סקר הוצאות משקי בית 2016 - 2023"
     accepted_files:
+      - H20161024/H20161024datamb.csv
+      - H20161024/H20161024dataprat.csv
+      - H20161024/H20161024dataincmissim.csv
+      - H20161024/H20161024datahouse.csv
+      - H20161024/H20161024dataprod.csv
+      - H20171023/H20171023datamb.csv
+      - H20171023/H20171023dataprat.csv
+      - H20171023/H20171023dataincmissim.csv
+      - H20171023/H20171023datahouse.csv
+      - H20171023/h20171023dataprod.csv
+      - H20181023/H20181023datamb.csv
+      - H20181023/H20181023dataprat.csv
+      - H20181023/H20181023dataincmissim.csv
+      - H20181023/H20181023datahouse.csv
+      - H20181023/H20181023dataprod.csv
       - H20211021/H20211021datamb.csv
       - H20211021/H20211021dataprat.csv
       - H20211021/H20211021dataincmissim.csv
@@ -82,6 +97,19 @@ datasets:
       household: [siduri, weight_hh]
       person: [siduri]
       interviewer: [siduri]
+    owners: [household_equity, hh_balance_sheet, hh_fiscal_balance]
+
+  - id: cbs_longitudinal_panel_full
+    title: Canonical longitudinal household panel
+    years: [2012, 2013, 2014, 2016, 2017, 2018, 2019, 2020, 2021, 2023]
+    role: Required local input for balance-sheet modeling and the 2023 HES market-flow export.
+    publisher: Israel demographic dashboards local build
+    public_availability: derived_from_licensed_public_use_files
+    access_restrictions: Household-level derived data; do not commit or redistribute.
+    source_datasets: [cbs_longitudinal_2012_2023]
+    local_subpath: "derived/cbs_longitudinal_panel_full.csv"
+    accepted_files: [cbs_longitudinal_panel_full.csv]
+    required_columns: [wave, weight_hh, year]
     owners: [household_equity, hh_balance_sheet, hh_fiscal_balance]
 
   - id: cbs_census_puf_2022

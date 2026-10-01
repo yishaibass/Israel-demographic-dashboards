@@ -11,11 +11,52 @@ import argparse
 import json
 import os
 from pathlib import Path
+from typing import Mapping
 
 import numpy as np
 import pandas as pd
 
 from pipeline import build_household_frame
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
+
+
+def resolve_market_export_path(
+    cli_path: Path | None,
+    environment: Mapping[str, str] | None = None,
+) -> Path:
+    """Require a private household-export path outside the Git worktree."""
+    environment = os.environ if environment is None else environment
+    raw_path = cli_path or (Path(environment["IDD_HES_MARKET_EXPORT"]) if environment.get("IDD_HES_MARKET_EXPORT") else None)
+    if raw_path is None:
+        raise ValueError("provide --market-export or set IDD_HES_MARKET_EXPORT")
+    resolved = raw_path.expanduser().resolve()
+    try:
+        resolved.relative_to(REPOSITORY_ROOT)
+    except ValueError:
+        return resolved
+    raise ValueError("household market export must be outside the Git worktree")
+
+
+def resolve_longitudinal_panel_path(
+    cli_path: Path | None,
+    environment: Mapping[str, str] | None = None,
+) -> Path:
+    """Resolve the user-supplied longitudinal panel; no repository default exists."""
+    environment = os.environ if environment is None else environment
+    raw_path = cli_path or (Path(environment["IDD_LONGITUDINAL_PANEL"]) if environment.get("IDD_LONGITUDINAL_PANEL") else None)
+    if raw_path is None:
+        raise ValueError("provide --longitudinal-panel or set IDD_LONGITUDINAL_PANEL")
+    resolved = raw_path.expanduser().resolve()
+    if not resolved.is_file():
+        raise ValueError("longitudinal panel does not exist or is not a file")
+    return resolved
+
+
+def load_longitudinal_household_frame(longitudinal_panel: Path):
+    """Route the explicit panel path into the balance-sheet model."""
+    return build_household_frame(longitudinal_panel)
 
 
 AGE_LABELS = ["<30", "30-39", "40-49", "50-64", "65+"]
@@ -102,6 +143,9 @@ def load_hes_year(hes_root: Path, year: int) -> tuple[pd.DataFrame, ...]:
     frames = []
     for suffix in ["mb", "prat", "incmissim", "house", "prod"]:
         frame = normalise_keys(read_csv(release / f"{prefix}{suffix}.csv"))
+        source_survey = pd.to_numeric(frame["survey_year"], errors="coerce")
+        if source_survey.isna().any() or not source_survey.eq(year).all():
+            raise ValueError(f"HES {year} {suffix} has an unexpected S_Seker value")
         frame["survey_year"] = year
         frames.append(frame)
     return tuple(frames)
@@ -142,7 +186,7 @@ def expense_category(code: str) -> str:
     return "Other consumption"
 
 
-def aggregate_expense_categories(prod: pd.DataFrame, hh: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
+def aggregate_expense_categories(prod: pd.DataFrame, hh: pd.DataFrame, keys: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
     p = prod.loc[prod["ProdCode"].notna(), keys + ["ProdCode", "Schum"]].copy()
     p["code"] = p["ProdCode"].astype("int64").astype(str)
     p = p.groupby(keys + ["code"], as_index=False)["Schum"].sum()
@@ -188,7 +232,7 @@ def aggregate_expense_categories(prod: pd.DataFrame, hh: pd.DataFrame, keys: lis
                 cell_w = g["weight"]
                 row[measure] = wmean(g.get(f"{measure}__{category}", pd.Series(0.0, index=g.index)), cell_w)
             rows.append(row)
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows), by_hh
 
 
 def aggregate_flows(hh: pd.DataFrame) -> pd.DataFrame:
@@ -219,8 +263,8 @@ def aggregate_flows(hh: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def aggregate_wealth() -> tuple[pd.DataFrame, dict]:
-    p, _ = build_household_frame()
+def aggregate_wealth(longitudinal_panel: Path) -> tuple[pd.DataFrame, dict]:
+    p, _ = load_longitudinal_household_frame(longitudinal_panel)
     p = p.loc[p["year"] == 2023].copy()
     p["age_band"] = age_band(pd.to_numeric(p["age"], errors="coerce"))
     p["ses_band"] = ses_band(p["ses10"])
@@ -245,8 +289,10 @@ def aggregate_wealth() -> tuple[pd.DataFrame, dict]:
     coverage = {c: float(p.loc[p[c].notna(), "w"].sum() / p["w"].sum()) for c in specs.values()}
     return pd.DataFrame(rows), coverage
 
-def build(project: Path, mortgage_rate: float, hes_root: Path, deposit_return: float = 0.01,
-          investment_return: float = 0.04, pension_return: float = 0.04) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
+def build(project: Path, mortgage_rate: float, hes_root: Path, longitudinal_panel: Path, deposit_return: float = 0.01,
+          investment_return: float = 0.04, pension_return: float = 0.04) -> tuple[
+              pd.DataFrame, pd.DataFrame, pd.DataFrame, dict, pd.DataFrame
+          ]:
     releases = [load_hes_year(hes_root, year) for year in (2021, 2022, 2023)]
     mb, people, inc, house, prod = [
         pd.concat([release[i] for release in releases], ignore_index=True, sort=False)
@@ -313,6 +359,8 @@ def build(project: Path, mortgage_rate: float, hes_root: Path, deposit_return: f
     hh["reported_interest_dividend_income"] = num(hh, "i124")
     hh["other_asset_income"] = hh["rental_property_income"] + hh["reported_interest_dividend_income"]
     hh["transfers_income"] = num(hh, "i14")
+    hh["government_cash_benefits_reported"] = num(hh, "i141") + num(hh, "i142")
+    hh["private_transfer_income"] = hh["transfers_income"] - hh["government_cash_benefits_reported"]
     hh["imputed_owner_rent"] = num(hh, "i121012")
     reported_gross = num(hh, "Total_Net") + num(hh, "t21")
     explained_gross = (hh["labor_income"] + hh["pension_income"]
@@ -377,7 +425,7 @@ def build(project: Path, mortgage_rate: float, hes_root: Path, deposit_return: f
         hh["other_saving_and_debt_flows"] - hh["other_debt_net_repayment"]
         - hh["household_asset_sales_net"] - hh["household_loans_extended"]
     )
-    expense_categories = aggregate_expense_categories(prod, hh, keys)
+    expense_categories, expense_by_hh = aggregate_expense_categories(prod, hh, keys)
 
     result = aggregate_flows(hh)
     gemach = (expense_categories.loc[expense_categories["category"].eq("Donations"),
@@ -385,7 +433,7 @@ def build(project: Path, mortgage_rate: float, hes_root: Path, deposit_return: f
               .rename(columns={"value_nis": "community_gemach_saving"}))
     result = result.merge(gemach, on=["breakdown_dimension", "column_label", "column_order"], how="left", validate="1:1")
     result["community_gemach_saving"] = result["community_gemach_saving"].fillna(0.0)
-    wealth, coverage = aggregate_wealth()
+    wealth, coverage = aggregate_wealth(longitudinal_panel)
     result = result.merge(wealth, on=["breakdown_dimension", "column_label", "column_order"], validate="1:1")
     result["other_financial_assets_overlay"] = (
         result["financial_assets_overlay"] - result["pension_wealth_overlay"]
@@ -662,7 +710,45 @@ def build(project: Path, mortgage_rate: float, hes_root: Path, deposit_return: f
             "Wealth stocks are not household-level joined to HES flows; missing 2023 stock fields are zero in unconditional means.",
         ],
     }
-    return result, sensitivity, expense_categories, metadata
+    # Additive household export for the canonical P&L adapter. It exposes the
+    # already-computed model fields; no downstream script reconstructs them.
+    expense_wide = expense_by_hh.pivot_table(
+        index=keys, columns="category", values="value_nis", aggfunc="sum", fill_value=0.0
+    ).reset_index()
+    household_export = hh.merge(expense_wide, on=keys, how="left", validate="1:1")
+    age_interest = result.loc[result["breakdown_dimension"].eq("Age group"),
+                              ["column_label", "mortgage_interest_share"]].rename(columns={"column_label": "age_band"})
+    household_export = household_export.merge(age_interest, on="age_band", how="left", validate="m:1")
+    household_export["mortgage_interest"] = household_export["mortgage_payment"] * household_export["mortgage_interest_share"].fillna(0.0)
+    household_export["mortgage_principal"] = (household_export["mortgage_payment"] - household_export["mortgage_interest"]).clip(lower=0.0)
+    household_export["private_health_expense"] = num(household_export, "Health")
+    household_export["private_education_expense"] = num(household_export, "Education") + num(household_export, "Childcare")
+    household_export["other_cash_consumption"] = (
+        household_export["cash_consumption"] - household_export["private_health_expense"]
+        - household_export["private_education_expense"] - household_export["rent_paid"]
+    )
+    # Preserve the exact fiscal-allocation join tuple.  The market adapter uses
+    # these three fields, rather than inferring S_Seker from the pooled wave.
+    household_export["year"] = household_export["survey_year"].astype(int)
+    household_export["s_seker"] = household_export["survey_year"].astype(int)
+    household_export["misparmb"] = household_export["household_id"].astype(int)
+    export_columns = keys + [
+        "year", "s_seker", "misparmb",
+        "weight", "household_size", "demographic_group", "labor_income", "pension_income",
+        "rental_property_income", "reported_interest_dividend_income", "other_income",
+        "imputed_owner_rent", "transfers_income", "government_cash_benefits_reported",
+        "private_transfer_income", "cash_consumption", "other_cash_consumption",
+        "private_health_expense", "private_education_expense", "rent_paid",
+        "imputed_housing_consumption", "private_transfers_paid", "mortgage_interest",
+        "mortgage_principal", "pension_contributions", "training_fund_contributions",
+        "provident_fund_contributions", "life_exec_insurance_contributions",
+    ]
+    household_export = household_export[export_columns].copy()
+    # Keep the additive pickle readable in the shared runtime without requiring
+    # the optional Arrow extension package used by the source HES loader.
+    household_export["demographic_group"] = household_export["demographic_group"].astype(object)
+    household_export.columns = pd.Index(list(household_export.columns), dtype=object)
+    return result, sensitivity, expense_categories, metadata, household_export
 
 
 def main() -> None:
@@ -670,13 +756,23 @@ def main() -> None:
     parser.add_argument("--project", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--mortgage-rate", type=float, default=0.045)
     parser.add_argument("--hes-root", type=Path, default=Path(os.environ["IDD_HES_ROOT"]) if "IDD_HES_ROOT" in os.environ else None)
+    parser.add_argument("--market-export", type=Path)
+    parser.add_argument("--longitudinal-panel", type=Path)
     parser.add_argument("--deposit-return", type=float, default=0.01)
     parser.add_argument("--investment-return", type=float, default=0.04)
     parser.add_argument("--pension-return", type=float, default=0.04)
     args = parser.parse_args()
     if args.hes_root is None:
         parser.error("provide --hes-root or set IDD_HES_ROOT")
-    result, sensitivity, expense_categories, metadata = build(args.project, args.mortgage_rate, args.hes_root, args.deposit_return, args.investment_return, args.pension_return)
+    try:
+        market_export_path = resolve_market_export_path(args.market_export)
+    except ValueError as exc:
+        parser.error(str(exc))
+    try:
+        longitudinal_panel_path = resolve_longitudinal_panel_path(args.longitudinal_panel)
+    except ValueError as exc:
+        parser.error(str(exc))
+    result, sensitivity, expense_categories, metadata, household_export = build(args.project, args.mortgage_rate, args.hes_root, longitudinal_panel_path, args.deposit_return, args.investment_return, args.pension_return)
     figures = args.project / "figures"
     figures.mkdir(parents=True, exist_ok=True)
     result.to_csv(figures / "fig_household_pnl_by_age.csv", index=False, float_format="%.3f")
@@ -685,6 +781,8 @@ def main() -> None:
     (figures / "fig_household_pnl_metadata.json").write_text(
         json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    market_export_path.parent.mkdir(parents=True, exist_ok=True)
+    household_export.to_pickle(market_export_path)
     checks = {
         "max_abs_pnl_identity_gap": float(result["pnl_identity_gap"].abs().max()),
         "max_abs_saving_decomposition_gap": float(result["saving_decomposition_gap"].abs().max()),

@@ -1,0 +1,60 @@
+{
+  "contract_version": 1,
+  "contracts": [
+    {
+      "contract_id": "canonical_household_v1",
+      "grain": "household",
+      "primary_key": ["household_key"],
+      "required_fields": ["spine_id", "reference_year", "household_key", "survey_weight", "household_size"],
+      "optional_fields": ["geography_key", "children_count", "sector_group", "income_decile", "head_age"]
+    },
+    {
+      "contract_id": "canonical_person_v1",
+      "grain": "person",
+      "primary_key": ["person_key"],
+      "foreign_keys": [{"fields": ["household_key"], "references": "canonical_household_v1"}],
+      "required_fields": ["spine_id", "reference_year", "household_key", "person_key", "age", "sex"],
+      "optional_fields": ["person_weight", "relationship_to_head", "labor_status", "education_level", "religion_group"]
+    },
+    {
+      "contract_id": "household_component_fact_v1",
+      "grain": "household_component",
+      "primary_key": ["household_key", "reference_year", "component_id", "representation", "method_version"],
+      "foreign_keys": [{"fields": ["household_key"], "references": "canonical_household_v1"}],
+      "required_fields": ["household_key", "reference_year", "component_id", "amount_nis", "accounting_side", "value_basis", "frequency_basis", "price_basis", "price_year", "evidence_status", "representation", "economic_function", "payer_funder", "delivery_value_type", "method_version", "source_dataset_id"],
+      "optional_fields": ["national_control_id", "allocation_factor_id", "embedded_tax_basis_nis_monthly", "quality_flags"]
+    },
+    {
+      "contract_id": "hes_market_component_fact_v1",
+      "grain": "household_component",
+      "primary_key": ["household_key", "reference_year", "component_id", "representation", "method_version"],
+      "foreign_keys": [{"fields": ["household_key"], "references": "canonical_household_v1"}],
+      "required_fields": ["household_key", "reference_year", "component_id", "amount_nis", "accounting_side", "value_basis", "frequency_basis", "price_basis", "price_year", "evidence_status", "representation", "economic_function", "payer_funder", "delivery_value_type", "method_version", "source_dataset_id"],
+      "optional_fields": ["allocation_factor_id", "embedded_tax_basis_nis_monthly", "quality_flags"],
+      "constraints": {"representation": "reported", "component_roots": ["income.market", "income.imputed", "expense.private", "financing"]}
+    },
+    {
+      "contract_id": "fiscal_allocation_component_fact_v1",
+      "grain": "household_component",
+      "primary_key": ["household_key", "reference_year", "component_id", "representation", "method_version"],
+      "foreign_keys": [{"fields": ["household_key"], "references": "canonical_household_v1"}, {"fields": ["national_control_id"], "references": "national_control_v1"}],
+      "required_fields": ["household_key", "reference_year", "component_id", "amount_nis", "accounting_side", "value_basis", "frequency_basis", "price_basis", "price_year", "evidence_status", "representation", "economic_function", "payer_funder", "delivery_value_type", "method_version", "source_dataset_id", "national_control_id"],
+      "optional_fields": ["allocation_factor_id", "embedded_tax_basis_nis_monthly", "quality_flags"],
+      "constraints": {"representation": "allocated", "component_roots": ["income.government", "expense.government", "expense.public.in_kind"]}
+    },
+    {
+      "contract_id": "national_control_v1",
+      "grain": "national",
+      "primary_key": ["national_control_id"],
+      "required_fields": ["national_control_id", "control_year", "component_id", "amount_nis_annual", "population_scope", "source_dataset_id", "source_reference", "source_checksum", "method_version"],
+      "optional_fields": ["quality_flags"]
+    },
+    {
+      "contract_id": "allocation_factor_v1",
+      "grain": "factor",
+      "primary_key": ["factor_id", "reference_year", "method_version", "factor_dimensions"],
+      "required_fields": ["factor_id", "reference_year", "component_id", "factor_dimensions", "factor_value", "source_dataset_id", "method_version"],
+      "optional_fields": ["quality_flags"]
+    }
+  ]
+}

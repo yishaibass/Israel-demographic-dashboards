@@ -10,7 +10,13 @@ modeling/outputs/
 modeling/*_outputs/
 modeling/__pycache__/
 products/**/outputs/
+products/**/processed/
 products/**/__pycache__/
+**/hes_market_pnl_households_*.pkl
+**/canonical_household*.pkl
+**/canonical_household*.parquet
+**/household_component_fact*.pkl
+**/household_component_fact*.parquet
 .pytest_cache/
 .venv/
 *.py[cod]
