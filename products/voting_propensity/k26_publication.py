@@ -54,6 +54,7 @@ def integrate(page: str, cube: dict, audit: dict, historical: dict,
     page = re.sub(r'(<header class="top">.*?<h1>.*?</h1>)<p>.*?</p>', r'\1', page, count=1, flags=re.DOTALL)
     page = re.sub(r'(<div class="group-footnote">)<p>.*?</p>', r'\1', page, count=1, flags=re.DOTALL)
     page = page.replace('שיעור הצבעה חזוי', 'שיעור הצבעה')
+    page = page.replace('ימין חילוני', 'ליברמן')
     start = page.index("const CUBE=") + len("const CUBE=")
     baseline, _ = json.JSONDecoder().raw_decode(page[start:])
     current = merge_cube(baseline, cube)
