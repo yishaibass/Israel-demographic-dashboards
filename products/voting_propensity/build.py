@@ -40,7 +40,14 @@ def main() -> None:
             readiness = json.loads((args.k26_current / "readiness.json").read_text(encoding="utf-8"))
             if readiness["snapshot_id"] != cube["snapshot_id"]:
                 raise ValueError("K26 fit is stale relative to current results")
-            transform = lambda page: integrate(page, cube, audit, history)
+            independent_folder = folder / "independent"
+            independent_paths = [independent_folder / "election_cubes.json", independent_folder / "model_audit.json"]
+            independent = independent_audit = None
+            if any(path.exists() for path in independent_paths):
+                if not all(path.is_file() for path in independent_paths):
+                    raise ValueError("Independent publication bundle is incomplete")
+                independent, independent_audit = [json.loads(path.read_text(encoding="utf-8")) for path in independent_paths]
+            transform = lambda page: integrate(page, cube, audit, history, independent, independent_audit)
         sync_html(source, destination, route=route, transform=transform)
     verify_route(destination, route)
     print("voting_propensity: publication checks passed")

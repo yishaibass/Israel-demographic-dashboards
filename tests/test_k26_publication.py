@@ -2,7 +2,7 @@ import copy
 import json
 import unittest
 
-from products.voting_propensity.k26_publication import integrate, merge_cube
+from products.voting_propensity.k26_publication import ELECTIONS, integrate, merge_cube
 
 
 class K26PublicationTests(unittest.TestCase):
@@ -47,6 +47,56 @@ class K26PublicationTests(unittest.TestCase):
         page = '<script>const CUBE=' + json.dumps(baseline) + '</script>'
         with self.assertRaisesRegex(ValueError, "different fitted models"):
             integrate(page, current, {"snapshot_id": "same", "model_fit_id": "a"}, history)
+
+    def publication_inputs(self):
+        baseline, current = self.inputs()
+        current.update(snapshot_id="same", model_fit_id="joint", election="K26")
+        audit = {"snapshot_id": "same", "model_fit_id": "joint", "matched_localities": 200, "national_valid_vote_coverage": .8}
+        history = {e: {**copy.deepcopy(current), "election": e} for e in ELECTIONS[:-1]}
+        page = '<html><body><script>const CUBE=' + json.dumps(baseline) + ';</script><section class="analysis-section"></section></body></html>'
+        independent = {e: {**copy.deepcopy(current), "election": e, "model_fit_id": "fit-" + e, "collection_id": "collection"} for e in ELECTIONS}
+        independent_audit = {"snapshot_id": "same", "fit_mode": "independent", "publication_approved": True, "collection_id": "collection", "election_fit_ids": {e: "fit-" + e for e in ELECTIONS}}
+        return baseline, page, current, audit, history, independent, independent_audit
+
+    def test_all_elections_comparison_controls_and_frozen_payload(self):
+        baseline, page, cube, audit, history, _, _ = self.publication_inputs()
+        result = integrate(page, cube, audit, history)
+        self.assertIn('const CUBE=' + json.dumps(baseline), result)
+        self.assertNotIn('id="modelFitMethod"', result)
+        for election in ELECTIONS:
+            self.assertEqual(result.count('value="' + election + '"'), 3)
+        self.assertIn('id="comparisonElectionA"', result)
+        self.assertIn('id="comparisonElectionB"', result)
+        self.assertEqual(result, integrate(result, cube, audit, history))
+
+    def test_independent_bundle_approved_and_idempotent(self):
+        _, page, cube, audit, history, independent, independent_audit = self.publication_inputs()
+        result = integrate(page, cube, audit, history, independent, independent_audit)
+        self.assertIn('id="modelFitMethod"', result)
+        self.assertIn('"independent"', result)
+        self.assertEqual(result, integrate(result, cube, audit, history, independent, independent_audit))
+
+    def test_independent_mixed_or_stale_fits_rejected(self):
+        for mutation, message in [
+            (lambda c, a: c["K22"].update(snapshot_id="stale"), "snapshot is stale"),
+            (lambda c, a: a.update(snapshot_id="stale"), "snapshot is stale"),
+            (lambda c, a: c["K22"].update(model_fit_id="fit-K21"), "fit identities differ"),
+            (lambda c, a: c["K22"].update(collection_id="mixed"), "fit identities differ"),
+            (lambda c, a: c["K22"].update(election="K21"), "fit identities differ"),
+            (lambda c, a: a.update(publication_approved=False), "not approved"),
+            (lambda c, a: c.pop("K21"), "all six"),
+            (lambda c, a: a["election_fit_ids"].update(K22="fit-K21"), "distinct election"),
+        ]:
+            with self.subTest(message=message):
+                _, page, cube, audit, history, independent, independent_audit = self.publication_inputs()
+                mutation(independent, independent_audit)
+                with self.assertRaisesRegex(ValueError, message):
+                    integrate(page, cube, audit, history, independent, independent_audit)
+
+    def test_independent_pair_required(self):
+        _, page, cube, audit, history, independent, _ = self.publication_inputs()
+        with self.assertRaisesRegex(ValueError, "supplied together"):
+            integrate(page, cube, audit, history, independent)
 
 
 if __name__ == "__main__":

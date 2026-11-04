@@ -29,7 +29,7 @@ python products/voting_propensity/model/update_dashboard_from_model.py --puf PAT
 
 Generated product outputs are ignored because individual-row probabilities are derived from microdata. Only aggregate, disclosure-safe dashboard content is committed.
 
-## Common six-election fit and publication
+## Election fits and publication
 
 The published five-election cube remains the default reference. `fit_k26.py`
 jointly refits K21–K26 with one design: whole-locality supervision, fixed 2022
@@ -43,6 +43,16 @@ movement. The difference between the published reference and the new historical
 fit describes a model-version change. The common historical estimates are
 retrospective and use K26 through shared coefficients; they are not forecasts.
 
+`fit_independent.py` fits the same specification separately to each election. Each fitted parameter vector uses only that election's outcomes. Census features, party-family definitions and held-out locality folds stay consistent across years. The joint fit above is retained as a benchmark; independent results and their validation are stored under `individual_model/independent/`. All fits use the fixed 2022 Census population, including historical elections.
+
+```bash
+python products/voting_propensity/model/fit_independent.py --current PATH_TO_PROJECT/data/processed/k26/current --puf PATH_TO_CENSUS_PUF --output PATH_TO_PROJECT/data/processed/k26/current/individual_model/independent
+```
+
+The independent audit records each election's fit identity, paired geographic cross-validation and subgroup sensitivity to the held-out locality folds. Fold sensitivity is not a confidence interval. Good locality predictions do not identify individual votes or establish accuracy for every filtered subgroup. Age and education are available for filtering; the fitted specification uses group, religiosity, income and geographic-context predictors, so filtered differences can reflect their association with those predictors.
+
+The reviewed November 2026 run retains the joint fit as the primary method and exposes independent fits as sensitivity analysis. Across six elections, the independent model's mean party-family error differs from the joint fit by less than 0.04 percentage points. K26 errors are 2.81 points for family shares and 4.44 points for turnout. Subgroup fold ranges reach 15.9 points for broad groups and 47.9 points for income-by-education slices across the six elections; these are model sensitivity ranges, not observed swings or uncertainty intervals. Independent estimates therefore do not support claims of precise subgroup voting rates. The separate run took about 49 seconds on the tested runtime.
+
 From the repository root:
 
 ```bash
@@ -52,7 +62,7 @@ python tools/build.py voting_propensity --k26-current PATH_TO_PROJECT/data/proce
 
 The publication adapter also requires `voting_propensity_project` in the ignored
 local path configuration. Pass `--k26-current` when building `all` to retain this
-comparison. The UI keeps the historical cube intact, switches to K26 explicitly,
+comparison. The UI keeps the historical cube intact, allows each election to be selected,
 and preserves historical fiscal data. Exported aggregate cubes include:
 
 - `k26_probability_cube.json`: K26 under the common design.

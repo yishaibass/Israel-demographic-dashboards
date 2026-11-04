@@ -8,6 +8,8 @@ from pathlib import Path
 import re
 
 KEYS = ["pop_group", "religiosity", "income_band", "age_band", "academic", "district"]
+ELECTIONS = ["K21", "K22", "K23", "K24", "K25", "K26"]
+ELECTION_LABELS = ["אפריל 2019", "ספטמבר 2019", "2020", "2021", "2022", "2026"]
 BEGIN = "<!-- K26_COMPARISON_BEGIN -->"
 END = "<!-- K26_COMPARISON_END -->"
 
@@ -41,7 +43,8 @@ def merge_cube(baseline: dict, current: dict) -> dict:
     return {"columns": baseline["columns"], "rows": rows}
 
 
-def integrate(page: str, cube: dict, audit: dict, historical: dict) -> str:
+def integrate(page: str, cube: dict, audit: dict, historical: dict,
+              independent: dict | None = None, independent_audit: dict | None = None) -> str:
     if cube["snapshot_id"] != audit["snapshot_id"]:
         raise ValueError("K26 cube and fit audit snapshots differ")
     fit_id = cube.get("model_fit_id")
@@ -54,7 +57,7 @@ def integrate(page: str, cube: dict, audit: dict, historical: dict) -> str:
     start = page.index("const CUBE=") + len("const CUBE=")
     baseline, _ = json.JSONDecoder().raw_decode(page[start:])
     current = merge_cube(baseline, cube)
-    elections = ["K21", "K22", "K23", "K24", "K25"]
+    elections = ELECTIONS[:-1]
     if set(historical) != set(elections):
         raise ValueError("Historical comparison requires all five same-design election cubes")
     mass_columns = [name for name in baseline["columns"] if name.endswith("_mass")]
@@ -67,14 +70,47 @@ def integrate(page: str, cube: dict, audit: dict, historical: dict) -> str:
             raise ValueError("Historical and K26 comparison cubes come from different fitted models")
         matched = merge_cube(baseline, historical[election])
         history_masses[election] = [[row[index] for index in indices] for row in matched["rows"]]
+    method_masses = {"joint": {**history_masses, "K26": [[row[index] for index in indices] for row in current["rows"]]}}
+    independent_metadata = None
+    if independent is not None or independent_audit is not None:
+        if independent is None or independent_audit is None:
+            raise ValueError("Independent cubes and audit must be supplied together")
+        if independent_audit.get("publication_approved") is not True:
+            raise ValueError("Independent model is not approved for publication")
+        if independent_audit.get("fit_mode") != "independent":
+            raise ValueError("Independent audit must identify the independent fit mode")
+        if set(independent) != set(ELECTIONS):
+            raise ValueError("Independent comparison requires all six election cubes")
+        collection_id = independent_audit.get("collection_id")
+        fit_ids = independent_audit.get("election_fit_ids", {})
+        if not collection_id or set(fit_ids) != set(ELECTIONS) or any(not fit_ids[e] for e in ELECTIONS) or len(set(fit_ids.values())) != len(ELECTIONS):
+            raise ValueError("Independent audit requires a collection and distinct election fit identities")
+        if independent_audit.get("snapshot_id") != cube["snapshot_id"]:
+            raise ValueError("Independent model snapshot is stale")
+        independent_masses = {}
+        for election in ELECTIONS:
+            candidate = independent[election]
+            if candidate.get("snapshot_id") != cube["snapshot_id"]:
+                raise ValueError("Independent election snapshot is stale")
+            if candidate.get("collection_id") != collection_id or candidate.get("model_fit_id") != fit_ids[election] or candidate.get("election") != election:
+                raise ValueError("Independent election cube and audit fit identities differ")
+            matched = merge_cube(baseline, candidate)
+            independent_masses[election] = [[row[index] for index in indices] for row in matched["rows"]]
+        method_masses["independent"] = independent_masses
+        independent_metadata = {"collection_id": collection_id, "election_fit_ids": fit_ids, "snapshot_id": cube["snapshot_id"]}
     baseline_hash = hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()
+    election_options = "".join(f'<option value="{election}">{label}</option>' for election, label in zip(ELECTIONS, ELECTION_LABELS))
+    method_control = ('<label for="modelFitMethod">התאמה: </label><select id="modelFitMethod"><option value="joint">משותפת</option><option value="independent">נפרדת לכל בחירות · בדיקת רגישות</option></select>' if independent_metadata else '')
     panel = '''<div class="card" id="k26ModelPanel">
+__METHOD__
 <label for="modelElection"><strong>בחירות: </strong></label>
-<select id="modelElection"><option value="historical">ממוצע חמש הבחירות</option><option value="K26">2026</option></select>
-<details><summary>2026 מול ממוצע חמש הבחירות</summary>
-<div style="overflow-x:auto"><table style="width:100%"><thead><tr><th>מדד</th><th>ממוצע שפורסם</th><th>ממוצע חמש הבחירות · התאמה אחידה</th><th>2026</th><th>שינוי (נ״א)</th><th>שינוי (ס״ת)</th></tr></thead><tbody id="k26FamilyComparison"></tbody></table></div>
+<select id="modelElection"><option value="historical">ממוצע חמש הבחירות · פורסם</option>__ELECTIONS__</select>
+<details><summary>השוואת בחירות</summary>
+<label for="comparisonElectionA">א׳: </label><select id="comparisonElectionA"><option value="mean">ממוצע חמש הבחירות</option>__ELECTIONS__</select>
+<label for="comparisonElectionB">ב׳: </label><select id="comparisonElectionB"><option value="mean">ממוצע חמש הבחירות</option>__ELECTIONS_B__</select>
+<div style="overflow-x:auto"><table style="width:100%"><thead><tr><th>מדד</th><th>ממוצע חמש הבחירות · פורסם</th><th id="comparisonHeaderA">א׳</th><th id="comparisonHeaderB">ב׳</th><th>ב׳ פחות א׳ (נ״א)</th><th>ב׳ פחות א׳ (ס״ת)</th></tr></thead><tbody id="k26FamilyComparison"></tbody></table></div>
 </details>
-</div>'''
+</div>'''.replace("__METHOD__", method_control).replace("__ELECTIONS__", election_options).replace("__ELECTIONS_B__", election_options.replace('value="K26"', 'value="K26" selected'))
     marker = '<section class="analysis-section">'
     if marker not in page:
         raise ValueError("Demographic explorer publication anchor missing")
@@ -82,12 +118,20 @@ def integrate(page: str, cube: dict, audit: dict, historical: dict) -> str:
     # Both cubes use identical dimensions. Keep the original serialized CUBE intact.
     script = r'''<script>
 const K26_FROZEN_ROWS=CUBE.rows;
-const K26_FITTED_CUBE=__CUBE__;
-const K26_HISTORICAL_MASSES=__HISTORY__;
+const K26_METHOD_MASSES=__METHOD_MASSES__;
+const K26_HISTORICAL_MASSES=Object.fromEntries(Object.entries(K26_METHOD_MASSES.joint).filter(([key])=>key!=='K26'));
 const K26_MASS_COLUMNS=__MASS_COLUMNS__;
 const K26_FIT_METADATA=__META__;
-const K26_HISTORICAL_PARTY_NAMES=P.map(p=>p[1]);
-const K26_PARTY_NAMES={shas:'ש״ס',utj:'יהדות התורה',likud:'ליכוד',national_religious:'הציונות הדתית–זהות, עוצמה יהודית ונעם',center:'ישר וביחד',zionist_left:'הדמוקרטים',secular_national_right:'ישראל ביתנו',arab:'הרשימה המשותפת ורע״ם',other:'שאר הרשימות, כולל עמך ישראל, הציבור החרדי והמילואימניקים'};
+const k26Method=()=>document.getElementById('modelFitMethod')?.value||'joint';
+const K26_ROW_CACHE={};
+function k26Rows(election){
+  if(election==='historical')return K26_FROZEN_ROWS;
+  const method=k26Method(),key=method+':'+election;
+  if(!K26_ROW_CACHE[key])K26_ROW_CACHE[key]=K26_METHOD_MASSES[method][election].map((masses,index)=>{
+    const row=K26_FROZEN_ROWS[index].slice();K26_MASS_COLUMNS.forEach((name,j)=>row[ci[name]]=masses[j]);return row;
+  });
+  return K26_ROW_CACHE[key];
+}
 function renderK26Comparison(){
   const selections=Object.entries(F).map(([key,element])=>[ci[key],sel(element)]);
   const selected=K26_FROZEN_ROWS.map((row,index)=>selections.every(([column,allowed])=>allowed.has(String(row[column])))?index:-1).filter(index=>index>=0);
@@ -102,16 +146,21 @@ function renderK26Comparison(){
     const totalVoted=weight-abstain;
     return [weight?100*totalVoted/weight:null,...masses.map(mass=>totalVoted?100*mass/totalVoted:null)];
   }
-  const old=values(K26_FROZEN_ROWS),current=values(K26_FITTED_CUBE.rows),names=['שיעור הצבעה',...P.map(p=>p[2])];
-  const history=Object.values(K26_HISTORICAL_MASSES).map(rows=>values(rows,true));
+  const old=values(K26_FROZEN_ROWS),names=['שיעור הצבעה',...P.map(p=>p[2])];
+  const fitted=Object.fromEntries(Object.entries(K26_METHOD_MASSES[k26Method()]).map(([key,rows])=>[key,values(rows,true)]));
+  const history=['K21','K22','K23','K24','K25'].map(key=>fitted[key]);
+  const means=names.map((_,i)=>history.every(e=>e[i]!==null)?history.reduce((sum,e)=>sum+e[i],0)/history.length:null);
+  const a=document.getElementById('comparisonElectionA'),b=document.getElementById('comparisonElectionB');
+  const av=a.value==='mean'?means:fitted[a.value],bv=b.value==='mean'?means:fitted[b.value];
+  document.getElementById('comparisonHeaderA').textContent=a.selectedOptions[0].textContent;
+  document.getElementById('comparisonHeaderB').textContent=b.selectedOptions[0].textContent;
   const fmt=v=>v===null?'':v.toFixed(0)+'%';
   document.getElementById('k26FamilyComparison').innerHTML=names.map((name,i)=>{
-    const available=history.every(e=>e[i]!==null)&&current[i]!==null;
-    const mean=available?history.reduce((sum,e)=>sum+e[i],0)/history.length:null;
-    const sd=available?Math.sqrt(history.reduce((sum,e)=>sum+(e[i]-mean)**2,0)/history.length):null;
-    const delta=available?current[i]-mean:null,z=available&&sd>=.0001?delta/sd:null;
+    const mean=means[i];
+    const sd=mean===null?null:Math.sqrt(history.reduce((sum,e)=>sum+(e[i]-mean)**2,0)/history.length);
+    const delta=av[i]!==null&&bv[i]!==null?bv[i]-av[i]:null,z=delta!==null&&sd!==null&&sd>=.0001?delta/sd:null;
     const signed=value=>value===null?'':(value>=0?'+':'')+value.toFixed(1);
-    return '<tr><td>'+name+'</td><td>'+fmt(old[i])+'</td><td>'+fmt(mean)+'</td><td>'+fmt(current[i])+'</td><td dir="ltr">'+signed(delta)+'</td><td dir="ltr">'+signed(z)+'</td></tr>';
+    return '<tr><td>'+name+'</td><td>'+fmt(old[i])+'</td><td>'+fmt(av[i])+'</td><td>'+fmt(bv[i])+'</td><td dir="ltr">'+signed(delta)+'</td><td dir="ltr">'+signed(z)+'</td></tr>';
   }).join('');
 }
 const k26OriginalRenderDemo=renderDemo;
@@ -127,21 +176,24 @@ function refreshK26PartyLabels(){
     el.querySelector('.trigger').textContent=checked.length===n?'הכול':checked.length===0?'לא נבחר':checked.length===1?checked[0].dataset.label:checked.length+' נבחרו';
   });
 }
-selector.addEventListener('change',()=>{
-  CUBE.rows=selector.value==='K26'?K26_FITTED_CUBE.rows:K26_FROZEN_ROWS;
-  P.forEach((p,i)=>p[1]=selector.value==='K26'?K26_PARTY_NAMES[p[0]]:K26_HISTORICAL_PARTY_NAMES[i]);
+function updateK26Election(){
+  CUBE.rows=k26Rows(selector.value);
+  P.forEach(p=>p[1]=p[2]);
   refreshK26PartyLabels();
   renderDemo();renderParty();
-});
+}
+selector.addEventListener('change',updateK26Election);
+document.getElementById('modelFitMethod')?.addEventListener('change',updateK26Election);
+['comparisonElectionA','comparisonElectionB'].forEach(id=>document.getElementById(id).addEventListener('change',renderK26Comparison));
 document.getElementById('filters').addEventListener('change',renderK26Comparison);
 document.querySelectorAll('#filters [data-x]').forEach(button=>button.addEventListener('click',renderK26Comparison));
-renderK26Comparison();
+updateK26Election();
 </script>'''
     metadata = {"snapshot_id": cube["snapshot_id"], "model_fit_id": fit_id, "baseline_sha256": baseline_hash,
+                "methods": {"joint": {"model_fit_id": fit_id, "snapshot_id": cube["snapshot_id"]}, **({"independent": independent_metadata} if independent_metadata else {})},
                 "coverage": f"{audit['matched_localities']} יישובים בהתאמה · {100*audit['national_valid_vote_coverage']:.2f}% מהקולות הכשרים הארציים. המודל אינו מכייל את התוצאות לסכום הארצי.",
                 "status": f"{cube['snapshot_id']} · מקור ספירה משני; האימות הישיר והאישור המשפטי לא אומתו. אומדנים אקולוגיים, אינם קולות פרטניים."}
-    script = script.replace("__CUBE__", json.dumps(current, ensure_ascii=False, allow_nan=False).replace("</", "<\\/"))
-    script = script.replace("__HISTORY__", json.dumps(history_masses, separators=(",", ":"), allow_nan=False))
+    script = script.replace("__METHOD_MASSES__", json.dumps(method_masses, separators=(",", ":"), allow_nan=False))
     script = script.replace("__MASS_COLUMNS__", json.dumps(mass_columns))
     script = script.replace("__META__", json.dumps(metadata, ensure_ascii=False).replace("</", "<\\/"))
     return page.replace("</body>", BEGIN + script + END + "</body>", 1)
@@ -153,9 +205,13 @@ def main():
     parser.add_argument("--cube", type=Path, required=True)
     parser.add_argument("--audit", type=Path, required=True)
     parser.add_argument("--historical-cubes", type=Path, required=True)
+    parser.add_argument("--independent-cubes", type=Path)
+    parser.add_argument("--independent-audit", type=Path)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    page = integrate(args.html.read_text(encoding="utf-8"), json.loads(args.cube.read_text(encoding="utf-8")), json.loads(args.audit.read_text(encoding="utf-8")), json.loads(args.historical_cubes.read_text(encoding="utf-8")))
+    page = integrate(args.html.read_text(encoding="utf-8"), json.loads(args.cube.read_text(encoding="utf-8")), json.loads(args.audit.read_text(encoding="utf-8")), json.loads(args.historical_cubes.read_text(encoding="utf-8")),
+                     json.loads(args.independent_cubes.read_text(encoding="utf-8")) if args.independent_cubes else None,
+                     json.loads(args.independent_audit.read_text(encoding="utf-8")) if args.independent_audit else None)
     (args.output or args.html).write_text(page, encoding="utf-8")
 
 

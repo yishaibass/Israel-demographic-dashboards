@@ -102,40 +102,138 @@ const files = {
     }
     await page.goto('https://model.test/propensity.html');
     assert.equal(await page.locator('#modelElection').inputValue(),'historical');
-    const baseline=await page.evaluate(()=>JSON.stringify(CUBE.rows));
-    const before=await page.locator('#k26FamilyComparison').textContent();
-    await page.selectOption('#modelElection','K26');
+    const frozen=await page.evaluate(()=>({columns:CUBE.columns,rows:CUBE.rows}));
+    const baseline=JSON.stringify(frozen.rows);
     assert.equal(await page.locator('#k26ModelPanel p').count(),0,'No methodological narrative in the demographic controls');
     assert.equal(await page.locator('#k26ModelStatus, #k26FitCoverage').count(),0,'Technical audit text is absent from viewer flow');
+    await page.locator('#k26ModelPanel details').evaluate(el=>el.open=true);
     const modelFolder=path.join(project,'data/processed/k26/current/individual_model');
-    const history=JSON.parse(fs.readFileSync(path.join(modelFolder,'historical_election_cubes.json'),'utf8'));
-    const latest=JSON.parse(fs.readFileSync(path.join(modelFolder,'k26_probability_cube.json'),'utf8'));
-    function nationalTurnout(cube){
-      const weight=cube.columns.indexOf('weight'),abstain=cube.columns.indexOf('abstain_mass');
-      return 100*(1-cube.rows.reduce((sum,row)=>sum+row[abstain],0)/cube.rows.reduce((sum,row)=>sum+row[weight],0));
+    const readJson=file=>JSON.parse(fs.readFileSync(file,'utf8'));
+    const elections=['K21','K22','K23','K24','K25','K26'];
+    const history=readJson(path.join(modelFolder,'historical_election_cubes.json'));
+    const latest=readJson(path.join(modelFolder,'k26_probability_cube.json'));
+    const methods={joint:{...history,K26:latest}};
+    const families=await page.evaluate(()=>P.map(p=>({key:p[0],label:p[2]})));
+    const columns=Object.fromEntries(frozen.columns.map((name,index)=>[name,index]));
+    const cellKeys=['pop_group','religiosity','income_band','age_band','academic','district'];
+    function mergeSource(cube){
+      const source=Object.fromEntries(cube.columns.map((name,index)=>[name,index]));
+      const cellKey=(row,index)=>cellKeys.map(key=>row[index[key]]).join('|');
+      const byCell=new Map(cube.rows.map(row=>[cellKey(row,source),row]));
+      assert.equal(byCell.size,frozen.rows.length,'Source fits cover every frozen demographic cell');
+      return frozen.rows.map(row=>{
+        const fitted=byCell.get(cellKey(row,columns));
+        assert.ok(fitted,'Source fit has matching demographic identities');
+        return row.map((value,index)=>{
+          const name=frozen.columns[index];
+          return name.endsWith('_mass')?fitted[source[name]]:value;
+        });
+      });
     }
-    const historicalRates=Object.values(history).map(nationalTurnout);
-    const expectedMean=historicalRates.reduce((sum,x)=>sum+x,0)/5;
-    const expectedSd=Math.sqrt(historicalRates.reduce((sum,x)=>sum+(x-expectedMean)**2,0)/5);
-    const cells=await page.locator('#k26FamilyComparison tr').first().locator('td').allTextContents();
-    assert.equal(cells[2],expectedMean.toFixed(0)+'%','Common historical mean is calculated from five election rates');
-    assert.equal(Number(cells[5]),Number(((nationalTurnout(latest)-expectedMean)/expectedSd).toFixed(1)),'SD change uses the same-design historical mean and population SD');
-    assert.notEqual(await page.evaluate(()=>JSON.stringify(CUBE.rows)),baseline);
-    assert.ok(await page.locator('#partyA').textContent().then(s=>s.includes('ישר וביחד')),'K26 party selectors use reviewed family names');
-    await page.evaluate(()=>{
-      const input=F.pop_group.querySelector('input[value="1"]');
-      input.checked=false;input.dispatchEvent(new Event('change',{bubbles:true}));
-    });
-    assert.notEqual(await page.locator('#k26FamilyComparison').textContent(),before,'Comparison follows demographic filters');
-    await page.locator('#filters .trigger').first().click();
-    await page.locator('#filters [data-x="none"]').first().click();
-    assert.ok(await page.locator('#k26FamilyComparison tr').first().locator('td').allTextContents().then(cells=>cells.slice(1).every(value=>value==='')),'Empty group has blank numeric cells');
-    await page.selectOption('#modelElection','historical');
-    assert.equal(await page.evaluate(()=>JSON.stringify(CUBE.rows)),baseline,'Historical cube restores exactly');
+    function values(rows,selection){
+      const included=rows.filter(row=>Object.entries(selection).every(([name,allowed])=>allowed.includes(String(row[columns[name]]))));
+      const sum=name=>included.reduce((total,row)=>total+row[columns[name]],0);
+      const weight=sum('weight'),voted=weight-sum('abstain_mass');
+      return [weight?100*voted/weight:null,...families.map(party=>voted?100*sum(party.key+'_mass')/voted:null)];
+    }
+    const percentage=value=>value===null?'':value.toFixed(0)+'%';
+    const signed=value=>value===null?'':(value>=0?'+':'')+value.toFixed(1);
+    const activeSelection=()=>page.evaluate(()=>Object.fromEntries(Object.entries(F).map(([key,el])=>[key,[...el.querySelectorAll('input:checked')].map(input=>input.value)])));
+    async function checkComparison(cubes,a,b){
+      const selected=await activeSelection();
+      const frozenValues=values(frozen.rows,selected);
+      const byElection=Object.fromEntries(elections.map(election=>[election,values(cubes[election],selected)]));
+      const historical=elections.slice(0,5).map(election=>byElection[election]);
+      const mean=frozenValues.map((_,i)=>historical.every(row=>row[i]!==null)?historical.reduce((sum,row)=>sum+row[i],0)/5:null);
+      const first=a==='mean'?mean:byElection[a],second=b==='mean'?mean:byElection[b];
+      const expected=frozenValues.map((old,i)=>{
+        const sd=mean[i]===null?null:Math.sqrt(historical.reduce((sum,row)=>sum+(row[i]-mean[i])**2,0)/5);
+        const delta=first[i]===null||second[i]===null?null:second[i]-first[i];
+        const z=delta===null||sd===null||sd<.0001?null:delta/sd;
+        return [percentage(old),percentage(first[i]),percentage(second[i]),signed(delta),signed(z)];
+      });
+      const displayed=await page.locator('#k26FamilyComparison tr').evaluateAll(rows=>rows.map(row=>[...row.querySelectorAll('td')].slice(1).map(cell=>cell.textContent.trim())));
+      assert.deepEqual(displayed,expected,'Filtered comparison uses selected elections and historical population SD: '+a+' to '+b);
+      assert.equal(await page.locator('#k26FamilyComparison tr').first().locator('td').first().textContent(),'שיעור הצבעה');
+      for(const side of ['A','B']) {
+        const selectedLabel=await page.locator('#comparisonElection'+side).evaluate(select=>select.selectedOptions[0].textContent);
+        assert.equal(await page.locator('#comparisonHeader'+side).textContent(),selectedLabel,'Comparison header identifies its selected election');
+      }
+    }
+    // The page must expose each election as a peer; these checks also detect a selector that only relabels the current cube.
+    assert.deepEqual(await page.locator('#modelElection option').evaluateAll(options=>options.map(option=>option.value)),['historical',...elections]);
+    for(const id of ['comparisonElectionA','comparisonElectionB']) {
+      assert.deepEqual(await page.locator('#'+id+' option').evaluateAll(options=>options.map(option=>option.value)),['mean',...elections]);
+    }
+    const jointCubes=Object.fromEntries(elections.map(election=>[election,mergeSource(methods.joint[election])]));
+    const methodCubes={joint:jointCubes};
+    const methodOptions=await page.locator('#modelFitMethod option').evaluateAll(options=>options.map(option=>option.value));
+    assert.ok(!methodOptions.length||methodOptions.includes('joint'),'Joint fit remains available');
+    const independentFolder=path.join(modelFolder,'independent');
+    const independentAuditFile=path.join(independentFolder,'model_audit.json');
+    const independentAudit=fs.existsSync(independentAuditFile)?readJson(independentAuditFile):null;
+    if(independentAudit?.publication_approved===true) {
+      const independent=readJson(path.join(independentFolder,'election_cubes.json'));
+      assert.deepEqual(methodOptions,['joint','independent'],'Approved independent fit is selectable');
+      assert.deepEqual(Object.keys(independent).sort(),elections,'Independent bundle contains all six elections');
+      methodCubes.independent=Object.fromEntries(elections.map(election=>[election,mergeSource(independent[election])]));
+      const provenance=await page.evaluate(()=>K26_FIT_METADATA.methods.independent);
+      assert.equal(provenance.collection_id,independentAudit.collection_id,'Published independent provenance matches the approved audit');
+      for(const election of elections) {
+        assert.equal(independent[election].election,election,'Independent cube carries its own election identity');
+        assert.equal(provenance.election_fit_ids[election],independent[election].model_fit_id,'Published fit identity matches '+election+' source');
+      }
+    } else {
+      assert.ok(!methodOptions.includes('independent'),'Unapproved independent fit is not published');
+    }
+    for(const method of Object.keys(methodCubes)) {
+      const cubes=methodCubes[method];
+      await page.selectOption('#modelElection','K26');
+      if(methodOptions.length) await page.selectOption('#modelFitMethod',method);
+      assert.deepEqual(await page.evaluate(()=>CUBE.rows),cubes.K26,'Changing fit method immediately refreshes the selected election');
+      for(const election of elections) {
+        await page.selectOption('#modelElection',election);
+        assert.deepEqual(await page.evaluate(()=>CUBE.rows),cubes[election],method+' '+election+' loads its own fitted masses and preserves fiscal inputs');
+        const actualLabels=await page.locator('#partyA input').evaluateAll(inputs=>inputs.map(input=>({key:input.value,label:input.dataset.label})));
+        assert.deepEqual(actualLabels,families,'Party controls use stable political-family labels in '+election);
+        assert.deepEqual(await page.evaluate(()=>P.map(p=>({key:p[0],label:p[2]}))),families,'Family identities remain stable across elections');
+        assert.equal(await page.locator('#labelA').textContent(),families.find(party=>party.key==='likud').label,'Party comparison uses the stable selected family name');
+        assert.equal(await page.locator('#labelB').textContent(),families.find(party=>party.key==='center').label,'Historical center labels do not inherit 2026 party aliases');
+        await page.selectOption('#comparisonElectionA',election);
+        await page.selectOption('#comparisonElectionB','K26');
+        await checkComparison(cubes,election,'K26');
+      }
+      await page.selectOption('#comparisonElectionA','mean');
+      await page.selectOption('#comparisonElectionB','K26');
+      await checkComparison(cubes,'mean','K26');
+      const unfiltered=await page.locator('#k26FamilyComparison').textContent();
+      await page.evaluate(()=>{
+        const inputs=[...F.pop_group.querySelectorAll('input')];
+        inputs.forEach((input,index)=>input.checked=index===0);
+        inputs[0].dispatchEvent(new Event('change',{bubbles:true}));
+      });
+      await checkComparison(cubes,'mean','K26');
+      assert.notEqual(await page.locator('#k26FamilyComparison').textContent(),unfiltered,'Comparison follows demographic filters');
+      await page.selectOption('#comparisonElectionA','K25');
+      await page.selectOption('#comparisonElectionB','K21');
+      await checkComparison(cubes,'K25','K21');
+      await page.locator('#filters .trigger').first().click();
+      await page.locator('#filters [data-x="none"]').first().click();
+      await checkComparison(cubes,'K25','K21');
+      assert.ok(await page.locator('#k26FamilyComparison tr').evaluateAll(rows=>rows.every(row=>[...row.querySelectorAll('td')].slice(1).every(cell=>cell.textContent===''))),'Empty group has blank numeric cells in every row');
+      await page.locator('#filters [data-x="all"]').first().click();
+      await page.selectOption('#modelElection','historical');
+      assert.equal(await page.evaluate(()=>JSON.stringify(CUBE.rows)),baseline,'Frozen published cube restores exactly for '+method);
+      await page.locator('body').click({position:{x:5,y:5}});
+    }
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),'Desktop propensity explorer must not overflow');
     await page.setViewportSize({width:390,height:844});
+    await page.selectOption('#modelElection','K26');
     await page.locator('#k26ModelPanel details').evaluate(el=>el.open=true);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),'Mobile propensity explorer must not overflow');
+    await page.locator('#partyA .trigger').click();
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),'Mobile party controls must not overflow');
     assert.deepEqual(errors,[],'No browser exceptions');
-    console.log('K26 browser checks passed: English/Hebrew simulators, apply/reset, frozen cube, filters, family labels, empty selection, mobile layout.');
+    console.log('K26 browser checks passed: unchanged simulator coverage; six demographic election cubes, fit methods, comparison/SD math, filters, family labels, frozen restore, desktop/mobile layout.');
   } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exit(1);});
