@@ -6,15 +6,17 @@ import pandas as pd
 import data_pipeline as base
 
 HERE=Path(__file__).resolve().parent
-HTML=HERE.parent/"voting-simulator"/"demographics.html"
+HTML=base.REPO_ROOT/"voting-simulator"/"demographics.html"
 DEFAULT_PROBS=HERE/"outputs"/"individual_probabilities.csv.gz"
 
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--puf",type=Path,default=base.PUF_DEFAULT)
+    ap.add_argument("--html",type=Path,default=HTML,help="Dashboard HTML to update")
     ap.add_argument("--probabilities",type=Path,default=DEFAULT_PROBS)
     ap.add_argument("--source-label",default="all-context five-election model")
     args=ap.parse_args()
+    html=args.html
     parts=[]
     for d in pd.read_csv(args.puf,usecols=base.RAW_FEATURES,chunksize=250_000,low_memory=False):
         age=pd.to_numeric(d.GilPUF,errors="coerce"); wt=pd.to_numeric(d.MishkalPratPUF,errors="coerce")
@@ -39,7 +41,7 @@ def main():
     keys=["pop_group","religiosity","income_band","age_band","academic","district"]
     agg=micro.groupby(keys,as_index=False)[["raw_weight"]+masscols].sum()
 
-    s=HTML.read_text(encoding="utf-8"); start=s.index("const CUBE=")+len("const CUBE=")
+    s=html.read_text(encoding="utf-8"); start=s.index("const CUBE=")+len("const CUBE=")
     oldobj,end=json.JSONDecoder().raw_decode(s[start:]); old=pd.DataFrame(oldobj["rows"],columns=oldobj["columns"])
     # The full PUF defines the dashboard population; fiscal estimates are joined
     # from the existing household-survey cube where exact cells are available.
@@ -89,9 +91,9 @@ def main():
         '.segment-detail{min-height:34px;margin:12px auto 0;padding:8px 12px;max-width:520px;border-radius:7px;background:var(--page);color:var(--secondary);font-size:12px;text-align:center}.segment-detail strong{color:var(--text);margin-left:5px}':
         '.segment-detail{min-height:34px;margin:12px auto 0;padding:10px 14px;max-width:620px;border:1px solid var(--grid);border-radius:9px;background:var(--page);color:var(--secondary);font-size:12px;text-align:center}.segment-detail .detail-title{display:block;color:var(--text);font-size:14px;font-weight:800;margin-bottom:3px}.segment-detail .detail-included{display:block;margin-bottom:7px}.segment-detail .detail-values{display:flex;justify-content:center;gap:20px;flex-wrap:wrap}.segment-detail .detail-values strong{color:var(--text);font-size:15px;margin-right:4px}.segment-detail .overall-value{color:var(--muted)}',
         '<div class="segment-detail" id="segmentDetail">לחצו על כל מקטע להצגת שם המפלגה והאחוז המדויק</div><p class="coalition-note">צהוב: חרדים · כחול: קואליציה ללא חרדים · ירוק: אופוזיציה ללא ערבים · אפור: מפלגות ערביות ואחרות</p><p class="muted" id="cellNote"></p><div class="group-footnote"><p><strong>הרכב הקבוצות:</strong> חרדים — ש״ס ויהדות התורה · קואליציה ללא חרדים — הליכוד, הציונות הדתית, עוצמה יהודית, נעם והבית היהודי · אופוזיציה ללא ערבים — יש עתיד, המחנה הממלכתי, העבודה, מרצ וישראל ביתנו · ערבים — רע״ם, חד״ש־תע״ל ובל״ד</p>':
-        '<div class="segment-detail" id="segmentDetail">לחצו על מקטע בטור הראשי כדי לראות את המפלגות הכלולות ואת ההשוואה לכלל האוכלוסייה</div><p class="coalition-note">צהוב: מפלגות חרדיות · כחול: ליכוד וימין דתי · ירוק: מרכז, שמאל ציוני וישראל ביתנו · אפור: מפלגות ערביות ואחרות</p><p class="muted" id="cellNote"></p><div class="group-footnote"><p><strong>קבוצות המודל:</strong> חרדים — ש״ס ויהדות התורה · ליכוד — הליכוד, כולנו וזהות · ימין דתי — הציונות הדתית, עוצמה יהודית, נעם, הבית היהודי, האיחוד הלאומי והימין החדש · מרכז — יש עתיד, כחול לבן, המחנה הממלכתי, תקווה חדשה, גשר וימינה · שמאל ציוני — העבודה ומרצ · ימין חילוני — ישראל ביתנו · מפלגות ערביות — רע״ם, חד״ש־תע״ל, הרשימה המשותפת ובל״ד · אחרות — רשימות קטנות שלא סווגו</p>',
+        '<div class="segment-detail" id="segmentDetail">לחצו על מקטע בטור הראשי כדי לראות את המפלגות הכלולות ואת ההשוואה לכלל האוכלוסייה</div><p class="coalition-note">צהוב: מפלגות חרדיות · כחול: ליכוד וימין דתי · ירוק: מרכז, שמאל ציוני וישראל ביתנו · אפור: מפלגות ערביות ואחרות</p><p class="muted" id="cellNote"></p><div class="group-footnote"><p><strong>קבוצות המודל:</strong> חרדים — ש״ס ויהדות התורה · ליכוד — הליכוד, כולנו וזהות · ימין דתי — הציונות הדתית, עוצמה יהודית, נעם, הבית היהודי, האיחוד הלאומי, הימין החדש וימינה · מרכז — יש עתיד, כחול לבן, המחנה הממלכתי, תקווה חדשה וגשר · שמאל ציוני — העבודה ומרצ · ימין חילוני — ישראל ביתנו · מפלגות ערביות — רע״ם, חד״ש־תע״ל, הרשימה המשותפת ובל״ד · אחרות — רשימות קטנות שלא סווגו</p>',
         "const P=[['shas','ש״ס','ש״ס'],['utj','יהדות התורה','יהדות התורה'],['likud','ליכוד','ליכוד'],['national_religious','הציונות הדתית, עוצמה, נעם והבית היהודי','ציונות דתית'],['center','מרכז — יש עתיד והמחנה הממלכתי','מרכז'],['zionist_left','שמאל ציוני — העבודה ומרצ','שמאל ציוני'],['secular_national_right','ישראל ביתנו','ישראל ביתנו'],['other','מפלגות אחרות','אחרות'],['arab','מפלגות ערביות','ערביות']];":
-        "const P=[['shas','ש״ס','ש״ס'],['utj','יהדות התורה','יהדות התורה'],['likud','הליכוד, כולנו וזהות','ליכוד'],['national_religious','הציונות הדתית, עוצמה יהודית, נעם, הבית היהודי, האיחוד הלאומי והימין החדש','ימין דתי'],['center','יש עתיד, כחול לבן, המחנה הממלכתי, תקווה חדשה, גשר וימינה','מרכז'],['zionist_left','העבודה ומרצ','שמאל ציוני'],['secular_national_right','ישראל ביתנו','ימין חילוני'],['other','רשימות קטנות שלא סווגו','אחרות'],['arab','רע״ם, חד״ש־תע״ל, הרשימה המשותפת ובל״ד','ערביות']];",
+        "const P=[['shas','ש״ס','ש״ס'],['utj','יהדות התורה','יהדות התורה'],['likud','הליכוד, כולנו וזהות','ליכוד'],['national_religious','הציונות הדתית, עוצמה יהודית, נעם, הבית היהודי, האיחוד הלאומי, הימין החדש וימינה','ימין דתי'],['center','יש עתיד, כחול לבן, המחנה הממלכתי, תקווה חדשה וגשר','מרכז'],['zionist_left','העבודה ומרצ','שמאל ציוני'],['secular_national_right','ישראל ביתנו','ימין חילוני'],['other','רשימות קטנות שלא סווגו','אחרות'],['arab','רע״ם, חד״ש־תע״ל, הרשימה המשותפת ובל״ד','ערביות']];",
         "const ci=Object.fromEntries(CUBE.columns.map((x,i)=>[x,i])),F={};let distributionMode='voters';":
         "const ci=Object.fromEntries(CUBE.columns.map((x,i)=>[x,i])),F={};let distributionMode='voters',demoSelected=[],demoOverall=[];",
         " data-name=\"'+party+'\" data-value=\"'+fmtPct(x.pct)+'\" data-group=\"'+label+'\"":
@@ -104,7 +106,7 @@ def main():
     for before,after in replacements.items():
         if before in s: s=s.replace(before,after,1)
         elif after not in s: raise RuntimeError('dashboard UI replacement target missing: '+before[:80])
-    HTML.write_text(s,encoding="utf-8")
+    html.write_text(s,encoding="utf-8")
     try: probability_source=str(args.probabilities.resolve().relative_to(HERE.parent.resolve()))
     except ValueError: probability_source=args.probabilities.name
     audit={"dashboard_cells":len(new),"eligible_population_weight":float(new.weight.sum()),

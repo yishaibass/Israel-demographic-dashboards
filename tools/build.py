@@ -24,6 +24,7 @@ def main() -> None:
     parser.add_argument("--config", type=Path)
     parser.add_argument("--site-root", type=Path, default=ROOT)
     parser.add_argument("--verify", action="store_true", help="Run checks without publishing")
+    parser.add_argument("--k26-current", type=Path, help="Prepared K26 current folder for the separate voting-propensity view")
     args = parser.parse_args()
 
     selected = PRODUCTS if args.product == "all" else (args.product,)
@@ -33,6 +34,8 @@ def main() -> None:
             command.extend(["--config", str(args.config)])
         if args.verify:
             command.append("--verify")
+        if args.k26_current and product == "voting_propensity":
+            command.extend(["--k26-current", str(args.k26_current.resolve())])
         subprocess.run(command, cwd=ROOT, check=True)
     if args.product == "all" and not args.verify:
         publish_static_routes(args.site_root)

@@ -39,7 +39,7 @@ def aggregate(pt,pc,w,g,n):
 def setup(cells,geos,targets,cols):
     x=torch.tensor(cells[cols].to_numpy(np.float32)); fsu=torch.tensor(cells.fsu_proxy.to_numpy(np.float32)); w=torch.tensor(cells.weight.to_numpy(np.float32)); g=torch.tensor(cells.g.to_numpy(np.int64)); gi={k:i for i,k in enumerate(geos.geo_key)}; obs=[]
     for e in ELECTIONS:
-      z=targets[targets.election.eq(e)].copy(); z["g"]=z.geo_key.map(gi); yf=z[FAMILIES].to_numpy(np.float32); yf/=yf.sum(1,keepdims=True)
+      z=targets[targets.election.eq(e)].copy(); z["g"]=z.geo_key.map(gi); yf=z[FAMILIES].to_numpy(np.float32, copy=True); yf/=yf.sum(1,keepdims=True)
       obs.append({"z":z,"ix":torch.tensor(z.g.to_numpy(np.int64)),"turn":torch.tensor((z.voted/z.eligible).to_numpy(np.float32)),"fam":torch.tensor(yf)})
     return x,fsu,w,g,obs
 

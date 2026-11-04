@@ -2,9 +2,9 @@
 
 This directory contains the code used to estimate the voting model. Raw Census and ballot-level files are excluded; see the repository `sources/` catalog for provenance, filenames, and required columns.
 
-## Method
+## Published historical reference
 
-The population base is the 2022 Israel Census Public Use File (PUF). The model estimates a binary logistic probability of turnout and a multinomial softmax probability over nine stable party families. Predictors are population group, Jewish religiosity, standardized income, income-by-group interactions, local Arab/religious/Haredi concentration, municipality size, broad periphery, and group-by-context interactions. Individual probabilities are Census-weighted and aggregated to the locality × statistical-area level, where they are fitted to official aggregate election results for 9 April 2019, 17 September 2019, 2 March 2020, 23 March 2021 and 1 November 2022.
+The population base is the 2022 Israel Census Public Use File (PUF). The model estimates a binary logistic probability of turnout and a multinomial softmax probability over nine stable party families. Predictors are population group, Jewish religiosity, standardized income, income-by-group interactions, local Arab/religious/Haredi concentration, municipality size, broad periphery, and group-by-context interactions. Individual probabilities are Census-weighted and aggregated to locality × TatRova, where they are fitted to aggregate election results for 9 April 2019, 17 September 2019, 2 March 2020, 23 March 2021 and 1 November 2022. The legacy code name `rova` refers here to the PUF TatRova field.
 
 Coefficients contain a component shared across elections and regularized election-specific deviations. Three-fold cross-validation holds out whole localities. No unrestricted locality identifier enters a person's published propensity. The published vector is the equal-weight mean of the five election-specific probability vectors.
 
@@ -28,6 +28,59 @@ python products/voting_propensity/model/update_dashboard_from_model.py --puf PAT
 ```
 
 Generated product outputs are ignored because individual-row probabilities are derived from microdata. Only aggregate, disclosure-safe dashboard content is committed.
+
+## Common six-election fit and publication
+
+The published five-election cube remains the default reference. `fit_k26.py`
+jointly refits K21–K26 with one design: whole-locality supervision, fixed 2022
+Census features and weights, the same logistic/softmax objective, and shared
+coefficients with regularized election deviations. Context features remain
+Census locality × TatRova. Whole-locality supervision is used for every election
+because K26 ballot-to-TatRova identity is unverified.
+
+Compare K26 with the common-design historical estimates to assess election
+movement. The difference between the published reference and the new historical
+fit describes a model-version change. The common historical estimates are
+retrospective and use K26 through shared coefficients; they are not forecasts.
+
+From the repository root:
+
+```bash
+python products/voting_propensity/model/fit_k26.py --current PATH_TO_PROJECT/data/processed/k26/current --puf PATH_TO_CENSUS_PUF --output PATH_TO_PROJECT/data/processed/k26/current/individual_model
+python tools/build.py voting_propensity --k26-current PATH_TO_PROJECT/data/processed/k26/current
+```
+
+The publication adapter also requires `voting_propensity_project` in the ignored
+local path configuration. Pass `--k26-current` when building `all` to retain this
+comparison. The UI keeps the historical cube intact, switches to K26 explicitly,
+and preserves historical fiscal data. Exported aggregate cubes include:
+
+- `k26_probability_cube.json`: K26 under the common design.
+- `historical_comparable_cube.json`: equal-weight K21–K25 joint-probability mean
+  from the same fit.
+- `historical_election_cubes.json`: direct `K21`–`K25` entries containing cubes for
+  selected-group historical means and population SD (`ddof=0`).
+
+For conditional party shares, compute each historical election's selected-group
+share before taking its equal-weight mean and SD. A ratio formed from averaged
+joint masses instead weights elections by their modeled turnout. Label these
+distinct summaries explicitly. Historical SD measures variation across five
+estimates; it is separate from estimation uncertainty and significance.
+
+The tested runtime is Python **3.15.2**, NumPy 2.5.4, pandas 3.1.0, and PyTorch
+2.15.0+cpu. Default validation uses 70 epochs and three folds holding each locality
+out across every election. The common run took 36.7 seconds and produced 18
+cross-validation rows (six elections × three folds). Read `model_audit.json` for per-election coverage and
+cross-validation; K26's available Census match covers 200 localities and 81.71%
+of national valid votes (88.72% of regular valid votes). No individual probability
+export is written by this comparison fitter.
+
+The user assigns Yashar and Beyachad to `liberal_center`, Democrats to
+`zionist_left`, and remaining unassigned minor lists to `other`. Preserve the
+disclosed crosswalk; party families do not imply coalition membership.
+Source-reported counts come from a secondary CEC mirror. Direct primary retrieval
+and legal certification have not been independently verified. Envelope votes
+are excluded from fitting and included in separate national comparisons.
 
 ## Interpretation
 
