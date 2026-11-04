@@ -98,19 +98,20 @@ def integrate(page: str, cube: dict, audit: dict, historical: dict,
             independent_masses[election] = [[row[index] for index in indices] for row in matched["rows"]]
         method_masses["independent"] = independent_masses
         independent_metadata = {"collection_id": collection_id, "election_fit_ids": fit_ids, "snapshot_id": cube["snapshot_id"]}
+    combined_masses = [[sum(method_masses["joint"][election][row_index][column_index] for election in ELECTIONS) / len(ELECTIONS)
+                        for column_index in range(len(mass_columns))] for row_index in range(len(baseline["rows"]))]
     baseline_hash = hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()
     election_options = "".join(f'<option value="{election}">{label}</option>' for election, label in zip(ELECTIONS, ELECTION_LABELS))
-    method_control = ('<label for="modelFitMethod">התאמה: </label><select id="modelFitMethod"><option value="joint">משותפת</option><option value="independent">נפרדת לכל בחירות · בדיקת רגישות</option></select>' if independent_metadata else '')
+    election_options += '<option value="joint_combined">2019–2026 · ממוצע התאמה משותפת</option>'
     panel = '''<div class="card" id="k26ModelPanel">
-__METHOD__
-<label for="modelElection"><strong>בחירות: </strong></label>
+<label for="modelElection"><strong>התאמה: </strong></label>
 <select id="modelElection"><option value="historical">ממוצע חמש הבחירות · פורסם</option>__ELECTIONS__</select>
-<details><summary>השוואת בחירות</summary>
+<details><summary>השוואת התאמות</summary>
 <label for="comparisonElectionA">א׳: </label><select id="comparisonElectionA"><option value="mean">ממוצע חמש הבחירות</option>__ELECTIONS__</select>
 <label for="comparisonElectionB">ב׳: </label><select id="comparisonElectionB"><option value="mean">ממוצע חמש הבחירות</option>__ELECTIONS_B__</select>
 <div style="overflow-x:auto"><table style="width:100%"><thead><tr><th>מדד</th><th>ממוצע חמש הבחירות · פורסם</th><th id="comparisonHeaderA">א׳</th><th id="comparisonHeaderB">ב׳</th><th>ב׳ פחות א׳ (נ״א)</th><th>ב׳ פחות א׳ (ס״ת)</th></tr></thead><tbody id="k26FamilyComparison"></tbody></table></div>
 </details>
-</div>'''.replace("__METHOD__", method_control).replace("__ELECTIONS__", election_options).replace("__ELECTIONS_B__", election_options.replace('value="K26"', 'value="K26" selected'))
+</div>'''.replace("__ELECTIONS__", election_options).replace("__ELECTIONS_B__", election_options.replace('value="K26"', 'value="K26" selected'))
     marker = '<section class="analysis-section">'
     if marker not in page:
         raise ValueError("Demographic explorer publication anchor missing")
@@ -119,15 +120,17 @@ __METHOD__
     script = r'''<script>
 const K26_FROZEN_ROWS=CUBE.rows;
 const K26_METHOD_MASSES=__METHOD_MASSES__;
+const K26_COMBINED_MASSES=__COMBINED_MASSES__;
 const K26_HISTORICAL_MASSES=Object.fromEntries(Object.entries(K26_METHOD_MASSES.joint).filter(([key])=>key!=='K26'));
 const K26_MASS_COLUMNS=__MASS_COLUMNS__;
 const K26_FIT_METADATA=__META__;
-const k26Method=()=>document.getElementById('modelFitMethod')?.value||'joint';
+const k26Method=()=>K26_METHOD_MASSES.independent?'independent':'joint';
 const K26_ROW_CACHE={};
 function k26Rows(election){
   if(election==='historical')return K26_FROZEN_ROWS;
   const method=k26Method(),key=method+':'+election;
-  if(!K26_ROW_CACHE[key])K26_ROW_CACHE[key]=K26_METHOD_MASSES[method][election].map((masses,index)=>{
+  const source=election==='joint_combined'?K26_COMBINED_MASSES:K26_METHOD_MASSES[method][election];
+  if(!K26_ROW_CACHE[key])K26_ROW_CACHE[key]=source.map((masses,index)=>{
     const row=K26_FROZEN_ROWS[index].slice();K26_MASS_COLUMNS.forEach((name,j)=>row[ci[name]]=masses[j]);return row;
   });
   return K26_ROW_CACHE[key];
@@ -148,6 +151,7 @@ function renderK26Comparison(){
   }
   const old=values(K26_FROZEN_ROWS),names=['שיעור הצבעה',...P.map(p=>p[2])];
   const fitted=Object.fromEntries(Object.entries(K26_METHOD_MASSES[k26Method()]).map(([key,rows])=>[key,values(rows,true)]));
+  fitted.joint_combined=values(K26_COMBINED_MASSES,true);
   const history=['K21','K22','K23','K24','K25'].map(key=>fitted[key]);
   const means=names.map((_,i)=>history.every(e=>e[i]!==null)?history.reduce((sum,e)=>sum+e[i],0)/history.length:null);
   const a=document.getElementById('comparisonElectionA'),b=document.getElementById('comparisonElectionB');
@@ -183,7 +187,6 @@ function updateK26Election(){
   renderDemo();renderParty();
 }
 selector.addEventListener('change',updateK26Election);
-document.getElementById('modelFitMethod')?.addEventListener('change',updateK26Election);
 ['comparisonElectionA','comparisonElectionB'].forEach(id=>document.getElementById(id).addEventListener('change',renderK26Comparison));
 document.getElementById('filters').addEventListener('change',renderK26Comparison);
 document.querySelectorAll('#filters [data-x]').forEach(button=>button.addEventListener('click',renderK26Comparison));
@@ -191,9 +194,13 @@ updateK26Election();
 </script>'''
     metadata = {"snapshot_id": cube["snapshot_id"], "model_fit_id": fit_id, "baseline_sha256": baseline_hash,
                 "methods": {"joint": {"model_fit_id": fit_id, "snapshot_id": cube["snapshot_id"]}, **({"independent": independent_metadata} if independent_metadata else {})},
+                "annual_fit_method": "independent" if independent_metadata else "joint",
+                "joint_combined": {"model_fit_id": fit_id, "elections": ELECTIONS, "definition": "Equal arithmetic mean of all six joint-fit election cell probability masses; conditional shares are computed after aggregation."},
+                "historical_sd": {"elections": ELECTIONS[:-1], "fit_method": "independent" if independent_metadata else "joint", "definition": "Population standard deviation of the five annual filtered estimates."},
                 "coverage": f"{audit['matched_localities']} יישובים בהתאמה · {100*audit['national_valid_vote_coverage']:.2f}% מהקולות הכשרים הארציים. המודל אינו מכייל את התוצאות לסכום הארצי.",
                 "status": f"{cube['snapshot_id']} · מקור ספירה משני; האימות הישיר והאישור המשפטי לא אומתו. אומדנים אקולוגיים, אינם קולות פרטניים."}
     script = script.replace("__METHOD_MASSES__", json.dumps(method_masses, separators=(",", ":"), allow_nan=False))
+    script = script.replace("__COMBINED_MASSES__", json.dumps(combined_masses, separators=(",", ":"), allow_nan=False))
     script = script.replace("__MASS_COLUMNS__", json.dumps(mass_columns))
     script = script.replace("__META__", json.dumps(metadata, ensure_ascii=False).replace("</", "<\\/"))
     return page.replace("</body>", BEGIN + script + END + "</body>", 1)

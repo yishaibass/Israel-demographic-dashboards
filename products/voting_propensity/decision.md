@@ -33,9 +33,13 @@ subgroup estimates change when localities are held out. Preserve the diagnostics
 with the aggregate cubes. Publication requires a reviewed bundle with matching
 snapshot, collection and per-election fit identities.
 
-Allow each election to be selected and any two elections, or the same-method
-five-election mean, to be compared under the current demographic filters. Report
-whole percentages, percentage-point differences and one-decimal historical SD.
-Keep the frozen reference visibly distinct from the refitted historical mean.
+Use one fit selector for each independently fitted election and a combined
+2019–2026 joint fit. Compute the combined option from the equal-weight mean of
+all six joint-model probability vectors, then aggregate under demographic filters.
+Allow any two fits, or the five-election independent historical mean, to be compared.
+Report whole percentages, percentage-point differences and one-decimal historical
+SD of the five independent K21–K25 subgroup rates. Comparisons involving the joint
+summary also reflect model differences. Keep the frozen reference visibly distinct
+from the refitted historical mean.
 Keep fiscal values and Census weights unchanged. Geographic validation and fold
 sensitivity do not establish individual votes or subgroup confidence intervals.

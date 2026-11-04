@@ -65,6 +65,7 @@ class K26PublicationTests(unittest.TestCase):
         self.assertNotIn('id="modelFitMethod"', result)
         for election in ELECTIONS:
             self.assertEqual(result.count('value="' + election + '"'), 3)
+        self.assertEqual(result.count('value="joint_combined"'), 3)
         self.assertIn('id="comparisonElectionA"', result)
         self.assertIn('id="comparisonElectionB"', result)
         self.assertEqual(result, integrate(result, cube, audit, history))
@@ -72,9 +73,21 @@ class K26PublicationTests(unittest.TestCase):
     def test_independent_bundle_approved_and_idempotent(self):
         _, page, cube, audit, history, independent, independent_audit = self.publication_inputs()
         result = integrate(page, cube, audit, history, independent, independent_audit)
-        self.assertIn('id="modelFitMethod"', result)
+        self.assertNotIn('id="modelFitMethod"', result)
         self.assertIn('"independent"', result)
         self.assertEqual(result, integrate(result, cube, audit, history, independent, independent_audit))
+
+    def test_combined_is_equal_mean_of_joint_masses(self):
+        _, page, cube, audit, history, independent, independent_audit = self.publication_inputs()
+        cube["rows"][0][7:9] = [10, 90]
+        for index, election in enumerate(ELECTIONS[:-1]):
+            history[election]["rows"][0][7:9] = [40 + index, 60 - index]
+        result = integrate(page, cube, audit, history, independent, independent_audit)
+        combined = json.JSONDecoder().raw_decode(result.split('const K26_COMBINED_MASSES=', 1)[1])[0]
+        self.assertAlmostEqual(combined[0][0], (10 + sum(40 + i for i in range(5))) / 6)
+        self.assertAlmostEqual(combined[0][1], (90 + sum(60 - i for i in range(5))) / 6)
+        self.assertIn('"annual_fit_method": "independent"', result)
+        self.assertIn("fitted.joint_combined=values(K26_COMBINED_MASSES,true)", result)
 
     def test_independent_mixed_or_stale_fits_rejected(self):
         for mutation, message in [

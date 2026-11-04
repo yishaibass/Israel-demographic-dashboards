@@ -30,8 +30,9 @@ python tools/build.py voting_propensity --k26-current PATH_TO_PROJECT/data/proce
 The same option is accepted with `all`. Omitting it publishes the configured
 historical source. K21–K25 remains the default in both voting products; K26 is a
 separate comparison. The propensity view keeps the published reference and adds
-individual election selection and two-election comparison. It supports the joint
-K21–K26 fit and independent election fits as a sensitivity option, each with its own historical SD.
+individual fit selection and comparison. Each election uses its independent fit;
+the combined 2019–2026 option averages the six joint-model election vectors equally.
+Comparison SD uses the selected subgroup's five independent historical rates.
 See the [coalition simulator](products/coalition_simulator/README.md)
 and [propensity model](products/voting_propensity/model/README.md) for fit commands,
 data coverage, and interpretation. Both K26 fits were tested with Python 3.15.2.
