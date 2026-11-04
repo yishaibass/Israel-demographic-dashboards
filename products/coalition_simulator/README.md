@@ -19,6 +19,8 @@ CSVs, and prepared `data/processed/k26/current/` results. It writes JSON and CSV
 under that current directory's `model_comparison/`; historical parameters are
 checked by hash and remain unchanged. Python 3.15.2 was tested.
 
+`model/k26_party_blocs.json` is the authoritative 2026 coalition definition. It includes Likud, Otzma Yehudit, United Torah Judaism, Shas, Religious Zionism–Zehut, Amcha Israel, Noam, Tzeva Shachor, Haredi Public and Tzomet Beit Israel. Intake, fitting and rendering validate the same contract and hash. Coalition membership is separate from the nine ideological families in the demographic model. Historical definitions and frozen forecast/contest rules remain unchanged.
+
 The fitter carries K25 locality Census composition forward explicitly. It fits
 turnout, then coalition votes per eligible voter bounded by turnout. Coalition
 support uses all voters, including invalid ballots, under the original simulator

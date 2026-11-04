@@ -10,11 +10,17 @@ import argparse
 import hashlib
 import json
 import platform
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from scipy.optimize import lsq_linear
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from products.coalition_simulator.model.k26_bloc import (
+    contract_sha256, load_contract, validate_dimension,
+)
 
 GROUPS = ["haredi", "dati", "masorti", "hiloni", "arab", "druze"]
 SHARES = ["share_" + group for group in GROUPS]
@@ -194,9 +200,19 @@ def main():
     current = args.root / "data/processed/k26/current"
     baseline_path = args.root / "data/processed/params_groups.csv"
     baseline_hash = hashlib.sha256(baseline_path.read_bytes()).hexdigest()
-    result = estimate(pd.read_csv(current / "ballots.csv"), pd.read_csv(current / "party_dimension.csv"),
+    dimension = pd.read_csv(current / "party_dimension.csv")
+    readiness = json.loads((current / "readiness.json").read_text(encoding="utf-8"))
+    validate_dimension(dimension)
+    if readiness.get("party_bloc_contract_sha256") != contract_sha256():
+        raise ValueError("Prepared K26 bloc definition is stale; rerun prepare_k26_results.py")
+    result = estimate(pd.read_csv(current / "ballots.csv"), dimension,
                       pd.read_csv(args.root / "data/clean/model_input_v2.csv"), pd.read_csv(baseline_path),
-                      json.loads((current / "readiness.json").read_text(encoding="utf-8")), args.bootstrap, args.seed)
+                      readiness, args.bootstrap, args.seed)
+    result["party_bloc_definition_id"] = load_contract()["definition_id"]
+    result["party_bloc_contract_sha256"] = contract_sha256()
+    for row in result["rows"]:
+        row["party_bloc_definition_id"] = result["party_bloc_definition_id"]
+        row["party_bloc_contract_sha256"] = result["party_bloc_contract_sha256"]
     result["baseline"]["sha256"] = baseline_hash
     if hashlib.sha256(baseline_path.read_bytes()).hexdigest() != baseline_hash:
         raise RuntimeError("Historical baseline changed during estimation")

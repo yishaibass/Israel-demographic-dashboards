@@ -48,8 +48,8 @@ const files = {
       await page.locator('#loadK26').click();
       assert.ok(await page.locator('#tab-scenario').evaluate(el=>el.classList.contains('active')),'Loading estimates opens the scenario');
       assert.equal(await page.locator('.load-btn.active').getAttribute('data-election'),'K26');
-      assert.equal(await page.locator('#wc').inputValue(),'1.68');
-      assert.equal(await page.locator('#wo').inputValue(),'3.70');
+      assert.equal(await page.locator('#wc').inputValue(),'2.34');
+      assert.equal(await page.locator('#wo').inputValue(),'3.04');
       const actual=await page.evaluate(()=>({...currentVal}));
       const expected=JSON.parse(fs.readFileSync(path.join(project,'data/processed/k26/current/model_comparison/six_group_comparison.json'),'utf8'));
       for(const row of expected.rows) {
@@ -87,9 +87,11 @@ const files = {
       await page.locator('[data-tab="parties"]').click();
       assert.equal(await page.locator('#partyElection').inputValue(),'K26','Party tagging opens on the latest election');
       assert.equal(await page.locator('#partiesTable tbody tr').count(),38,'2026 party tagging preserves every list');
-      const partyData=await page.evaluate(()=>({sum:DATA.parties.K26.reduce((sum,p)=>sum+p.share,0),amcha:DATA.parties.K26.find(p=>p.letter==='ך').bloc}));
+      const partyData=await page.evaluate(()=>({sum:DATA.parties.K26.reduce((sum,p)=>sum+p.share,0),amcha:DATA.parties.K26.find(p=>p.letter==='ך').bloc,added:['ני','נר','זך','בי'].map(symbol=>DATA.parties.K26.find(p=>p.letter===symbol).bloc),coalitionShare:DATA.parties.K26.filter(p=>p.bloc==='Coalition').reduce((sum,p)=>sum+p.share,0)}));
       assert.ok(Math.abs(partyData.sum-1)<1e-12,'Displayed K26 lists exhaust national valid votes');
       assert.equal(partyData.amcha,'Coalition');
+      assert.deepEqual(partyData.added,['Coalition','Coalition','Coalition','Coalition'],'All four reviewed minor lists count as coalition');
+      assert.ok(Math.abs(partyData.coalitionShare-expected.national_observed.coalition_share_valid)<1e-12,'Party tagging and fitted bloc use the same definition');
       await page.selectOption('#partyElection','K25');
       assert.ok(await page.locator('#partiesTable tbody tr').count()>0,'Historical party tagging still works');
       await page.selectOption('#partyElection','K26');

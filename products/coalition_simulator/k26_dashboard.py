@@ -6,6 +6,7 @@ import html
 import json
 import csv
 from pathlib import Path
+from .model.k26_bloc import canonical_names, coalition_symbols, contract_sha256, load_contract
 
 
 def add_comparison(page: str, root: Path, language: str = "en") -> str:
@@ -18,6 +19,9 @@ def add_comparison(page: str, root: Path, language: str = "en") -> str:
     baseline_hash = hashlib.sha256(baseline_path.read_bytes()).hexdigest()
     if data["snapshot_id"] != readiness["snapshot_id"] or data["baseline"]["sha256"] != baseline_hash:
         raise ValueError("K26 comparison is stale: rerun scripts/fit_k26_comparison.py")
+    contract_hash = contract_sha256()
+    if any(value.get("party_bloc_contract_sha256") != contract_hash for value in (data, readiness)):
+        raise ValueError("K26 coalition definition changed: rebuild prepared results and refit the comparison")
     he = language == "he"
     labels = ({"haredi": "חרדים", "dati": "דתי־לאומי", "masorti": "מסורתיים", "hiloni": "חילונים", "arab": "ערבים", "druze": "דרוזים"} if he else
               {"haredi": "Haredi", "dati": "Dati", "masorti": "Masorti", "hiloni": "Hiloni", "arab": "Arab", "druze": "Druze"})
@@ -36,6 +40,12 @@ def add_comparison(page: str, root: Path, language: str = "en") -> str:
         parties = list(csv.DictReader(stream))
     if not parties or {row["snapshot_id"] for row in parties} != {data["snapshot_id"]}:
         raise ValueError("K26 party actuals and model comparison snapshots differ")
+    assigned = {row["ballot_symbol"] for row in parties if row["bloc_core"] == "Netanyahu bloc"}
+    if assigned != coalition_symbols():
+        raise ValueError("K26 party tagging differs from the reviewed coalition definition")
+    names = canonical_names()
+    if any(row["ballot_symbol"] in names and row["party_id"] != names[row["ballot_symbol"]] for row in parties):
+        raise ValueError("K26 coalition party names differ from the reviewed definition")
     valid_totals = {int(row["valid_votes"]) for row in parties}
     if len(valid_totals) != 1 or sum(int(row["votes"]) for row in parties) != next(iter(valid_totals)):
         raise ValueError("K26 party counts do not reconcile to national valid votes")
@@ -73,6 +83,7 @@ def add_comparison(page: str, root: Path, language: str = "en") -> str:
     tab_label = "2026 מול חמש הבחירות הקודמות" if he else "2026 vs past five elections"
     button = "טען אומדני 2026" if he else "Load 2026 estimates"
     technical = {"snapshot_id": data["snapshot_id"], "count_status": readiness["count_status"], "fit": data["fit"],
+                 "party_bloc_definition_id": load_contract()["definition_id"], "party_bloc_contract_sha256": contract_hash,
                  "coverage": data["coverage"], "limitations": data["limitations"],
                  "population_basis": "K25 eligible rolls and 2022 Census composition", "projection_years": years,
                  "population_reweighted_from_2026_locality_counts": False,

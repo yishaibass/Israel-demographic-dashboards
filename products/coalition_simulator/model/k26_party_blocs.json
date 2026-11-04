@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "election": "K26",
+  "definition_id": "K26-netanyahu-bloc-20261104-v2",
+  "basis": "User-defined Netanyahu-bloc membership for the 2026 model",
+  "historical_elections_unchanged": true,
+  "coalition_parties": [
+    {
+      "symbol": "מחל",
+      "party_id": "Likud",
+      "name_he": "הליכוד"
+    },
+    {
+      "symbol": "ב",
+      "party_id": "Otzma Yehudit",
+      "name_he": "עוצמה יהודית"
+    },
+    {
+      "symbol": "ג",
+      "party_id": "United Torah Judaism",
+      "name_he": "יהדות התורה"
+    },
+    {
+      "symbol": "שס",
+      "party_id": "Shas",
+      "name_he": "ש״ס"
+    },
+    {
+      "symbol": "ט",
+      "party_id": "Religious Zionism-Zehut",
+      "name_he": "הציונות הדתית–זהות"
+    },
+    {
+      "symbol": "ך",
+      "party_id": "Amcha Israel",
+      "name_he": "עמך ישראל"
+    },
+    {
+      "symbol": "ני",
+      "party_id": "Noam",
+      "name_he": "נעם"
+    },
+    {
+      "symbol": "נר",
+      "party_id": "Tzeva Shachor",
+      "name_he": "צבע שחור"
+    },
+    {
+      "symbol": "זך",
+      "party_id": "Haredi Public",
+      "name_he": "הציבור החרדי"
+    },
+    {
+      "symbol": "בי",
+      "party_id": "Tzomet Beit Israel",
+      "name_he": "צומת בית ישראל"
+    }
+  ]
+}
