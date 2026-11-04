@@ -33,10 +33,12 @@ const files = {
       assert.equal(await page.locator('.tabs-bar .tab-btn').last().getAttribute('data-tab'),'k26','Comparison is the final tab');
       await page.locator('[data-tab="k26"]').click();
       assert.equal(await page.locator('#k26Comparison tbody tr').count(),6);
+      assert.equal(await page.locator('#k26Comparison p').count(),0,'Comparison contains no narrative paragraphs');
+      assert.ok((await page.locator('#k26Comparison th').nth(1).textContent()).includes('2022'),'Population-change header states its true reference');
       const cells=await page.locator('#k26Comparison tbody td').allTextContents();
       assert.ok(cells.every(cell=>!/[0-9]+\.[0-9]+%/.test(cell)),'Percentages use whole numbers');
       assert.ok(cells.filter(cell=>cell.includes(' SD')).every(cell=>/[+-][0-9]+\.[0-9] SD/.test(cell)),'SD changes use one decimal');
-      assert.equal((await page.locator('#k26Comparison tbody tr').first().locator('td').allTextContents())[1],'11% (+6%)');
+      assert.equal((await page.locator('#k26Comparison tbody tr').first().locator('td').allTextContents())[1],'11% (+0.6 pp)');
       const before=await page.evaluate(()=>({...currentVal}));
       for(const [group,row] of Object.entries(parameters)) {
         assert.ok(Math.abs(before['t_'+group]-Number(row.theta_vote_mean))<1e-12,'Published turnout default must match model output: '+group);
@@ -44,6 +46,9 @@ const files = {
       }
       await page.locator('#loadK26').click();
       assert.ok(await page.locator('#tab-scenario').evaluate(el=>el.classList.contains('active')),'Loading estimates opens the scenario');
+      assert.equal(await page.locator('.load-btn.active').getAttribute('data-election'),'K26');
+      assert.equal(await page.locator('#wc').inputValue(),'1.68');
+      assert.equal(await page.locator('#wo').inputValue(),'3.70');
       const actual=await page.evaluate(()=>({...currentVal}));
       const expected=JSON.parse(fs.readFileSync(path.join(project,'data/processed/k26/current/model_comparison/six_group_comparison.json'),'utf8'));
       for(const row of expected.rows) {
@@ -55,6 +60,28 @@ const files = {
       assert.ok(Math.abs(metadata.coverage.k26_matched_valid_vote_fraction_national-.9131946897)<1e-8);
       await page.locator('#clearBtn').click();
       assert.deepEqual(await page.evaluate(()=>({...currentVal})),before,'Reset must restore frozen defaults');
+      assert.equal(await page.locator('.sd-btn[data-n="3"]').count(),12,'Every control includes +3 SD');
+      await page.locator('#t_masorti_btns [data-n="3"]').click();
+      assert.ok(Math.abs(await page.evaluate(()=>currentVal.t_masorti)-(Number(parameters.masorti.theta_vote_mean)+3*Number(parameters.masorti.theta_vote_sd)))<1e-12);
+      assert.equal(await page.locator('#t_masorti_sd').textContent(),'+3.0 SD');
+      await page.locator('#k_dati_btns [data-n="3"]').click();
+      assert.equal(await page.evaluate(()=>currentVal.k_dati),1,'Probability remains bounded at 100%');
+      assert.equal((await page.locator('#k_dati_sd').textContent()).trim(),'+1.0 SD','Readout reports achieved SD after the probability cap');
+      assert.ok(await page.locator('#k_haredi_btns [data-n="3"]').isDisabled());
+      assert.equal(await page.locator('#k_haredi_sd').textContent(),'—','Near-zero historical SD is not shown as a meaningful movement');
+      await page.locator('#clearBtn').click();
+      await page.locator('.load-btn[data-election="K26"]').click();
+      assert.deepEqual(await page.evaluate(()=>({...currentVal})),actual,'Normal 2026 button loads the same election estimates');
+      assert.equal(await page.locator('.load-btn.active').getAttribute('data-election'),'K26');
+      assert.equal((await page.locator('#t_masorti_sd').textContent()).trim(),'+3.7 SD','Election loading shows its actual historical SD movement');
+      await page.locator('.load-btn[data-election="K25"]').click();
+      assert.equal(await page.locator('.load-btn.active').getAttribute('data-election'),'K25');
+      for(const [group,row] of Object.entries(parameters)) {
+        const loaded=await page.evaluate(group=>({t:currentVal['t_'+group],k:currentVal['k_'+group]}),group);
+        assert.ok(Math.abs(loaded.t-Number(row.theta_vote_K25))<1e-12,'2022 turnout still loads');
+        assert.ok(Math.abs(loaded.k-Number(row.theta_bibi_K25))<1e-12,'2022 support still loads');
+      }
+      await page.locator('#clearBtn').click();
       await page.locator('[data-tab="k26"]').click();
       await page.setViewportSize({width:390,height:844});
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),'Mobile page must not overflow');

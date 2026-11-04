@@ -23,7 +23,7 @@ The fitter carries K25 locality Census composition forward explicitly. It fits
 turnout, then coalition votes per eligible voter bounded by turnout. Coalition
 support uses all voters, including invalid ballots, under the original simulator
 convention. Envelopes remain in national totals and outside group fitting.
-The final simulator tab shows six group rows, whole percentages, one-decimal historical SD changes, and projected eligible-voter shares. Use `#2026` to open it directly. Eligible-share changes compare the 2026 projection with the K25/2022 Census base, not a five-election population average. Detailed changes, fit diagnostics, coverage and conditional bootstrap intervals remain in the analysis JSON/CSV. SD uses `ddof=0` across K21–K25;
+The final simulator tab shows six group rows, whole percentages, one-decimal historical SD changes, and projected eligible-voter shares. Use `#2026` to open it directly. Eligible-share changes are percentage points versus the K25/2022 Census base, not relative percent growth or a five-election population average. Detailed changes, fit diagnostics, coverage and conditional bootstrap intervals remain in the analysis JSON/CSV. SD uses `ddof=0` across K21–K25;
 values below `1e-6` yield an undefined standardized change.
 
 `k26_dashboard.py` owns the English/Hebrew comparison renderer; the source project's
@@ -37,3 +37,5 @@ Count metadata are source-reported by a secondary CEC mirror. Arithmetic checks
 do not establish direct primary verification or legal certification. Group rates
 are ecological estimates; historical SD is descriptive variation, separate from
 estimation uncertainty.
+
+The election-loading row includes K26 alongside K21–K25. K26 loads its fitted turnout/support and its national below-threshold vote fractions; the same scenario engine handles every year. The population toggle is independent. The renderer checks projected eligible shares against the stored base, growth assumptions and projection horizon. Actual 2026 locality registered-voter counts and turnout enter the behavioral fit; they do not currently reweight the national demographic-share projection.
