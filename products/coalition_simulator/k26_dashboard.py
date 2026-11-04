@@ -49,13 +49,13 @@ def add_comparison(page: str, root: Path, language: str = "en") -> str:
             coalition = party["bloc_core"] == "Netanyahu bloc" or party["amcha_included_in_coalition"].lower() == "true"
             lost["w_c" if coalition else "w_o"] += votes
     thresholds = {key: votes / valid for key, votes in lost.items()}
-    headings = (["קבוצה", "חלק מבעלי זכות ההצבעה · תחזית 2026 (נ״א מול בסיס 2022)", "הצבעה · ממוצע חמש הבחירות", "הצבעה · אומדן 2026 (ס״ת מול הממוצע)", "תמיכה בגוש נתניהו · ממוצע חמש הבחירות", "תמיכה בגוש נתניהו · אומדן 2026 (ס״ת מול הממוצע)"] if he else
+    headings = (["קבוצה", "חלק מבעלי זכות ההצבעה · תחזית 2026 (נ״א מול בסיס 2022)", "שיעור הצבעה · ממוצע חמש הבחירות", "שיעור הצבעה · אומדן 2026 (ס״ת מול הממוצע)", "תמיכה בגוש נתניהו · ממוצע חמש הבחירות", "תמיכה בגוש נתניהו · אומדן 2026 (ס״ת מול הממוצע)"] if he else
                 ["Group", "Eligible-voter share · 2026 projection (pp vs 2022 base)", "Turnout · past five elections average", "Turnout · 2026 estimate (SD vs average)", "Netanyahu support · past five elections average", "Netanyahu support · 2026 estimate (SD vs average)"])
     def percent(value):
         return f"{value * 100:.0f}%"
     def estimate(row):
         z = row["change_vs_mean_sd"]
-        return percent(row["k26_estimate"]) + (" (—)" if z is None else f" ({z:+.1f} SD)")
+        return percent(row["k26_estimate"]) + ("" if z is None else f" ({z:+.1f} SD)")
     by_group = {}
     for row in data["rows"]:
         by_group.setdefault(row["group"], {})[row["parameter"]] = row
@@ -91,7 +91,7 @@ def add_comparison(page: str, root: Path, language: str = "en") -> str:
 <button type="button" class="clear-btn" id="loadK26">{button}</button>
 </div>
 </section>'''
-    page = page.replace('</head>', '<style>.tabs-bar{flex-wrap:wrap}.k26-comparison table{min-width:760px}.k26-comparison th{white-space:normal}</style>\n</head>', 1)
+    page = page.replace('</head>', '<style>.tabs-bar{flex-wrap:wrap}.k26-comparison table{min-width:760px}.k26-comparison th{white-space:normal}.foot:empty{display:none}html[lang="en"] #partiesTable[data-election="K26"] th:nth-child(2),html[lang="en"] #partiesTable[data-election="K26"] td:nth-child(2){display:none}</style>\n</head>', 1)
     # Append before the existing JS binds tabs; publication adds demographics before this last tab.
     tabs_end = page.index("</div>", page.index('<div class="tabs-bar">'))
     tab = f'  <button class="tab-btn" data-tab="k26">{tab_label}</button>\n'
@@ -107,6 +107,13 @@ def add_comparison(page: str, root: Path, language: str = "en") -> str:
     script = '''<script>
 DATA.election_labels.K26 = '2026';
 DATA.thresholds.K26 = __K26_THRESHOLDS__;
+DATA.parties.K26 = __K26_PARTIES__;
+const k26PartyOption = document.createElement('option');
+k26PartyOption.value = 'K26';
+k26PartyOption.textContent = '2026';
+partySelect.insertBefore(k26PartyOption, partySelect.firstChild);
+partySelect.value = 'K26';
+renderParties('K26');
 __K26_ROWS__.forEach(function (row) {
   const key = row.parameter === 'theta_vote' ? 'theta_vote_by_election' : 'theta_bibi_by_election';
   DATA.groups[row.group][key].K26 = row.k26_estimate;
@@ -117,5 +124,11 @@ document.getElementById('loadK26').addEventListener('click', function () {
 });
 if (window.location.hash === '#2026') document.querySelector('[data-tab="k26"]').click();
 </script>'''.replace("__K26_ROWS__", payload).replace("__K26_THRESHOLDS__", json.dumps(thresholds, allow_nan=False))
+    party_rows = [{"name": party["party_name_he"] if he or party["party_id"].startswith("K26:") else party["party_id"],
+                   "bloc": "Coalition" if party["bloc_core"] == "Netanyahu bloc" or party["amcha_included_in_coalition"].lower() == "true" else "Opposition",
+                   "share": int(party["votes"]) / valid, "letter": party["ballot_symbol"], "leader": ""}
+                  for party in sorted(parties, key=lambda row: int(row["votes"]), reverse=True)]
+    script = script.replace("__K26_PARTIES__", json.dumps(party_rows, ensure_ascii=False, allow_nan=False).replace("</", "<\\/"))
     page = page.replace("</body>", '<script type="application/json" id="k26ModelMetadata">' + json.dumps(technical, ensure_ascii=False, allow_nan=False).replace("</", "<\\/") + '</script>\n</body>', 1)
-    return page.replace("</body>", script + "\n</body>", 1)
+    rendered = page.replace("</body>", script + "\n</body>", 1)
+    return "\n".join(line.rstrip() for line in rendered.splitlines()) + "\n"

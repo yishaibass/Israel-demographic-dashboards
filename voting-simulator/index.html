@@ -314,21 +314,15 @@
     .control-label { font-size: 11px; }
   }
 </style>
-<style>.tabs-bar{flex-wrap:wrap}.k26-comparison table{min-width:760px}.k26-comparison th{white-space:normal}  .demographics-frame { width: 100%; border: 0; display: block; min-height: 1500px; background: var(--page); }</style>
+<style>.tabs-bar{flex-wrap:wrap}.k26-comparison table{min-width:760px}.k26-comparison th{white-space:normal}.foot:empty{display:none}html[lang="en"] #partiesTable[data-election="K26"] th:nth-child(2),html[lang="en"] #partiesTable[data-election="K26"] td:nth-child(2){display:none}  .demographics-frame { width: 100%; border: 0; display: block; min-height: 1500px; background: var(--page); }</style>
 </head>
 <body>
 <div class="wrap">
 
 <header class="page-head">
   <h1>סימולטור מנדטים &ndash; בחירות לכנסת</h1>
-  <div class="subtitle">
-    קבעו לכל קבוצה באוכלוסייה את אחוז ההצבעה ואת שיעור התמיכה בקואליציה, וראו כמה מנדטים מניב כל תרחיש.
-    כל הנתונים נלקחים ישירות מנתוני המודל; החישוב היחיד שנעשה בעמוד הוא נוסחת המנדטים &ndash; ללא כל גורם תיקון.
-  </div>
-  <div class="subtitle2">
-    קואליציה = הגוש בראשות נתניהו (ליכוד, ש"ס, יהדות התורה, הציונות הדתית). אופוזיציה = כל שאר המפלגות.
-    האחוזים מחושבים מתוך בעלי זכות הבחירה (לא מכלל האוכלוסייה).
-  </div>
+  <div class="subtitle">קבעו לכל קבוצה את שיעור ההצבעה והתמיכה בגוש נתניהו.</div>
+  <div class="subtitle2">קואליציה = גוש נתניהו. גדלי הקבוצות: חלק מבעלי זכות הבחירה.</div>
 </header>
 
 <div class="tabs-bar">
@@ -394,7 +388,7 @@
     <button class="clear-btn" id="clearBtn">איפוס לממוצע</button>
   </div>
 
-  <div class="group-callout">כל קבוצה מתחילה בממוצע שלה לשנים <span dir="ltr">2019&ndash;2022</span>. לחצו על <span dir="ltr">&minus;/+</span> כדי להזיז אותה מעל או מתחת לממוצע: <span dir="ltr">+1</span> = סטיית תקן היסטורית אחת, <span dir="ltr">+2</span> = שתי סטיות תקן היסטוריות; <span dir="ltr">&minus;1/&minus;2</span> באותו אופן מתחת לממוצע.</div>
+
 
   <div id="groupRows"></div>
 
@@ -422,7 +416,7 @@
 <p class="hint">נתונים היסטוריים &ndash; לצפייה בלבד, לא לעריכה.</p>
 
 <div class="card" id="examplesCard">
-<h3 class="section-title" style="margin-top:0;">דוגמאות: מודל מול תוצאה בפועל</h3>
+<h3 class="section-title" style="margin-top:0;">2022: מודל מול תוצאה בפועל</h3>
 <div class="party-select-row">
   <label for="exampleSelect">יישוב:</label>
   <select id="exampleSelect"></select>
@@ -449,7 +443,7 @@
 <span class="swipe-hint">&#8644; החלק</span>
 <div class="table-scroll">
 <table id="exCalcTable">
-  <thead><tr><th>קבוצה</th><th>חלק מהזכאים</th><th>אחוז הצבעה</th><th>חלק מהמצביעים</th><th>תמיכה בקואליציה</th><th>תרומה</th></tr></thead>
+  <thead><tr><th>קבוצה</th><th>חלק מהזכאים</th><th>שיעור הצבעה</th><th>חלק מהמצביעים</th><th>תמיכה בקואליציה</th><th>תרומה</th></tr></thead>
   <tbody></tbody>
 </table>
 </div>
@@ -471,7 +465,7 @@
 
 <div class="reference-section">
 <h3 class="section-title">דפוסי הצבעה לפי קבוצה, <span class="ltr-token">2019&ndash;2022</span></h3>
-<div class="legend-line"><span class="sw" style="background:var(--coalition)"></span>תמיכה בקואליציה &nbsp;&nbsp;<span class="sw" style="background:var(--turnout-line)"></span>אחוז הצבעה</div>
+<div class="legend-line"><span class="sw" style="background:var(--coalition)"></span>תמיכה בקואליציה &nbsp;&nbsp;<span class="sw" style="background:var(--turnout-line)"></span>שיעור הצבעה</div>
 <div class="card">
 <div class="table-scroll-wrap">
 <div class="table-fade table-fade-left"></div>
@@ -497,7 +491,7 @@
 <div class="table-scroll">
 <table id="actualsTable">
   <thead>
-    <tr><th>בחירות</th><th>חלק הקואליציה מהקולות הכשרים</th><th>אחוז הצבעה</th><th>מנדטים בפועל לקואליציה</th></tr>
+    <tr><th>בחירות</th><th>חלק הקואליציה מהקולות הכשרים</th><th>שיעור הצבעה</th><th>מנדטים בפועל לקואליציה</th></tr>
   </thead>
   <tbody></tbody>
 </table>
@@ -529,7 +523,6 @@
 <div class="party-select-row">
   <label for="partyElection">בחירות:</label>
   <select id="partyElection"></select>
-  <span class="hint" style="margin:0;">מפלגות קואליציה ואופוזיציה בלבד (מפלגות שוליות אינן מוצגות).</span>
 </div>
 <div class="card">
 <div class="table-scroll-wrap">
@@ -551,18 +544,14 @@
 <section class="tab-panel" id="tab-k26">
 <div class="card k26-comparison" id="k26Comparison">
 <h2>2026 מול ממוצע חמש הבחירות הקודמות</h2>
-<div class="table-scroll-wrap"><div class="table-scroll"><table><thead><tr><th>קבוצה</th><th>חלק מבעלי זכות ההצבעה · תחזית 2026 (נ״א מול בסיס 2022)</th><th>הצבעה · ממוצע חמש הבחירות</th><th>הצבעה · אומדן 2026 (ס״ת מול הממוצע)</th><th>תמיכה בגוש נתניהו · ממוצע חמש הבחירות</th><th>תמיכה בגוש נתניהו · אומדן 2026 (ס״ת מול הממוצע)</th></tr></thead><tbody><tr><td>חרדים</td><td dir="ltr">11% (+0.6 pp)</td><td dir="ltr">72%</td><td dir="ltr">73% (+0.6 SD)</td><td dir="ltr">100%</td><td dir="ltr">100% (—)</td></tr><tr><td>דתי־לאומי</td><td dir="ltr">13% (+0.3 pp)</td><td dir="ltr">73%</td><td dir="ltr">75% (+1.6 SD)</td><td dir="ltr">89%</td><td dir="ltr">87% (-0.2 SD)</td></tr><tr><td>מסורתיים</td><td dir="ltr">21% (-0.1 pp)</td><td dir="ltr">56%</td><td dir="ltr">66% (+3.7 SD)</td><td dir="ltr">81%</td><td dir="ltr">77% (-0.9 SD)</td></tr><tr><td>חילונים</td><td dir="ltr">40% (-0.9 pp)</td><td dir="ltr">69%</td><td dir="ltr">71% (+1.7 SD)</td><td dir="ltr">19%</td><td dir="ltr">16% (-1.1 SD)</td></tr><tr><td>ערבים</td><td dir="ltr">13% (+0.2 pp)</td><td dir="ltr">53%</td><td dir="ltr">80% (+3.2 SD)</td><td dir="ltr">0%</td><td dir="ltr">0% (—)</td></tr><tr><td>דרוזים</td><td dir="ltr">2% (0.0 pp)</td><td dir="ltr">53%</td><td dir="ltr">66% (+3.2 SD)</td><td dir="ltr">14%</td><td dir="ltr">13% (-0.3 SD)</td></tr></tbody></table></div></div>
+<div class="table-scroll-wrap"><div class="table-scroll"><table><thead><tr><th>קבוצה</th><th>חלק מבעלי זכות ההצבעה · תחזית 2026 (נ״א מול בסיס 2022)</th><th>שיעור הצבעה · ממוצע חמש הבחירות</th><th>שיעור הצבעה · אומדן 2026 (ס״ת מול הממוצע)</th><th>תמיכה בגוש נתניהו · ממוצע חמש הבחירות</th><th>תמיכה בגוש נתניהו · אומדן 2026 (ס״ת מול הממוצע)</th></tr></thead><tbody><tr><td>חרדים</td><td dir="ltr">11% (+0.6 pp)</td><td dir="ltr">72%</td><td dir="ltr">73% (+0.6 SD)</td><td dir="ltr">100%</td><td dir="ltr">100%</td></tr><tr><td>דתי־לאומי</td><td dir="ltr">13% (+0.3 pp)</td><td dir="ltr">73%</td><td dir="ltr">75% (+1.6 SD)</td><td dir="ltr">89%</td><td dir="ltr">87% (-0.2 SD)</td></tr><tr><td>מסורתיים</td><td dir="ltr">21% (-0.1 pp)</td><td dir="ltr">56%</td><td dir="ltr">66% (+3.7 SD)</td><td dir="ltr">81%</td><td dir="ltr">77% (-0.9 SD)</td></tr><tr><td>חילונים</td><td dir="ltr">40% (-0.9 pp)</td><td dir="ltr">69%</td><td dir="ltr">71% (+1.7 SD)</td><td dir="ltr">19%</td><td dir="ltr">16% (-1.1 SD)</td></tr><tr><td>ערבים</td><td dir="ltr">13% (+0.2 pp)</td><td dir="ltr">53%</td><td dir="ltr">80% (+3.2 SD)</td><td dir="ltr">0%</td><td dir="ltr">0%</td></tr><tr><td>דרוזים</td><td dir="ltr">2% (0.0 pp)</td><td dir="ltr">53%</td><td dir="ltr">66% (+3.2 SD)</td><td dir="ltr">14%</td><td dir="ltr">13% (-0.3 SD)</td></tr></tbody></table></div></div>
 <button type="button" class="clear-btn" id="loadK26">טען אומדני 2026</button>
 </div>
 </section>
 <section class="tab-panel" id="tab-demographics">
   <iframe id="demographicsFrame" class="demographics-frame" src="demographics.html?embed=1" title="ניתוח דפוסי הצבעה לפי דמוגרפיה ומפלגה"></iframe>
 </section>
-<footer class="foot">
-  איך זה עובד: אחוז ההצבעה (החלק מבעלי זכות הבחירה שהצביעו) ושיעור התמיכה בקואליציה (מבין מי שהצביעו, החלק שתמך בקואליציה) של כל קבוצה נאמדים בנפרד מתוצאות הקלפיות בחמש מערכות הבחירות שבין 2019 ל-2022, בשילוב נתוני מפקד האוכלוסין 2022 &ndash; שני מספרים נפרדים, לא מספר אחד שמשמש כפול.
-  מספר המנדטים נגזר ישירות מהנתונים לאחר הסרת מפלגות שלא עברו את אחוז החסימה (<span class="ltr-token">3.25%</span>) &ndash; ללא גורמי תיקון.
-  גדלי הקבוצות בתרחיש מוקרנים לשנת 2026.
-</footer>
+<footer class="foot"></footer>
 
 </div>
 
@@ -6014,6 +6003,7 @@ DATA.elections.slice().reverse().forEach(function (e) {
   partySelect.appendChild(opt);
 });
 function renderParties(e) {
+  document.getElementById('partiesTable').dataset.election = e;
   const body = document.querySelector('#partiesTable tbody');
   body.innerHTML = '';
   (DATA.parties[e] || []).forEach(function (p) {
@@ -6091,7 +6081,7 @@ DATA.group_order.forEach(function (g) {
       '</div>' +
     '</div>' +
     '<div class="control-block">' +
-      '<div class="control-label">אחוז הצבעה</div>' +
+      '<div class="control-label">שיעור הצבעה</div>' +
       buildControl('t', g, gd.theta_vote_mean, gd.theta_vote_sd, 'turnout-val') +
     '</div>' +
     '<div class="control-block">' +
@@ -6111,7 +6101,8 @@ function setControlValue(prefix, g, valFrac, activeN) {
   const sd = prefix === 't' ? gd.theta_vote_sd : gd.theta_bibi_sd;
   const applied = sd >= CONTROL_SD_MIN ? (currentVal[prefix + '_' + g] - mean) / sd : null;
   const rounded = applied !== null && Math.abs(applied) < 0.05 ? 0 : applied;
-  document.getElementById(prefix + '_' + g + '_sd').innerHTML = applied === null ? '—' :
+  document.getElementById(prefix + '_' + g + '_sd').hidden = applied === null;
+  document.getElementById(prefix + '_' + g + '_sd').innerHTML = applied === null ? '' :
     '<span dir="ltr">' + (rounded > 0 ? '+' : '') + rounded.toFixed(1) + ' SD</span>';
   document.getElementById(prefix + '_' + g + '_val').innerHTML = pct(valFrac, 1);
   document.getElementById(prefix + '_' + g + '_bar').style.width = clampPct(valFrac * 100) + '%';
@@ -6362,6 +6353,13 @@ document.querySelectorAll('.tab-btn').forEach(function (btn) {
 <script>
 DATA.election_labels.K26 = '2026';
 DATA.thresholds.K26 = {"w_c": 0.01682601161817794, "w_o": 0.037023058895960345};
+DATA.parties.K26 = [{"name": "הליכוד", "bloc": "Coalition", "share": 0.20514911377218994, "letter": "מחל", "leader": ""}, {"name": "ישר", "bloc": "Opposition", "share": 0.16052725626231457, "letter": "דרך", "leader": ""}, {"name": "ביחד", "bloc": "Opposition", "share": 0.09347710046656145, "letter": "רק", "leader": ""}, {"name": "הרשימה המשותפת", "bloc": "Opposition", "share": 0.08798410099683278, "letter": "ודם", "leader": ""}, {"name": "הדמוקרטים", "bloc": "Opposition", "share": 0.06435610337374148, "letter": "אמת", "leader": ""}, {"name": "רע״ם", "bloc": "Opposition", "share": 0.059338380223163754, "letter": "עם", "leader": ""}, {"name": "ישראל ביתנו", "bloc": "Opposition", "share": 0.05929094044269397, "letter": "ל", "leader": ""}, {"name": "עוצמה יהודית", "bloc": "Coalition", "share": 0.057418474737262686, "letter": "ב", "leader": ""}, {"name": "יהדות התורה", "bloc": "Coalition", "share": 0.05493034610306802, "letter": "ג", "leader": ""}, {"name": "ש״ס", "bloc": "Coalition", "share": 0.05262881393872116, "letter": "שס", "leader": ""}, {"name": "הציונות הדתית", "bloc": "Coalition", "share": 0.05105029916931187, "letter": "ט", "leader": ""}, {"name": "המילואימניקים והכלכלית", "bloc": "Opposition", "share": 0.027268912922701623, "letter": "די", "leader": ""}, {"name": "עמך ישראל", "bloc": "Coalition", "share": 0.01682601161817794, "letter": "ך", "leader": ""}, {"name": "צבע שחור", "bloc": "Opposition", "share": 0.001980347280277386, "letter": "נר", "leader": ""}, {"name": "הציבור החרדי", "bloc": "Opposition", "share": 0.0018631534522279653, "letter": "זך", "leader": ""}, {"name": "נעם", "bloc": "Opposition", "share": 0.0017443782981628856, "letter": "ני", "leader": ""}, {"name": "צומת בית ישראל", "bloc": "Opposition", "share": 0.001003790614162426, "letter": "בי", "leader": ""}, {"name": "השותפות לכולם", "bloc": "Opposition", "share": 0.000716340685093683, "letter": "ד", "leader": ""}, {"name": "שרשר", "bloc": "Opposition", "share": 0.00036651622985171026, "letter": "צדק", "leader": ""}, {"name": "ביחד נצליח", "bloc": "Opposition", "share": 0.00025266075672423745, "letter": "בד", "leader": ""}, {"name": "הפיראטים", "bloc": "Opposition", "share": 0.00018431233226962802, "letter": "צף", "leader": ""}, {"name": "ישראל תחילה", "bloc": "Opposition", "share": 0.00016393079695668536, "letter": "י", "leader": ""}, {"name": "סדר-חדש", "bloc": "Opposition", "share": 0.00016129525359725313, "letter": "קך", "leader": ""}, {"name": "אני ואתה", "bloc": "Opposition", "share": 0.00015303721773769877, "letter": "פה", "leader": ""}, {"name": "משפט צדק", "bloc": "Opposition", "share": 0.0001366968489092189, "letter": "קץ", "leader": ""}, {"name": "התיקון לשיטת הבחירות והממשל", "bloc": "Opposition", "share": 0.000133709899768529, "letter": "נקי", "leader": ""}, {"name": "אורות השחר", "bloc": "Opposition", "share": 0.00013125005929972558, "letter": "בקר", "leader": ""}, {"name": "קול הנשים", "bloc": "Opposition", "share": 0.00012510045812771703, "letter": "קה", "leader": ""}, {"name": "הקהל", "bloc": "Opposition", "share": 0.00010190767656471331, "letter": "רץ", "leader": ""}, {"name": "תקומה", "bloc": "Opposition", "share": 9.997494476779633e-05, "letter": "ק", "leader": ""}, {"name": "שמע", "bloc": "Opposition", "share": 9.206831468949961e-05, "letter": "נף", "leader": ""}, {"name": "בטח", "bloc": "Opposition", "share": 8.802714820503684e-05, "letter": "ז", "leader": ""}, {"name": "ביטחון אישי", "bloc": "Opposition", "share": 8.468879328308934e-05, "letter": "נץ", "leader": ""}, {"name": "גה\"ת", "bloc": "Opposition", "share": 7.01054533608976e-05, "letter": "יק", "leader": ""}, {"name": "גן עדן", "bloc": "Opposition", "share": 5.657633078247877e-05, "letter": "ה", "leader": ""}, {"name": "ברית עולם", "bloc": "Opposition", "share": 4.4277128438461645e-05, "letter": "זץ", "leader": ""}, {"name": "Unmapped symbol כן", "bloc": "Opposition", "share": 0.0, "letter": "כן", "leader": ""}, {"name": "תנועת אחי", "bloc": "Opposition", "share": 0.0, "letter": "צבי", "leader": ""}];
+const k26PartyOption = document.createElement('option');
+k26PartyOption.value = 'K26';
+k26PartyOption.textContent = '2026';
+partySelect.insertBefore(k26PartyOption, partySelect.firstChild);
+partySelect.value = 'K26';
+renderParties('K26');
 [{"group": "haredi", "parameter": "theta_vote", "historical_mean": 0.7178894949904515, "historical_sd": 0.01590681007978838, "k25_estimate": 0.7228152796746824, "k26_estimate": 0.7267071343718378, "change_vs_mean_pp": 0.8817639381386244, "change_vs_k25_pp": 0.38918546971553614, "change_vs_mean_sd": 0.5543310907188219, "sd_unavailable_reason": null, "bootstrap_p10": 0.6759604375128777, "bootstrap_p90": 0.7738020634402579, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "haredi", "parameter": "theta_bibi", "historical_mean": 0.9999999999999998, "historical_sd": 1.1102230246251565e-16, "k25_estimate": 0.9999999999999999, "k26_estimate": 0.9999999984336041, "change_vs_mean_pp": -1.5663956798306344e-07, "change_vs_k25_pp": -1.566395790852937e-07, "change_vs_mean_sd": null, "sd_unavailable_reason": "Historical SD below 0.000001; boundary-constrained or nearly constant historical coefficient", "bootstrap_p10": 0.9999999337544634, "bootstrap_p90": 0.9999999999999999, "at_lower_bound": false, "at_upper_bound": true, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "dati", "parameter": "theta_vote", "historical_mean": 0.7265612634106189, "historical_sd": 0.015890796535121682, "k25_estimate": 0.7187451126159898, "k26_estimate": 0.751424392524918, "change_vs_mean_pp": 2.486312911429911, "change_vs_k25_pp": 3.267927990892816, "change_vs_mean_sd": 1.5646244704818206, "sd_unavailable_reason": null, "bootstrap_p10": 0.7289470833612381, "bootstrap_p90": 0.7785117101287723, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "dati", "parameter": "theta_bibi", "historical_mean": 0.8878966362794039, "historical_sd": 0.1073373370145969, "k25_estimate": 0.9294159426722282, "k26_estimate": 0.8674811842206444, "change_vs_mean_pp": -2.04154520587595, "change_vs_k25_pp": -6.19347584515838, "change_vs_mean_sd": -0.19019898039750308, "sd_unavailable_reason": null, "bootstrap_p10": 0.834699020619036, "bootstrap_p90": 0.8937187619879631, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "masorti", "parameter": "theta_vote", "historical_mean": 0.555762903550975, "historical_sd": 0.027202380625579052, "k25_estimate": 0.5849568034544435, "k26_estimate": 0.6565815006685523, "change_vs_mean_pp": 10.081859711757723, "change_vs_k25_pp": 7.16246972141088, "change_vs_mean_sd": 3.7062416891106613, "sd_unavailable_reason": null, "bootstrap_p10": 0.6246311947162627, "bootstrap_p90": 0.6889298832918069, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "masorti", "parameter": "theta_bibi", "historical_mean": 0.8057157071503406, "historical_sd": 0.04185288779125377, "k25_estimate": 0.8421620136987071, "k26_estimate": 0.7667409236644329, "change_vs_mean_pp": -3.897478348590766, "change_vs_k25_pp": -7.542109003427422, "change_vs_mean_sd": -0.9312328382284875, "sd_unavailable_reason": null, "bootstrap_p10": 0.7149718855838639, "bootstrap_p90": 0.8150687886564442, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "hiloni", "parameter": "theta_vote", "historical_mean": 0.6881180279430703, "historical_sd": 0.015125791641804193, "k25_estimate": 0.667078516068359, "k26_estimate": 0.7137455353472901, "change_vs_mean_pp": 2.562750740421982, "change_vs_k25_pp": 4.666701927893113, "change_vs_mean_sd": 1.6942919756603885, "sd_unavailable_reason": null, "bootstrap_p10": 0.6942481265423579, "bootstrap_p90": 0.7356722498439499, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "hiloni", "parameter": "theta_bibi", "historical_mean": 0.19450213551785947, "historical_sd": 0.029982404556597776, "k25_estimate": 0.19137187885152068, "k26_estimate": 0.16275434992604565, "change_vs_mean_pp": -3.174778559181382, "change_vs_k25_pp": -2.8617528925475035, "change_vs_mean_sd": -1.05888056883108, "sd_unavailable_reason": null, "bootstrap_p10": 0.1300261013327775, "bootstrap_p90": 0.19251430619252546, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "arab", "parameter": "theta_vote", "historical_mean": 0.5349389649941096, "historical_sd": 0.0811080694789284, "k25_estimate": 0.5261938212599334, "k26_estimate": 0.7959708442967188, "change_vs_mean_pp": 26.10318793026092, "change_vs_k25_pp": 26.97770230367854, "change_vs_mean_sd": 3.218321937380403, "sd_unavailable_reason": null, "bootstrap_p10": 0.7828067641558651, "bootstrap_p90": 0.8082269713290275, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "arab", "parameter": "theta_bibi", "historical_mean": 1.1276161710537547e-09, "historical_sd": 1.888824080977304e-09, "k25_estimate": 1.1068229342490673e-12, "k26_estimate": 1.0530167404088768e-08, "change_vs_mean_pp": 9.402551233035014e-07, "change_vs_k25_pp": 1.052906058115452e-06, "change_vs_mean_sd": null, "sd_unavailable_reason": "Historical SD below 0.000001; boundary-constrained or nearly constant historical coefficient", "bootstrap_p10": 6.479781268383003e-16, "bootstrap_p90": 1.6343940728076793e-08, "at_lower_bound": true, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "druze", "parameter": "theta_vote", "historical_mean": 0.5272110122277713, "historical_sd": 0.043272011165454094, "k25_estimate": 0.49953873199590537, "k26_estimate": 0.6647038611944965, "change_vs_mean_pp": 13.74928489667252, "change_vs_k25_pp": 16.516512919859117, "change_vs_mean_sd": 3.177408335402068, "sd_unavailable_reason": null, "bootstrap_p10": 0.6187144598586957, "bootstrap_p90": 0.6935366733207233, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}, {"group": "druze", "parameter": "theta_bibi", "historical_mean": 0.1410282930901609, "historical_sd": 0.04104159235195503, "k25_estimate": 0.10311899536000298, "k26_estimate": 0.12837036039983285, "change_vs_mean_pp": -1.2657932690328055, "change_vs_k25_pp": 2.525136503982987, "change_vs_mean_sd": -0.3084171925343216, "sd_unavailable_reason": null, "bootstrap_p10": 0.0834011239593866, "bootstrap_p90": 0.19027877614690503, "at_lower_bound": false, "at_upper_bound": false, "snapshot_id": "K26_20261103T193753", "count_status": "official"}].forEach(function (row) {
   const key = row.parameter === 'theta_vote' ? 'theta_vote_by_election' : 'theta_bibi_by_election';
   DATA.groups[row.group][key].K26 = row.k26_estimate;

@@ -36,6 +36,7 @@ const files = {
       assert.equal(await page.locator('#k26Comparison p').count(),0,'Comparison contains no narrative paragraphs');
       assert.ok((await page.locator('#k26Comparison th').nth(1).textContent()).includes('2022'),'Population-change header states its true reference');
       const cells=await page.locator('#k26Comparison tbody td').allTextContents();
+      assert.ok(cells.every(cell=>!cell.includes('—')),'No inapplicable SD placeholders in the comparison');
       assert.ok(cells.every(cell=>!/[0-9]+\.[0-9]+%/.test(cell)),'Percentages use whole numbers');
       assert.ok(cells.filter(cell=>cell.includes(' SD')).every(cell=>/[+-][0-9]+\.[0-9] SD/.test(cell)),'SD changes use one decimal');
       assert.equal((await page.locator('#k26Comparison tbody tr').first().locator('td').allTextContents())[1],'11% (+0.6 pp)');
@@ -68,7 +69,8 @@ const files = {
       assert.equal(await page.evaluate(()=>currentVal.k_dati),1,'Probability remains bounded at 100%');
       assert.equal((await page.locator('#k_dati_sd').textContent()).trim(),'+1.0 SD','Readout reports achieved SD after the probability cap');
       assert.ok(await page.locator('#k_haredi_btns [data-n="3"]').isDisabled());
-      assert.equal(await page.locator('#k_haredi_sd').textContent(),'—','Near-zero historical SD is not shown as a meaningful movement');
+      assert.equal(await page.locator('#k_haredi_sd').textContent(),'','Inapplicable SD is omitted');
+      assert.ok(await page.locator('#k_haredi_sd').isHidden());
       await page.locator('#clearBtn').click();
       await page.locator('.load-btn[data-election="K26"]').click();
       assert.deepEqual(await page.evaluate(()=>({...currentVal})),actual,'Normal 2026 button loads the same election estimates');
@@ -82,6 +84,15 @@ const files = {
         assert.ok(Math.abs(loaded.k-Number(row.theta_bibi_K25))<1e-12,'2022 support still loads');
       }
       await page.locator('#clearBtn').click();
+      await page.locator('[data-tab="parties"]').click();
+      assert.equal(await page.locator('#partyElection').inputValue(),'K26','Party tagging opens on the latest election');
+      assert.equal(await page.locator('#partiesTable tbody tr').count(),38,'2026 party tagging preserves every list');
+      const partyData=await page.evaluate(()=>({sum:DATA.parties.K26.reduce((sum,p)=>sum+p.share,0),amcha:DATA.parties.K26.find(p=>p.letter==='ך').bloc}));
+      assert.ok(Math.abs(partyData.sum-1)<1e-12,'Displayed K26 lists exhaust national valid votes');
+      assert.equal(partyData.amcha,'Coalition');
+      await page.selectOption('#partyElection','K25');
+      assert.ok(await page.locator('#partiesTable tbody tr').count()>0,'Historical party tagging still works');
+      await page.selectOption('#partyElection','K26');
       await page.locator('[data-tab="k26"]').click();
       await page.setViewportSize({width:390,height:844});
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),'Mobile page must not overflow');
@@ -92,7 +103,8 @@ const files = {
     const baseline=await page.evaluate(()=>JSON.stringify(CUBE.rows));
     const before=await page.locator('#k26FamilyComparison').textContent();
     await page.selectOption('#modelElection','K26');
-    assert.ok(await page.locator('.top p').textContent().then(s=>s.includes('2026')),'Introduction identifies the selected election');
+    assert.equal(await page.locator('#k26ModelPanel p').count(),0,'No methodological narrative in the demographic controls');
+    assert.equal(await page.locator('#k26ModelStatus, #k26FitCoverage').count(),0,'Technical audit text is absent from viewer flow');
     const modelFolder=path.join(project,'data/processed/k26/current/individual_model');
     const history=JSON.parse(fs.readFileSync(path.join(modelFolder,'historical_election_cubes.json'),'utf8'));
     const latest=JSON.parse(fs.readFileSync(path.join(modelFolder,'k26_probability_cube.json'),'utf8'));
@@ -104,10 +116,9 @@ const files = {
     const expectedMean=historicalRates.reduce((sum,x)=>sum+x,0)/5;
     const expectedSd=Math.sqrt(historicalRates.reduce((sum,x)=>sum+(x-expectedMean)**2,0)/5);
     const cells=await page.locator('#k26FamilyComparison tr').first().locator('td').allTextContents();
-    assert.equal(cells[2],expectedMean.toFixed(2)+'%','Common historical mean is calculated from five election rates');
-    assert.equal(Number(cells[5]),Number(((nationalTurnout(latest)-expectedMean)/expectedSd).toFixed(2)),'SD change uses the same-design historical mean and population SD');
+    assert.equal(cells[2],expectedMean.toFixed(0)+'%','Common historical mean is calculated from five election rates');
+    assert.equal(Number(cells[5]),Number(((nationalTurnout(latest)-expectedMean)/expectedSd).toFixed(1)),'SD change uses the same-design historical mean and population SD');
     assert.notEqual(await page.evaluate(()=>JSON.stringify(CUBE.rows)),baseline);
-    assert.ok(await page.locator('#k26FitCoverage').textContent().then(s=>s.includes('81.71%')));
     assert.ok(await page.locator('#partyA').textContent().then(s=>s.includes('ישר וביחד')),'K26 party selectors use reviewed family names');
     await page.evaluate(()=>{
       const input=F.pop_group.querySelector('input[value="1"]');
@@ -116,7 +127,7 @@ const files = {
     assert.notEqual(await page.locator('#k26FamilyComparison').textContent(),before,'Comparison follows demographic filters');
     await page.locator('#filters .trigger').first().click();
     await page.locator('#filters [data-x="none"]').first().click();
-    assert.ok(await page.locator('#k26FamilyComparison').textContent().then(s=>s.includes('—')),'Empty group remains missing');
+    assert.ok(await page.locator('#k26FamilyComparison tr').first().locator('td').allTextContents().then(cells=>cells.slice(1).every(value=>value==='')),'Empty group has blank numeric cells');
     await page.selectOption('#modelElection','historical');
     assert.equal(await page.evaluate(()=>JSON.stringify(CUBE.rows)),baseline,'Historical cube restores exactly');
     await page.setViewportSize({width:390,height:844});

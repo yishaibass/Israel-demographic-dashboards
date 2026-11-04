@@ -48,6 +48,9 @@ def integrate(page: str, cube: dict, audit: dict, historical: dict) -> str:
     if not fit_id or audit.get("model_fit_id") != fit_id:
         raise ValueError("K26 cube and audit must come from the same fitted model")
     page = re.sub(re.escape(BEGIN) + r".*?" + re.escape(END), "", page, flags=re.DOTALL)
+    page = re.sub(r'(<header class="top">.*?<h1>.*?</h1>)<p>.*?</p>', r'\1', page, count=1, flags=re.DOTALL)
+    page = re.sub(r'(<div class="group-footnote">)<p>.*?</p>', r'\1', page, count=1, flags=re.DOTALL)
+    page = page.replace('שיעור הצבעה חזוי', 'שיעור הצבעה')
     start = page.index("const CUBE=") + len("const CUBE=")
     baseline, _ = json.JSONDecoder().raw_decode(page[start:])
     current = merge_cube(baseline, cube)
@@ -66,16 +69,11 @@ def integrate(page: str, cube: dict, audit: dict, historical: dict) -> str:
         history_masses[election] = [[row[index] for index in indices] for row in matched["rows"]]
     baseline_hash = hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()
     panel = '''<div class="card" id="k26ModelPanel">
-<label for="modelElection"><strong>תקופת המודל: </strong></label>
-<select id="modelElection"><option value="historical">ברירת המחדל שפורסמה — ממוצע 2019–2022</option><option value="K26">2026 — אומדן מהמודל המשותף</option></select>
-<p>אותו מודל מותאם לכל שש הבחירות: אותם משתנים, אוכלוסיית מפקד 2022, יעדים ברמת יישוב ופונקציית התאמה. לכל בחירה אומדנים משלה. ברירת המחדל שפורסמה נשמרת כנקודת ייחוס.</p>
-<p>סיווג 2026: ישר וביחד — מרכז ליברלי; הדמוקרטים — שמאל ציוני. רשימות קטנות אחרות מוצגות ב״אחרות״. נתוני המסים וההעברות נשארים נתונים היסטוריים.</p>
-<p>מעטפות חיצוניות אינן משויכות לקבוצות ואינן משתתפות בהתאמה. שיעור ההצבעה המוצג הוא אומדן מודל על בסיס מפקד 2022, ואינו שיעור ההצבעה הארצי הרשמי.</p>
-<p id="k26ModelStatus"></p>
-<p id="k26FitCoverage"></p>
-<details><summary>השוואת הקבוצה שנבחרה: שינוי לאורך זמן ושינוי באומדן</summary>
-<div style="overflow-x:auto"><table style="width:100%"><thead><tr><th>מדד</th><th>ברירת המחדל שפורסמה</th><th>ממוצע 2019–2022 באותו מודל</th><th>אומדן 2026</th><th>שינוי מהממוצע באותו מודל (נ״א)</th><th>שינוי בס״ת</th></tr></thead><tbody id="k26FamilyComparison"></tbody></table></div>
-<p>ממוצע וסטיית תקן מחושבים מחמשת שיעורי הבחירות ההיסטוריות בקבוצה שנבחרה, באותה התאמה משותפת. השינוי בס״ת משווה את 2026 לממוצע הזה; הוא אינו מובהקות סטטיסטית. זוהי התאמה בדיעבד המשתמשת גם בנתוני 2026. הפער מול ברירת המחדל עשוי לכלול גם עדכון של האמידה.</p></details>
+<label for="modelElection"><strong>בחירות: </strong></label>
+<select id="modelElection"><option value="historical">ממוצע חמש הבחירות</option><option value="K26">2026</option></select>
+<details><summary>2026 מול ממוצע חמש הבחירות</summary>
+<div style="overflow-x:auto"><table style="width:100%"><thead><tr><th>מדד</th><th>ממוצע שפורסם</th><th>ממוצע חמש הבחירות · התאמה אחידה</th><th>2026</th><th>שינוי (נ״א)</th><th>שינוי (ס״ת)</th></tr></thead><tbody id="k26FamilyComparison"></tbody></table></div>
+</details>
 </div>'''
     marker = '<section class="analysis-section">'
     if marker not in page:
@@ -89,8 +87,6 @@ const K26_HISTORICAL_MASSES=__HISTORY__;
 const K26_MASS_COLUMNS=__MASS_COLUMNS__;
 const K26_FIT_METADATA=__META__;
 const K26_HISTORICAL_PARTY_NAMES=P.map(p=>p[1]);
-const k26Intro=document.querySelector('.top p'),k26GroupFootnote=document.querySelector('.group-footnote p');
-const k26HistoricalIntro=k26Intro.textContent,k26HistoricalFootnote=k26GroupFootnote.innerHTML;
 const K26_PARTY_NAMES={shas:'ש״ס',utj:'יהדות התורה',likud:'ליכוד',national_religious:'הציונות הדתית–זהות, עוצמה יהודית ונעם',center:'ישר וביחד',zionist_left:'הדמוקרטים',secular_national_right:'ישראל ביתנו',arab:'הרשימה המשותפת ורע״ם',other:'שאר הרשימות, כולל עמך ישראל, הציבור החרדי והמילואימניקים'};
 function renderK26Comparison(){
   const selections=Object.entries(F).map(([key,element])=>[ci[key],sel(element)]);
@@ -108,13 +104,13 @@ function renderK26Comparison(){
   }
   const old=values(K26_FROZEN_ROWS),current=values(K26_FITTED_CUBE.rows),names=['שיעור הצבעה',...P.map(p=>p[2])];
   const history=Object.values(K26_HISTORICAL_MASSES).map(rows=>values(rows,true));
-  const fmt=v=>v===null?'—':v.toFixed(2)+'%';
+  const fmt=v=>v===null?'':v.toFixed(0)+'%';
   document.getElementById('k26FamilyComparison').innerHTML=names.map((name,i)=>{
     const available=history.every(e=>e[i]!==null)&&current[i]!==null;
     const mean=available?history.reduce((sum,e)=>sum+e[i],0)/history.length:null;
     const sd=available?Math.sqrt(history.reduce((sum,e)=>sum+(e[i]-mean)**2,0)/history.length):null;
     const delta=available?current[i]-mean:null,z=available&&sd>=.0001?delta/sd:null;
-    const signed=value=>value===null?'—':(value>=0?'+':'')+value.toFixed(2);
+    const signed=value=>value===null?'':(value>=0?'+':'')+value.toFixed(1);
     return '<tr><td>'+name+'</td><td>'+fmt(old[i])+'</td><td>'+fmt(mean)+'</td><td>'+fmt(current[i])+'</td><td dir="ltr">'+signed(delta)+'</td><td dir="ltr">'+signed(z)+'</td></tr>';
   }).join('');
 }
@@ -134,15 +130,11 @@ function refreshK26PartyLabels(){
 selector.addEventListener('change',()=>{
   CUBE.rows=selector.value==='K26'?K26_FITTED_CUBE.rows:K26_FROZEN_ROWS;
   P.forEach((p,i)=>p[1]=selector.value==='K26'?K26_PARTY_NAMES[p[0]]:K26_HISTORICAL_PARTY_NAMES[i]);
-  k26Intro.textContent=selector.value==='K26'?'אומדני 2026 ממודל אחד לכל שש הבחירות, עם משתנים ואופן התאמה משותפים, על בסיס מפקד 2022. אלו הסתברויות מודליות ולא קולות פרטניים.':k26HistoricalIntro;
-  k26GroupFootnote.innerHTML=selector.value==='K26'?'<strong>קבוצות המודל ב־2026:</strong> '+P.map(p=>p[2]+' — '+p[1]).join(' · '):k26HistoricalFootnote;
   refreshK26PartyLabels();
   renderDemo();renderParty();
 });
 document.getElementById('filters').addEventListener('change',renderK26Comparison);
 document.querySelectorAll('#filters [data-x]').forEach(button=>button.addEventListener('click',renderK26Comparison));
-document.getElementById('k26ModelStatus').textContent=K26_FIT_METADATA.status;
-document.getElementById('k26FitCoverage').textContent=K26_FIT_METADATA.coverage;
 renderK26Comparison();
 </script>'''
     metadata = {"snapshot_id": cube["snapshot_id"], "model_fit_id": fit_id, "baseline_sha256": baseline_hash,
