@@ -41,3 +41,37 @@ are ecological estimates; historical SD is descriptive variation, separate from
 estimation uncertainty.
 
 The election-loading row includes K26 alongside K21–K25. K26 loads its fitted turnout/support and its national below-threshold vote fractions; the same scenario engine handles every year. The population toggle is independent. The renderer checks projected eligible shares against the stored base, growth assumptions and projection horizon. Actual 2026 locality registered-voter counts and turnout enter the behavioral fit; they do not currently reweight the national demographic-share projection.
+
+## Turnout research: longer history and correlated uncertainty
+
+These backend analyses do not write published parameters or UI. `turnout_history.py`
+archives official K18/K19/K20 turnout counts with source hashes, fits K18–K26 on
+the same fixed K25 locality composition and exports five-, seven- and eight-election
+historical references. Every historical reference excludes K26. Both the full
+matched sample and a balanced locality panel are reported. Archived raw-count
+incoherencies are explicitly excluded by locality, with no count corrections.
+
+```bash
+python products/coalition_simulator/model/turnout_history.py --root PATH_TO_PROJECT --download
+python products/coalition_simulator/model/turnout_uncertainty.py --panel PATH_TO_PROJECT/data/processed/k26/current/turnout_research/history/locality_panel.csv --geography PATH_TO_PROJECT/data/processed/k26/current/turnout_research/geography/locality_geography.csv --block-column subdistrict_code --stress-block-column district_code --balanced --draws 1000 --output PATH_TO_PROJECT/data/processed/k26/current/turnout_research/uncertainty
+```
+
+The geography lookup comes from the official CBS 2022 locality catalog, resource
+`199b15db-3bcb-470e-ba03-73364737e352`. Raw responses, exact field mapping and
+coordinate normalization are retained with that catalog's source metadata in
+the project's `data/raw/ballots/historical_turnout/`.
+
+Resampling preserves each locality's entire election history; geographic blocks
+also preserve within-block co-movement. The uncertainty of K26 minus its historical
+mean retains their covariance. A separate covariance-aware diagnostic estimates
+how much fitted-coefficient noise contributes to historical scatter; individual
+voter variance is not added to historical SD. Research outputs live under the
+project's `data/processed/k26/current/turnout_research/`.
+
+Ranges are conditional resampling sensitivity results, not calibrated confidence
+intervals or probabilities for a future national election. They condition on fixed
+2022 demographics, whose historical changes are unobserved. There are few regional
+clusters, group exposure is uneven, and rank-deficient resamples are counted and
+excluded jointly. Additional localities do not create independent national election
+shocks. See the saved reports for covariance components, coverage and exclusions.
+The tested runtime is Python 3.15.2.
