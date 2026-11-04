@@ -28,23 +28,34 @@ const files = {
       return route.abort();
     });
     for(const name of ['simulator-en.html','simulator-he.html','legacy.html']) {
-      await page.goto('https://model.test/'+name);
-      assert.equal(await page.locator('#k26Comparison tbody tr').count(),12);
+      await page.goto('https://model.test/'+name+'#2026');
+      assert.ok(await page.locator('#tab-k26').evaluate(el=>el.classList.contains('active')),'Comparison deep link opens its tab');
+      assert.equal(await page.locator('.tabs-bar .tab-btn').last().getAttribute('data-tab'),'k26','Comparison is the final tab');
+      await page.locator('[data-tab="k26"]').click();
+      assert.equal(await page.locator('#k26Comparison tbody tr').count(),6);
+      const cells=await page.locator('#k26Comparison tbody td').allTextContents();
+      assert.ok(cells.every(cell=>!/[0-9]+\.[0-9]+%/.test(cell)),'Percentages use whole numbers');
+      assert.ok(cells.filter(cell=>cell.includes(' SD')).every(cell=>/[+-][0-9]+\.[0-9] SD/.test(cell)),'SD changes use one decimal');
+      assert.equal((await page.locator('#k26Comparison tbody tr').first().locator('td').allTextContents())[1],'11% (+6%)');
       const before=await page.evaluate(()=>({...currentVal}));
       for(const [group,row] of Object.entries(parameters)) {
         assert.ok(Math.abs(before['t_'+group]-Number(row.theta_vote_mean))<1e-12,'Published turnout default must match model output: '+group);
         assert.ok(Math.abs(before['k_'+group]-Number(row.theta_bibi_mean))<1e-12,'Published support default must match model output: '+group);
       }
       await page.locator('#loadK26').click();
+      assert.ok(await page.locator('#tab-scenario').evaluate(el=>el.classList.contains('active')),'Loading estimates opens the scenario');
       const actual=await page.evaluate(()=>({...currentVal}));
       const expected=JSON.parse(fs.readFileSync(path.join(project,'data/processed/k26/current/model_comparison/six_group_comparison.json'),'utf8'));
       for(const row of expected.rows) {
         const key=(row.parameter==='theta_vote'?'t':'k')+'_'+row.group;
         assert.ok(Math.abs(actual[key]-row.k26_estimate)<1e-8,key);
       }
-      assert.ok((await page.locator('#k26Comparison').textContent()).includes('91.32%'));
+      const metadata=await page.locator('#k26ModelMetadata').textContent().then(JSON.parse);
+      assert.equal(metadata.projection_years,3.5);
+      assert.ok(Math.abs(metadata.coverage.k26_matched_valid_vote_fraction_national-.9131946897)<1e-8);
       await page.locator('#clearBtn').click();
       assert.deepEqual(await page.evaluate(()=>({...currentVal})),before,'Reset must restore frozen defaults');
+      await page.locator('[data-tab="k26"]').click();
       await page.setViewportSize({width:390,height:844});
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),'Mobile page must not overflow');
       await page.setViewportSize({width:1280,height:960});

@@ -23,8 +23,7 @@ The fitter carries K25 locality Census composition forward explicitly. It fits
 turnout, then coalition votes per eligible voter bounded by turnout. Coalition
 support uses all voters, including invalid ballots, under the original simulator
 convention. Envelopes remain in national totals and outside group fitting.
-The comparison shows percentage-point and historical SD changes, fit diagnostics,
-coverage, and conditional bootstrap intervals. SD uses `ddof=0` across K21–K25;
+The final simulator tab shows six group rows, whole percentages, one-decimal historical SD changes, and projected eligible-voter shares. Use `#2026` to open it directly. Eligible-share changes compare the 2026 projection with the K25/2022 Census base, not a five-election population average. Detailed changes, fit diagnostics, coverage and conditional bootstrap intervals remain in the analysis JSON/CSV. SD uses `ddof=0` across K21–K25;
 values below `1e-6` yield an undefined standardized change.
 
 `k26_dashboard.py` owns the English/Hebrew comparison renderer; the source project's
