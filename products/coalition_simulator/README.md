@@ -75,3 +75,34 @@ clusters, group exposure is uneven, and rank-deficient resamples are counted and
 excluded jointly. Additional localities do not create independent national election
 shocks. See the saved reports for covariance components, coverage and exclusions.
 The tested runtime is Python 3.15.2.
+
+## Isolated model benchmark
+
+[`model/ei_benchmark/README.md`](model/ei_benchmark/README.md) describes the
+research-only comparison of pinned MIT-licensed PyEI/Rebane models and a fast
+regional empirical-residual predictor. It records geographic holdouts, numerical
+checks, convergence and practical-value gates. These experiments do not write
+published parameters or UI.
+
+## Demographic foundation: next research stage
+
+The current six shares originate in 2022 Census PUF household religiosity,
+person-weighted within locality/sub-quarter and mapped to statistical areas.
+They are proxies for eligible-voter composition. A local provenance audit found
+the raw PUF, codebooks and processed bridges, but none of five documented
+temporary reconstruction scripts. The retained notes do not verify an adult-only
+filter. Rebuilding and versioning that pipeline, with an explicit 18+ denominator,
+comes before changing demographic granularity.
+
+Use 2008 and 2022 census anchors, annual age/religion updates and reconciled
+[CBS statistical-area crosswalks](https://www.cbs.gov.il/he/cbsNewBrand/Pages/מפתחות-מעבר.aspx).
+Separate observed counts, reconstructed shares and 2026 projections. Historical
+Jewish religiosity needs its own estimation method: a
+[CBS working paper, page 24](https://www.cbs.gov.il/he/publications/DocLib/pw/pw118/wp118.pdf#page=24)
+explicitly notes that the 2008 Census did not contain religiosity. Annual
+population counts alone cannot supply those missing six-way distributions.
+
+Compare estimator changes on the same time-matched population foundation and
+geographic holdouts. Keep the six-group simulator and the richer socioeconomic
+nine-family model as distinct use cases; their current coverage and estimands
+differ. No foundation rebuild or structural change is published by this audit.
