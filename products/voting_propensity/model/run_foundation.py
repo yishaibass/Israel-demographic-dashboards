@@ -11,6 +11,12 @@ STAGES = {
     "population": "demographic_foundation",
     "history": "historical_elections",
     "fit": "fit_foundation_history",
+    "national-controls": "national_population_controls",
+    "religiosity": "annual_religiosity",
+    "electorate": "population_electorate",
+    "reconstruct": "population_reconstruction",
+    "source-inputs": "population_source_inputs",
+    "fit-reconstructed": "fit_population_reconstruction",
 }
 
 

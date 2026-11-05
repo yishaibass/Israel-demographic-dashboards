@@ -100,94 +100,162 @@ are excluded from fitting and included in separate national comparisons.
 
 The output is an ecological model: individual propensities are inferred from aggregate geographic outcomes and Census composition, not from observed individual ballots. Results should therefore be interpreted as modeled group tendencies, not identified votes or causal effects.
 
-## Research: annual demographics and earlier elections
+## Research: election-specific population
 
-The isolated `research/election-demographic-foundation` branch adds three
-reproducible stages, without writing published parameters, dashboard cubes or UI:
+The `research/population-reconstruction` branch rebuilds the population inputs.
+Published parameters, defaults, HTML and dashboard cubes remain unchanged.
+All research runs use Python 3.15.2. Raw records and fitted outputs stay outside Git.
 
-- `demographic_foundation.py` rebuilds explicit 18+ population cells from the
-  licensed 2022 PUF. Other population groups and mixed/other/unknown household
-  religiosity remain visible. It does not infer an individual's religion from
-  their locality. The detailed model already filtered adults; this rebuild
-  makes the foundation and the older six-share bridge audit reproducible.
-- `historical_elections.py` downloads and verifies primary CEC archives and applies
-  the versioned `historical_party_crosswalk_v1.csv`. Unknown positive vote mass
-  blocks training. Joint lists produce disjoint merged observations, including
-  every ballot touching the merged families; their components are not invented.
-- `fit_foundation_history.py` compares the same 24-feature logistic/softmax
-  design on immutable whole-locality folds, with year-specific population weights.
+### Population design
 
-Annual CBS counts provide broad population-group changes for 2018–2023.
-The preferred sensitivity starts from the known 2022 adult mix and multiplies
-each broad group's weights by its same-series population growth since 2022.
-It assumes adult group growth follows all-age growth; it does not substitute
-an all-age share for a known adult share. Household religiosity and other
-within-cell structure remain conditional on 2022. No annual religiosity is observed.
+1. Retain Census 2022 adult age × sex × population-group associations and household
+   religiosity. Other population, mixed households and unknown answers remain explicit.
+2. Use actual CBS 2020 locality age counts, Census 2008 subdistrict age × sex data,
+   annual locality totals and dated PIBA locality age profiles to estimate geographical
+   changes. For 2026, locality totals use the same-series PIBA 2020–2026 growth
+   against CBS 2020 resident anchors, with explicit fallbacks for new codes. Source-window and
+   registry/resident differences remain assumptions in the geographical prior.
+   Reviewed mergers and splits conserve their geographical family population;
+   code creation is distinguished from physical settlement founding.
+3. Reconcile each dated population to CBS national age × sex × Jewish/Arab/Other
+   counts. Annual averages are aligned to July 1 for interpolation to election dates.
+   Missing historical years are interpolated; October 2026 is projected from the
+   latest observed 2025 annual average using the 2023–2025 trend. Local source
+   counts are priors; the reconciled local joint counts are estimates.
+4. Update household religiosity with weighted HES 2019–2023 trends, centered on the
+   2022 Census. Sparse age/sex trends shrink toward national trends. The full
+   2016–2023 window is a sensitivity because nationality measurement changed in 2019.
+   Earlier years use observed Social Survey 2002–2021 relative changes through an
+   explicit 2019 measurement bridge. Individual 20+ self-definition and household
+   18+ religiosity are different measures; their equivalence is not asserted.
+5. Separately calibrate resident citizen voters to CBS election-specific eligible
+   population reports, and registered totals to CEC locality counts. Permanent
+   noncitizens and registered citizens abroad are distinct. The primary allocation
+   assumes overseas voters have the same group composition as resident citizens
+   within their registered locality; a conservative alternative leaves that gap
+   unallocated. The 2019–2020 national targets use approximate headlines and
+   rounded group percentages; 2021–2026 counts are published in thousands.
+   Unsupported CEC localities use a flagged national-group prior in the primary
+   calibration; the conservative allocation retains the unidentified gap.
+   Exact constraint closure does not identify individual voters.
 
-For 2026, official coded NII December 2024/2025 counts provide exact 18–64 and
-65+ categories. Each category's one-year count projection is `count_2025² / count_2024`.
-The target is December 1, 2026, not the exact election date. NII registry
-residents differ from CEC registered voters. Legacy NII tables are retained as
-separate diagnostics: their population reference dates are unverified and their
-retirement-age categories differ by sex, so they are not treated as exact 65+ data.
+The current model retains its 24 predictors and regularization. Resident weights
+construct locality/subquarter context; citizen-adjusted registered weights enter
+its voting mixture. No locality-specific turnout coefficients are added. Income
+and origin remain conditional on the 2022 PUF within the reconstructed demographic
+cells. Small demographic cohorts absent from a locality’s PUF sample receive
+explicit pooled Census donor profiles; their imputed population mass is audited.
+Model validation retains identical whole-locality folds and election targets.
 
-Full fits now include 2003, 2009, 2013 and 2015 alongside K21–K26: ten elections,
-nine historical. Those older fits retain the fixed-2022 common reference;
-they are not claimed to have reconstructed historical demographics. The 2006
-archive lacks locality codes and eligible counts, so it is retained without
-entering full turnout fits. Official pre-2003 downloads were identified but
-could not be retrieved through the available endpoints. Prime-minister-only
-ballots are excluded. Kulanu-to-Likud preserves the existing analytical family
-convention; family names do not identify literal party membership or coalition status.
+### Evidence and limits
 
-### Results and limits
+The reconstruction exports 24 calendar years, 2003–2026, plus ten election dates.
+The active geography changes with documented code creation, retirement and
+mergers. The reviewed lifecycle ledger covers specified 2019–2026 events; older
+geographical histories and unknown founding dates remain explicit limitations.
+Census 2008 supplies 15 inhabited subdistricts; three water polygons are excluded.
+Actual 2020 local age data and November 2026 registry profiles improve geographical
+priors, rather than supplying observed annual local religiosity or individual votes.
+National population constraints are checked separately from electoral prediction.
 
-The preferred paired comparison uses 196 identical localities and three frozen
-folds, with 70 epochs and full refits. Exact projected 65+ margins cover 193 of
-those localities; three retain explicitly recorded population fallbacks.
+Population validation withholds observed data before reconstruction. A separate
+parameter-free diagnostic backcasts published 2022 local age profiles to 2020
+using national age-count changes. On 753 matched localities with complete 2020
+65+ source cells, population-weighted error falls from 0.781 to 0.682 percentage
+points; equal-locality error improves only 1.1%. These localities cover 50.2% of
+2020 source residents. Suppressed/imputed values are excluded from the truth set.
+The older regional prior alone is substantially weaker (3.409 points), so available
+local 2022 profiles take priority when filling missing 2020 age components.
+Survey validation leaves out entire HES years. These checks do not validate every
+unobserved local demographic joint distribution.
 
-| Held-out metric, percentage points; equal fold means | Fixed 2022 | Anchored annual update |
+The CBS administrative Haredi voter estimate is an external benchmark. It uses a
+classifier, a different date, and citizen eligibility; it is not automatically
+substituted for Census household religiosity or Social Survey individual identity.
+The location of national residents outside identifiable locality codes is not
+observed; allocating national totals across supported active codes is disclosed.
+Older geographical estimates and the early Social Survey measurement bridge have
+weaker evidence than the recent population inputs.
+
+### Controlled model results
+
+All comparisons use the same 200 named PUF localities, three frozen locality
+folds, 70-epoch limit, seeds, 24 predictors and regularization. These are
+retrospective geographical holdouts of the same six elections.
+
+| Held-out error, percentage points | Fixed 2022 population | Reconstructed eligible population |
 |---|---:|---:|
-| K26 turnout MAE | 4.48 | 4.52 |
-| K26 party-partition MAE | 2.79 | 2.83 |
-| Mean turnout MAE across six elections | 4.54 | 4.53 |
+| 2026 turnout MAE | 4.503 | 3.949 |
+| 2026 party-family MAE | 2.800 | 2.388 |
+| Mean turnout MAE across six elections | 4.530 | 3.943 |
 
-The update improves the input definition and its auditability; it establishes no
-material predictive gain. Both comparisons use identical outcomes and support.
-The source rebuild reproduced all nine data CSV hashes, and primary-count
-regeneration preserved all four historical target CSVs.
+Errors are eligible-weighted within each fold/election, then averaged across
+three folds; party-family errors use valid-vote weights. Updating resident
+composition alone gives 4.525-point 2026 turnout error: most of the improvement
+comes from eligibility calibration. The alternative HES window gives 3.952;
+the Jerusalem citizenship-scope alternative gives 3.976. These sensitivities do
+not exhaust uncertainty in the population reconstruction or ecological estimates.
 
-Within the extended detailed-model fit, the Arab group's K26 turnout is 3.63
-historical SD above the previous-five mean and 3.36 SD above the nine-election
-mean, using the same 2022 reference population. This is a different model and
-population definition from the six-group simulator. These are descriptive
-fitted-election distances, not future-election probabilities. Party-family SD
-excludes years in which a family was observed only inside a merged list.
+The full run took 220 seconds on Python 3.15.2. All 92 focused/regression tests
+and four subtests passed. Five full coefficient exports restored identical
+probabilities through their actual JSON representations. Imputed Census donor
+cohorts account for at most 4,536 estimated registered voters in the paired
+sample, below 0.1%; the actual mass is recorded separately for each election.
+Published dashboard defaults, parameters and HTML were verified unchanged.
 
-Common-reference summaries use the same 200-locality 2022 population;
-year-specific summaries describe reweighted matched samples. Neither is an
-observed national eligible-voter distribution or observed individual voting behavior.
+### Reproduction and ownership
 
-### Reproduction
+`run_foundation.py STAGE --help` exposes each stage. Install `requirements.txt`;
+`pyogrio` reads the retained CBS 2020 geodatabase without geometry or GeoPandas.
+Provide the retained licensed PUF and HES/SS files, the pinned public census
+workbooks and the existing project source caches. No raw microdata are in Git.
 
-Use Python 3.15.2 and install `requirements.txt`. Raw PUF records, population cells,
-fitted outputs and raw election files stay outside Git. `PROJECT` is the existing
-local voting-data project and `PUF` is the retained licensed person-file path.
-The portable launcher also supports embedded Python installations:
+| Stage | Authoritative implementation | Local output |
+|---|---|---|
+| `population` | `demographic_foundation.py` | Adult Census cells; pinned annual locality source controls |
+| `national-controls` | `national_population_controls.py` | Verified annual national single-age × sex × group controls |
+| `source-inputs` | `population_source_inputs.py` | CBS 2020 attributes, 2008 regions and 2022 locality/founding crosswalk |
+| `reconstruct --mode anchors` | `population_reconstruction.py` | Census 2022 PUF joint and independent published margins |
+| `electorate --download` | `population_electorate.py` | Dated PIBA age profiles, official eligible totals, citizen controls |
+| `reconstruct --mode reconstruct` | `population_reconstruction.py` | `adult_controls.csv.gz`, reconciliation and population holdouts |
+| `religiosity` | `annual_religiosity.py` | Primary household trend factors, alternative window and source/holdout evidence |
+| `electorate --adult-controls ...` | `population_electorate.py` | Nationally calibrated resident-citizen and registered group allocations |
+| `fit-reconstructed` | `fit_population_reconstruction.py` | Paired model fits, profiles, group shares and frozen-fold validation |
+| `history` | `historical_elections.py` | Verified primary older election targets and disjoint joint-list partitions |
+
+Use a separate research output directory. Hash checks reject changed cached inputs;
+final fits capture source and input hashes before loading and verify them again
+before marking completion. Reconstructed population files are published atomically.
+The model comparison consumes `adult_controls.csv.gz`, primary and sensitivity
+`religiosity_relative_factors*.csv`, `citizen_electorate_factors.csv`, its full scope-sensitivity alternative, the PUF,
+prepared election targets and an immutable locality-fold assignment. Full-fit
+coefficients are retained in `fitted_models.json`; JSON round-trip verification
+requires identical election probabilities. Outputs remain research artifacts
+until publication is approved.
+
+Earlier research party fits also cover 2003, 2009, 2013 and 2015. The new
+citizen-calibrated controlled comparison covers 2019–2026; earlier national
+citizen controls have not been established. The 2006 archive lacks
+locality identities/eligible denominators and does not enter full turnout fitting.
+Joint ballot lists identify merged party families; their constituents are not
+invented. Party-specific historical SD omits unidentifiable constituent years.
+Historical SD is descriptive fitted-election variation, not a future tail probability.
+
+Primary entries: [CBS locality catalog](https://data.gov.il/api/3/action/package_show?id=localities-in-israel),
+[PIBA locality age profiles](https://data.gov.il/api/3/action/package_show?id=residents_in_israel_by_communities_and_age_groups),
+[CBS 2026 eligible population report](https://www.cbs.gov.il/he/mediarelease/DocLib/2026/332/24_26_332b.pdf),
+[CBS historical Social Survey table](https://www.cbs.gov.il/he/publications/doclib/2024/1905/t_a.xlsx),
+[CEC historical archive](https://data.gov.il/api/3/action/package_show?id=26f9fa06-fcd7-4173-8df5-65797b63e857).
+
+Example final controlled run (paths are supplied by the local project):
 
 ```bash
-python -B products/voting_propensity/model/run_foundation.py population --puf PUF --bridge PROJECT/data/clean/model_input_v2.csv --raw PROJECT/data/raw/demographic_foundation --output PROJECT/data/processed/demographic_foundation --download
-python -B products/voting_propensity/model/run_foundation.py history --project PROJECT --download
-python -B products/voting_propensity/model/run_foundation.py fit --project PROJECT --current PROJECT/data/processed/k26/current --puf PUF --annual-targets PROJECT/data/processed/demographic_foundation/annual_targets.csv --annual-projections PROJECT/data/processed/demographic_foundation/annual_projections.csv --historical-targets PROJECT/data/processed/historical_model --output PROJECT/data/processed/demographic_foundation/model_comparison/reproduced --variants fixed2022_recent fixed2022_paired annual_anchored_growth extended_fixed2022 --epochs 70 --folds 3
+python -B products/voting_propensity/model/run_foundation.py fit-reconstructed \
+  --project PROJECT --current PROJECT/data/processed/k26/current --puf PUF \
+  --population-controls OUTPUT/adult_controls.csv.gz \
+  --religiosity-factors OUTPUT/religiosity/religiosity_relative_factors.csv \
+  --sensitivity-factors OUTPUT/religiosity/religiosity_relative_factors_full_window_sensitivity.csv \
+  --electorate-controls OUTPUT/citizen_electorate_factors.csv \
+  --sensitivity-electorate-controls OUTPUT/citizen_electorate_factors_scope_sensitivity.csv \
+  --splits FROZEN_LOCALITY_FOLDS --output OUTPUT/model_comparison --epochs 70 --folds 3
 ```
-
-Population acquisition verifies the official CBS catalog and 19 pinned NII files.
-Historical acquisition verifies resource identity, retained hashes and complete
-unpaginated primary archives. Existing caches fail on tampering and are not silently
-replaced. Source URLs, versions, population bases, mapping qualifications, actual
-coverage, fitted identities and input/source hashes are retained in local audits.
-
-Primary source entry points are the
-[CBS locality catalog](https://data.gov.il/api/3/action/package_show?id=localities-in-israel),
-[NII December 2025 tables](https://www.btl.gov.il/Publications/yeshuvim/2025/lastmonth/Pages/default.aspx)
-and [CEC historical archive catalog](https://data.gov.il/api/3/action/package_show?id=26f9fa06-fcd7-4173-8df5-65797b63e857).

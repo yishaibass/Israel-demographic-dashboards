@@ -44,7 +44,7 @@ class DemographicFoundationTests(unittest.TestCase):
         self.assertNotIn("druze", cells.population_group.tolist())
         self.assertEqual(cells.loc[2, "population_group"], "other")
         self.assertEqual(cells.loc[2, "household_religiosity"], "unknown")
-        self.assertEqual(cells.loc[2, "geography_status"], "masked_regional_council")
+        self.assertEqual(cells.loc[2, "geography_status"], "masked_locality_pool")
         self.assertEqual(cells.loc[3, "household_religiosity"], "mixed")
         mix = population_mix(cells.loc[cells.person_weight.gt(0)])
         np.testing.assert_allclose(mix.groupby("locality_code").share.sum(), 1.)

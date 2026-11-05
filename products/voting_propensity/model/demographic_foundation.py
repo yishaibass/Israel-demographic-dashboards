@@ -214,7 +214,7 @@ def classify(chunk):
     out["household_religiosity"] = numeric.DatiyutPUF.map(RELIGIOSITY).fillna("unknown")
     out["sex"] = numeric.MinPUF.map({1: "male", 2: "female"}).fillna("unknown")
     out["age_band"] = numeric.GilPUF.map(AGE).fillna("unknown")
-    out["geography_status"] = np.where(out.locality_code.eq(9999), "masked_regional_council",
+    out["geography_status"] = np.where(out.locality_code.eq(9999), "masked_locality_pool",
                                          np.where(out.locality_code.gt(0), "identified_locality", "unknown"))
     out["person_weight"] = weight.fillna(0)
     out["puf_records"] = 1
@@ -631,7 +631,7 @@ def build(puf, bridge, output, raw, download=False):
              "population_groups": POPULATION, "household_religiosity": RELIGIOSITY,
              "classification": "Other population, mixed/other/unknown religiosity remain explicit; Arab unsplit because PUF has no individual religion",
              "bridge_comparison_crosswalk": "Only for comparison: Jewish mixed joins traditional; secular alone hiloni; Jewish other/unknown plus other-population retained unallocated; Arab+Druze combined",
-             "limits": ["PUF household religiosity is not individual identification", "Locality9999 pools masked regional-council settlements and must not join election envelopes", "Subquarter cells are not observed statistical-area cells", "No annual six-way religiosity is observed", "Annual population targets must retain year, geography, denominator and provisional/final status", "2016 catalog contains names only; 2017 ethnic fields excluded because their raw scale differs from total and official unit metadata is unavailable", "NII reference population dates and historical locality boundaries remain unverified; its year index is publication-year proxy", "NII source counts are rounded; component sums may differ by up to200persons; exact discrepancy retained per source row"]}
+             "limits": ["PUF household religiosity is not individual identification", "Locality9999 is a masked locality pool including small urban and regional-council localities and must not join election envelopes", "Subquarter cells are not observed statistical-area cells", "No annual six-way religiosity is observed", "Annual population targets must retain year, geography, denominator and provisional/final status", "2016 catalog contains names only; 2017 ethnic fields excluded because their raw scale differs from total and official unit metadata is unavailable", "NII reference population dates and historical locality boundaries remain unverified; its year index is publication-year proxy", "NII source counts are rounded; component sums may differ by up to200persons; exact discrepancy retained per source row"]}
     (output/"audit.json").write_text(json.dumps(audit, indent=2, ensure_ascii=False)+"\n", encoding="utf-8")
     return audit
 
