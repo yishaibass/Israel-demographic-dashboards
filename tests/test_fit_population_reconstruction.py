@@ -6,7 +6,8 @@ import json
 from types import SimpleNamespace
 import torch
 
-from fit_population_reconstruction import apply_eligible_mixture, reconstructed_micro, model_record, restore_model
+from fit_population_reconstruction import (apply_eligible_mixture, reconstructed_micro, model_record, restore_model,
+                                           selected_population, requested_variants, voter_composition)
 import fit_foundation_history as history
 
 
@@ -91,3 +92,39 @@ def test_exported_coefficients_restore_identical_election_probabilities():
     record["features"] = ["different"]
     with pytest.raises(ValueError,match="schema"):
         restore_model(record)
+
+
+def test_historical_population_prefers_exact_election_period():
+    controls = pd.DataFrame(dict(year=[2003,2003],period_id=["2003","K16"],adult_population=[100.,0.]))
+    assert selected_population(controls,2003,"K16").period_id.tolist() == ["K16"]
+    assert selected_population(controls,2003,"unavailable").period_id.tolist() == ["2003"]
+
+
+def test_population_only_run_does_not_silently_use_recent_citizenship_prior():
+    args = SimpleNamespace(variants=["fixed2022","reconstructed_residents"],electorate_controls=None,
+                           sensitivity_factors=None,sensitivity_electorate_controls=None)
+    assert requested_variants(args) == args.variants
+    args.variants = ["reconstructed_electorate"]
+    with pytest.raises(ValueError,match="calibrated"):
+        requested_variants(args)
+
+
+def test_voter_share_denominator_is_votes_cast_not_registered_voters():
+    cells = pd.DataFrame(0.,index=range(2),columns=history.FEATURES)
+    cells["weight"], cells["fsu_proxy"] = [100.,100.], [0.,0.]
+    cells["locality"], cells["profile_group"] = [10,20], ["dati","hiloni"]
+    data = SimpleNamespace(election="K16",cells=cells,available=history.FAMILIES,
+                           partition=[dict(id=f,families=[f]) for f in history.FAMILIES])
+    class Fitted:
+        def probs(self,x,fsu,ei):
+            choices=torch.zeros(2,len(history.FAMILIES));choices[:,0]=torch.tensor([.7,.3]);choices[:,5]=1-choices[:,0]
+            return torch.tensor([.8,.4]),choices
+    composition,preferences=voter_composition(Fitted(),[data],"synthetic")
+    table=pd.DataFrame(composition).set_index("group")
+    assert table.loc["dati","estimated_eligible_share"] == .5
+    assert table.loc["dati","voter_share"] == pytest.approx(2/3)
+    assert table.estimated_votes.sum() == pytest.approx(120)
+    assert pd.DataFrame(preferences).groupby("group").value.sum().to_numpy() == pytest.approx([1,1])
+    data.partition=[dict(id="unidentified",families=["likud","zionist_left"])]
+    with pytest.raises(ValueError,match="crosses"):
+        voter_composition(Fitted(),[data],"synthetic")

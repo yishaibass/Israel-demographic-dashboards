@@ -17,6 +17,8 @@ STAGES = {
     "reconstruct": "population_reconstruction",
     "source-inputs": "population_source_inputs",
     "fit-reconstructed": "fit_population_reconstruction",
+    "historical-electorate": "historical_electorate",
+    "historical-trends": "historical_trends",
 }
 
 

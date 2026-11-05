@@ -24,6 +24,78 @@ import population_electorate as electorate
 CELL_KEYS = ["locality_code", "age_band", "sex", "broad_group"]
 AGE_NAMES = {2: "18_24", 3: "25_34", 4: "35_44", 5: "45_54", 6: "55_64", 7: "65_plus"}
 REL_NAMES = {1: "secular", 2: "traditional", 3: "religious", 5: "haredi", 6: "mixed", 7: "other"}
+VARIANTS = ["fixed2022", "reconstructed_residents", "reconstructed_electorate",
+            "reconstructed_electorate_fullwindow", "reconstructed_electorate_jerusalem_scope",
+            "reconstructed_electorate_historical_mix"]
+ALLOCATION_SENSITIVITIES = {"reconstructed_electorate_jerusalem_scope", "reconstructed_electorate_historical_mix"}
+STABLE_CATEGORIES = {
+    "right_religious_families": {"likud", "national_religious_right", "shas", "utj", "secular_national_right"},
+    "center_left_and_other": {"liberal_center", "zionist_left", "other"},
+    "arab_parties": {"arab"},
+}
+
+
+def selected_population(controls, year, election):
+    chosen = controls.loc[controls.year.eq(year)].copy()
+    if "period_id" in chosen:
+        period = election if election in set(chosen.period_id.astype(str)) else str(year)
+        chosen = chosen.loc[chosen.period_id.astype(str).eq(period)]
+    return chosen
+
+
+def requested_variants(args):
+    names = getattr(args, "variants", None)
+    if names is None:
+        names = VARIANTS[:3] + ([VARIANTS[3]] if args.sensitivity_factors else []) + ([VARIANTS[4]] if args.sensitivity_electorate_controls else [])
+    names = list(dict.fromkeys(names))
+    if not names or not set(names) <= set(VARIANTS):
+        raise ValueError("Unknown or empty model variant selection")
+    if any(name.startswith("reconstructed_electorate") for name in names) and not args.electorate_controls:
+        raise ValueError("Electorate variants require calibrated --electorate-controls; select reconstructed_residents for a population-only fit")
+    if VARIANTS[3] in names and not args.sensitivity_factors:
+        raise ValueError("Full-window variant requires --sensitivity-factors")
+    if ALLOCATION_SENSITIVITIES.intersection(names) and not args.sensitivity_electorate_controls:
+        raise ValueError("Scope variant requires --sensitivity-electorate-controls")
+    return names
+
+
+def voter_composition(fitted, datasets, variant):
+    """Estimated shares of votes cast, with comparable broad party-family totals.
+
+    These are sample projections and net support estimates, not individual flows.
+    Category sums are exported only when every observed merged list is contained
+    within one category, so unidentified historical components are never split.
+    """
+    composition, preferences = [], []
+    for ei, data in enumerate(datasets):
+        for part in data.partition:
+            if not any(set(part["families"]) <= families for families in STABLE_CATEGORIES.values()):
+                raise ValueError("A historical merged list crosses the trend categories")
+        with torch.no_grad():
+            x = torch.tensor(data.cells[history.FEATURES].to_numpy(np.float32))
+            fsu = torch.tensor(data.cells.fsu_proxy.to_numpy(np.float32))
+            pt, pc = fitted.probs(x, fsu, ei)
+            pt = pt.numpy()
+            pc = history.normalized_choice(pc, data.available).numpy()
+        weight = data.cells.weight.to_numpy(float)
+        votes = weight * pt
+        for group, indices in data.cells.groupby("profile_group").indices.items():
+            eligible, voted = float(weight[indices].sum()), float(votes[indices].sum())
+            if eligible <= 0:
+                continue
+            composition.append(dict(variant=variant, election=data.election, group=group,
+                                    estimated_eligible=eligible, estimated_eligible_share=eligible/weight.sum(),
+                                    turnout=voted/eligible, estimated_votes=voted, voter_share=voted/votes.sum(),
+                                    population_localities=int(data.cells.locality.nunique()),
+                                    scope="common matched PUF-locality sample; modeled votes cast"))
+            for category, families in STABLE_CATEGORIES.items():
+                columns = [i for i, family in enumerate(history.FAMILIES) if family in families]
+                value = float(np.average(pc[indices][:, columns].sum(1), weights=votes[indices])) if voted > 0 else 0.
+                preferences.append(dict(variant=variant, election=data.election, group=group,
+                                        category=category, value=value,
+                                        family_components=json.dumps(sorted(families)),
+                                        interpretation="Stable party-family total; not current coalition or individual voter switching"))
+    return composition, preferences
 
 
 def model_record(fitted, datasets, info):
@@ -155,9 +227,13 @@ def apply_eligible_mixture(cells, targets, adult_priors, year, election, citizen
 
 def run(args):
     started = time.perf_counter()
+    requested = requested_variants(args)
     torch.set_num_threads(args.threads)
     args.output.mkdir(parents=True, exist_ok=True)
     input_paths = {name: getattr(args, name) for name in ["puf", "population_controls", "religiosity_factors", "sensitivity_factors", "electorate_controls", "sensitivity_electorate_controls", "splits"] if getattr(args, name) is not None}
+    if args.historical_targets:
+        input_paths.update(historical_targets=args.historical_targets / "targets.csv",
+                           historical_readiness=args.historical_targets / "readiness.json")
     input_hashes = {name: history.file_identity(path) for name, path in input_paths.items()}
     source_paths = {name: Path(__file__).parent / name for name in ["fit_population_reconstruction.py", "fit_foundation_history.py", "fit_k26.py", "context_features.py", "data_pipeline.py", "run_party_family_final.py", "run_multi_election_average.py", "population_electorate.py", "annual_religiosity.py", "population_donors.py"]}
     source_hashes = {name: history.file_identity(path) for name, path in source_paths.items()}
@@ -174,6 +250,11 @@ def run(args):
     if args.historical_targets:
         older, _ = history.read_older(args.historical_targets)
         target_sets = {**older, **target_sets}
+    for name, allocation in [("primary", calibrated_electorate), ("scope", alternate_electorate)]:
+        if allocation is not None and any(v.startswith("reconstructed_electorate") for v in requested):
+            missing = set(target_sets) - set(allocation.election)
+            if missing:
+                raise ValueError(f"{name} electorate controls lack requested elections: {sorted(missing)}")
     micro = common.elections.load_all_adults(args.puf).reset_index(drop=True)
     population = pd.to_numeric(micro.MishkalPratPUF).groupby(pd.to_numeric(micro.SmlYishuvPUF)).sum()
     logpop = np.log1p(population)
@@ -182,7 +263,8 @@ def run(args):
     supported = set(micro.SmlYishuvPUF.astype(int)) - {9999}
     for election, (z, _, _) in target_sets.items():
         year = int(electorate.ELECTION_DATES[election][:4])
-        supported &= set(z.locality) & set(controls.loc[controls.year.eq(year), "locality_code"])
+        dated = selected_population(controls, year, election)
+        supported &= set(z.locality) & set(dated.loc[dated.adult_population.gt(0), "locality_code"])
     micro = micro.loc[micro.SmlYishuvPUF.astype(int).isin(supported)].copy().reset_index(drop=True)
     if len(supported) < 100:
         raise ValueError("Paired model support unexpectedly small")
@@ -190,49 +272,53 @@ def run(args):
     selected_controls = []
     for election in target_sets:
         year = int(electorate.ELECTION_DATES[election][:4])
-        chosen = controls.loc[controls.year.eq(year)]
-        period = election if election in set(chosen.period_id.astype(str)) else str(year)
-        selected_controls.append(chosen.loc[chosen.period_id.astype(str).eq(period) & chosen.locality_code.isin(supported)])
+        chosen = selected_population(controls, year, election)
+        selected_controls.append(chosen.loc[chosen.locality_code.isin(supported)])
     reconstructed_source, donor_audit = expand_missing_cohorts(micro, pd.concat(selected_controls, ignore_index=True))
     splits = pd.read_csv(args.splits).sort_values("locality")
     if splits.locality.duplicated().any() or not supported <= set(splits.locality) or set(splits.fold) != set(range(args.folds)):
         raise ValueError("Frozen locality folds fail coverage")
     splits = splits.loc[splits.locality.isin(supported)]
     splits.to_csv(args.output / "splits.csv", index=False)
-    variants = {"fixed2022": [], "reconstructed_residents": [], "reconstructed_electorate": []}
+    variants = {name: [] for name in requested}
     if args.sensitivity_factors:
-        variants["reconstructed_electorate_fullwindow"] = []
         sensitivity = pd.read_csv(args.sensitivity_factors)
-    if alternate_electorate is not None:
-        variants["reconstructed_electorate_jerusalem_scope"] = []
     audits = []
     fixed_template, fixed_geos, _ = history.prepare_cells(micro, targets.loc[targets.election.eq("K25") & targets.locality.isin(supported)], scale)
     fixed_population = fixed_template.groupby("locality").population_weight.sum()
+    fixed_reference = None
     for election, (z, partitions, families) in sorted(target_sets.items(), key=lambda x: int(x[0][1:])):
         z = z.loc[z.locality.isin(supported)].copy().sort_values("locality").reset_index(drop=True)
         year = int(electorate.ELECTION_DATES[election][:4])
         fixed = fixed_template.copy()
         fixed["weight"] = fixed.population_weight * fixed.locality.map(z.set_index("locality").eligible / fixed_population)
         geos = fixed_geos.copy()
-        variants["fixed2022"].append(history.ElectionData(election, fixed, geos, z, partitions, families))
+        if election == "K25":
+            fixed_reference = history.ElectionData(election, fixed, geos, z, partitions, families)
+        if "fixed2022" in variants:
+            variants["fixed2022"].append(history.ElectionData(election, fixed, geos, z, partitions, families))
         dated, audit = reconstructed_micro(reconstructed_source, controls, factors, year, election)
         audits.append(dict(audit, election=election, variant="primary"))
         resident, geos, z = history.prepare_cells(dated, z, scale)
         # Exactly the represented resident priors are used, never all-age shares.
         dated_keys = micro_keys(dated).assign(adult_population=dated.MishkalPratPUF)
         priors = dated_keys.groupby(["locality_code", "broad_group"], as_index=False).adult_population.sum().assign(year=year)
-        variants["reconstructed_residents"].append(history.ElectionData(election, resident, geos, z, partitions, families))
-        eligible_cells = apply_eligible_mixture(resident, z, priors, year, election, allocated_controls=calibrated_electorate)
-        imputed = dated_keys.loc[dated.population_donor_imputed.fillna(False)].groupby(["locality_code", "broad_group"]).adult_population.sum()
-        fractions = (imputed / priors.set_index(["locality_code", "broad_group"]).adult_population).fillna(0)
-        eligible_groups = eligible_cells.groupby(["locality", "broad_group"]).weight.sum()
-        eligible_groups.index = eligible_groups.index.set_names(["locality_code", "broad_group"])
-        audits[-1]["imputed_registered_eligible_mass"] = float((fractions * eligible_groups).sum())
-        variants["reconstructed_electorate"].append(history.ElectionData(election, eligible_cells, geos, z, partitions, families))
-        if alternate_electorate is not None:
+        if "reconstructed_residents" in variants:
+            variants["reconstructed_residents"].append(history.ElectionData(election, resident, geos, z, partitions, families))
+        if any(name.startswith("reconstructed_electorate") for name in variants):
+            eligible_cells = apply_eligible_mixture(resident, z, priors, year, election, allocated_controls=calibrated_electorate)
+            imputed = dated_keys.loc[dated.population_donor_imputed.fillna(False)].groupby(["locality_code", "broad_group"]).adult_population.sum()
+            fractions = (imputed / priors.set_index(["locality_code", "broad_group"]).adult_population).fillna(0)
+            eligible_groups = eligible_cells.groupby(["locality", "broad_group"]).weight.sum()
+            eligible_groups.index = eligible_groups.index.set_names(["locality_code", "broad_group"])
+            audits[-1]["imputed_registered_eligible_mass"] = float((fractions * eligible_groups).sum())
+            if "reconstructed_electorate" in variants:
+                variants["reconstructed_electorate"].append(history.ElectionData(election, eligible_cells, geos, z, partitions, families))
+        if ALLOCATION_SENSITIVITIES.intersection(variants):
             alternate_cells = apply_eligible_mixture(resident, z, priors, year, election, allocated_controls=alternate_electorate)
-            variants["reconstructed_electorate_jerusalem_scope"].append(history.ElectionData(election, alternate_cells, geos, z, partitions, families))
-        if args.sensitivity_factors:
+            for name in ALLOCATION_SENSITIVITIES.intersection(variants):
+                variants[name].append(history.ElectionData(election, alternate_cells, geos, z, partitions, families))
+        if "reconstructed_electorate_fullwindow" in variants:
             other, audit = reconstructed_micro(reconstructed_source, controls, sensitivity, year, election)
             audits.append(dict(audit, election=election, variant="fullwindow_sensitivity"))
             cells, g, tz = history.prepare_cells(other, z, scale)
@@ -240,6 +326,7 @@ def run(args):
             variants["reconstructed_electorate_fullwindow"].append(history.ElectionData(election, cells, g, tz, partitions, families))
         print(json.dumps(dict(phase="prepared", election=election, localities=len(z), cells=len(resident))), flush=True)
     metrics, predictions, profiles, fits, populations, saved_models = [], [], [], [], [], {}
+    composition, preferences = [], []
     for variant, datasets in variants.items():
         for data in datasets:
             for group, cells in data.cells.groupby("profile_group"):
@@ -270,7 +357,7 @@ def run(args):
                 if any(not torch.equal(a, b) for a, b in zip(before, after)):
                     raise ValueError("Exported model changes predicted probabilities")
         saved_models[variant] = record
-        reference = variants["fixed2022"][-1]
+        reference = fixed_reference
         profiles.extend(dict(row, variant=variant) for row in history.subgroup_profiles(fitted, datasets, reference, "fixed2022_matched_resident_reference"))
         # Profiles of the election electorate use eligibility weights, while
         # features continue to describe the separately reconstructed residents.
@@ -280,6 +367,9 @@ def run(args):
             copy["population_weight"] = copy.weight
             yearly.append(history.ElectionData(data.election, copy, data.geos, data.targets, data.partition, data.available))
         profiles.extend(dict(row, variant=variant) for row in history.subgroup_profiles(fitted, yearly, None, "year_specific_matched_eligible_estimate"))
+        group_rows, preference_rows = voter_composition(fitted, datasets, variant)
+        composition.extend(group_rows)
+        preferences.extend(preference_rows)
     frame = pd.DataFrame(metrics)
     frame.to_csv(args.output / "cross_validation.csv", index=False)
     comparison = frame.groupby(["variant", "election"], as_index=False)[["turnout_mae_pp", "turnout_rmse_pp", "observed_partition_mae_pp"]].mean()
@@ -290,6 +380,8 @@ def run(args):
     profile_frame.to_csv(args.output / "demographic_profiles.csv", index=False)
     history.history_sd(profile_frame).to_csv(args.output / "historical_sd.csv", index=False)
     history.write_json(args.output / "fitted_models.json", saved_models)
+    pd.DataFrame(composition).to_csv(args.output / "electoral_composition.csv", index=False)
+    pd.DataFrame(preferences).to_csv(args.output / "stable_political_preferences.csv", index=False)
     for name, path in input_paths.items():
         if history.file_identity(path) != input_hashes[name]:
             raise ValueError("Input changed during model run: " + name)
@@ -321,6 +413,8 @@ def main():
     parser.add_argument("--electorate-controls", type=Path, help="Reviewed primary registered group allocations; applied directly, without a second citizenship adjustment")
     parser.add_argument("--sensitivity-electorate-controls", type=Path, help="Alternative population allocation assumption, using the same resident features")
     parser.add_argument("--historical-targets", type=Path)
+    parser.add_argument("--variants", nargs="+", choices=VARIANTS,
+                        help="Select only the model variants needed for a historical or controlled run")
     parser.add_argument("--epochs", type=int, default=70)
     parser.add_argument("--folds", type=int, default=3)
     parser.add_argument("--threads", type=int, default=4)

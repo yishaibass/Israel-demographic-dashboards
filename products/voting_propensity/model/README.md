@@ -222,6 +222,8 @@ workbooks and the existing project source caches. No raw microdata are in Git.
 | `electorate --adult-controls ...` | `population_electorate.py` | Nationally calibrated resident-citizen and registered group allocations |
 | `fit-reconstructed` | `fit_population_reconstruction.py` | Paired model fits, profiles, group shares and frozen-fold validation |
 | `history` | `historical_elections.py` | Verified primary older election targets and disjoint joint-list partitions |
+| `historical-electorate` | `historical_electorate.py` | Dated citizen controls, explicit 2003 backcast and alternative allocation |
+| `historical-trends` | `historical_trends.py` | Vote-cast shares, political voter-base composition and accounting decompositions |
 
 Use a separate research output directory. Hash checks reject changed cached inputs;
 final fits capture source and input hashes before loading and verify them again
@@ -233,13 +235,80 @@ coefficients are retained in `fitted_models.json`; JSON round-trip verification
 requires identical election probabilities. Outputs remain research artifacts
 until publication is approved.
 
-Earlier research party fits also cover 2003, 2009, 2013 and 2015. The new
-citizen-calibrated controlled comparison covers 2019–2026; earlier national
-citizen controls have not been established. The 2006 archive lacks
-locality identities/eligible denominators and does not enter full turnout fitting.
+The separate historical controlled comparison fits ten elections: 2003, 2009,
+2013, 2015, April and September 2019, 2020, 2021, 2022 and 2026. It uses the same
+195 common named localities and frozen three-fold geographical split in every
+variant. The six-election results above remain a separate run.
+`historical_electorate.py` adds contemporaneous CBS resident-citizen totals and
+rounded group shares for 2009, 2013 and 2015. For 2003, only the 4.3-million
+resident-citizen total was recovered: the primary split backcasts the 2009
+citizen/adult group calibration factors onto dated 2003 adult counts, while a
+second complete fit uses the unadjusted 2003 resident group mix. Neither split
+is an observed 2003 citizenship distribution. The Jerusalem local seed remains
+a spatial prior; national totals are independently calibrated for each election.
+The retrieved 2006 archive lacks locality identities/eligible denominators;
+other official files containing them could not be retrieved. That election
+does not enter full turnout fitting.
 Joint ballot lists identify merged party families; their constituents are not
 invented. Party-specific historical SD omits unidentifiable constituent years.
 Historical SD is descriptive fitted-election variation, not a future tail probability.
+
+### Historical voter shares
+
+`electoral_composition.csv` divides each group's estimated votes cast by all
+estimated votes cast, using that election's reconstructed eligible population
+and fitted turnout. Its denominator differs from the eligible-population share.
+`stable_political_preferences.csv` exports three totals that respect every
+historical joint-list identification constraint: right/religious families
+(Likud, national-religious right, Shas, UTJ and Liberman), center/left/Other,
+and Arab parties. These are analytical families, not coalition membership.
+The residual Other family contains some minor right-wing lists. Individual
+constituents of merged historical lists are not identified.
+
+`historical_trends.py` consumes those two exports and produces demographic
+voter shares, the demographic composition of each political voter base, and
+exact accounting decompositions. Two-factor changes separate eligible group
+mix from turnout; three-factor political changes also separate modeled support
+within groups. These average all factor orders and conserve the total change.
+They describe aggregate net changes, not individual voter switching or causal
+effects. Within-group changes can include changing composition inside a broad
+group. Masorti includes mixed-religiosity households; Arab includes Druze;
+Other/unknown remains visible. All estimates refer to the common sample,
+rather than observed national demographic vote counts.
+
+The producer retains its actual fitted coefficients and checks identical
+probabilities after a JSON round trip. The consumer accepts and audits only
+floating-point probability-sum deviations below one part per million;
+larger inconsistencies fail. Input and fitting-source hashes are verified
+before and after training. Historical outputs remain private research artifacts.
+
+The historical paired run uses a 70-epoch budget: mean held-out turnout MAE
+falls from 4.733 to 4.149 percentage points and observed party-partition MAE
+from 2.734 to 2.343. The primary model was also rerun for 140 epochs; errors
+are 4.087 and 2.305 respectively. The runs reached their epoch limits, so
+optimization convergence is not established. Across all elections and groups,
+the longer run changes voter shares by at most 0.97 points and political
+category support by at most 6.14 points. Fine subgroup levels remain provisional.
+
+| Estimated share of votes cast in the common sample | 2003, 70 epochs | 2022, 70 epochs | Change, points | Change, 140 epochs |
+|---|---:|---:|---:|---:|
+| Haredi | 7.6% | 10.8% | +3.1 | +3.1 |
+| Dati | 10.1% | 11.1% | +1.0 | +1.2 |
+| Masorti, including mixed households | 24.5% | 22.0% | -2.5 | -2.1 |
+| Hiloni | 38.4% | 34.1% | -4.3 | -4.5 |
+| Arab, including Druze | 12.2% | 14.0% | +1.8 | +1.7 |
+| Other/unknown | 7.2% | 8.0% | +0.8 | +0.5 |
+
+The alternative 2003 citizen allocation preserves the Haredi, Hiloni and
+Masorti trend directions, but reduces the Arab voter-share change to +0.2
+points. The latter is not a robust population-allocation finding. Haredi
+growth and Hiloni decline continue across the intermediate elections with
+reversals; most of the Masorti decline occurs by 2009, followed by a plateau.
+Dati support for the stable right-family total rises about 18 points in both
+training budgets; Hiloni and Masorti support shows no net increase between
+2003 and 2022. The composition of that political voter base therefore changes
+more clearly than its aggregate vote share. These are sample-specific
+ecological estimates with reconstructed historical demographic inputs.
 
 Primary entries: [CBS locality catalog](https://data.gov.il/api/3/action/package_show?id=localities-in-israel),
 [PIBA locality age profiles](https://data.gov.il/api/3/action/package_show?id=residents_in_israel_by_communities_and_age_groups),
