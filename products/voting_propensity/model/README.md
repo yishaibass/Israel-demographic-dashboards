@@ -224,6 +224,9 @@ workbooks and the existing project source caches. No raw microdata are in Git.
 | `history` | `historical_elections.py` | Verified primary older election targets and disjoint joint-list partitions |
 | `historical-electorate` | `historical_electorate.py` | Dated citizen controls, explicit 2003 backcast and alternative allocation |
 | `historical-trends` | `historical_trends.py` | Vote-cast shares, political voter-base composition and accounting decompositions |
+| `historical-right-bloc` | `historical_right_bloc.py` | Explicit party-level right/rest targets and classification sensitivity |
+| `historical-survey` | `historical_survey_benchmark.py` | Independent pinned-source INES 2003 benchmark; no calibration to survey results |
+| `historical-support-audit` | `historical_support_audit.py` | Independent-year, outcome-definition and context-specification checks |
 
 Use a separate research output directory. Hash checks reject changed cached inputs;
 final fits capture source and input hashes before loading and verify them again
@@ -304,11 +307,71 @@ Masorti trend directions, but reduces the Arab voter-share change to +0.2
 points. The latter is not a robust population-allocation finding. Haredi
 growth and Hiloni decline continue across the intermediate elections with
 reversals; most of the Masorti decline occurs by 2009, followed by a plateau.
-Dati support for the stable right-family total rises about 18 points in both
-training budgets; Hiloni and Masorti support shows no net increase between
-2003 and 2022. The composition of that political voter base therefore changes
-more clearly than its aggregate vote share. These are sample-specific
-ecological estimates with reconstructed historical demographic inputs.
+The fitted Dati right-family increase of about 18 points is withdrawn as a
+validated historical finding. Agreement between training budgets did not test
+whether the model attributed votes to the correct demographic group. The
+demographic composition of a fitted political voter base also depends on that
+attribution and must not be treated as independently verified.
+
+### Independent historical support check
+
+The public [TAU Israel National Election Studies 2003 data](https://socsci4.tau.ac.il/mu2/ines/data/our-data/)
+provide a direct check. For Jewish respondents (`JEW=1`), religious self-definition
+is `B91`: 3 religious and 4 Haredi. `B63` measures pre-election party intention,
+not reported votes after the election. Among respondents naming a party, the
+same narrow right-family definition gives 80/93 religious respondents (86%)
+and 72/77 Haredi respondents (94%). The legacy model estimates approximately
+69% and 88% respectively for 2003. In particular, the Dati starting point
+does not pass this independent check. The survey is unweighted in this audit;
+sampling uncertainty, intentions versus actual votes, individual versus
+household identity, and the model's geographical sample remain distinct.
+
+There is a separate classification problem: the historical Other family
+contains right-wing lists, including Sharansky and Herut. Their votes cannot
+be recovered by relabeling the entire fitted Other probability. A complete
+historical right-wing comparison requires a separately versioned ballot-level
+bloc definition and a new fit to those original counts. The existing nine-family
+crosswalk and outputs are retained for reproducibility.
+
+The versioned right-bloc crosswalk and count builder retain all votes, exclude
+external envelopes, fail on unknown symbols and reconcile right plus rest to
+valid votes for every locality. Ambiguous lists are excluded from the primary
+definition and included in a separate classification sensitivity. In observed
+2003 results, completing the bloc raises right support from 86.7% to 98.4%
+in Kedumim, 84.1% to 98.7% in Beit El and 80.5% to 95.5% in Efrat. These are
+locality results, not observations of individual religious identity.
+
+The support audit preserves the 195-locality sample, dated population controls
+and frozen folds. It fits 2003 and 2022 independently and compares the existing
+context design against direct demographic and income terms. With the same
+narrow party-family targets and 140-epoch budget, inferred 2003 Dati support
+changes from 65.0% to 74.8%; Haredi support changes from 87.5% to 90.8%.
+Held-out right-share MAE improves from 4.65 to 4.30 points in 2003, while the
+simpler design worsens 2022 error from 5.28 to 6.50. Right-share errors compare
+the same aggregate target; average errors across differing party partitions
+are not comparable. Thus neither epoch stability nor geographical prediction
+accuracy establishes the correctness of subgroup historical support.
+
+For the explicit broad-right binary outcome, the direct demographic/income
+candidate gives the following independently fitted endpoint estimates. The
+survey was not used as a fitting constraint.
+
+| Broad-right support within group | 2003, 500-epoch budget | 2022, 500-epoch budget |
+|---|---:|---:|
+| Dati | 94.4% | 95.3% |
+| Haredi | 96.0% | 98.1% |
+
+Three genuinely different initial coefficient states agree within 0.005
+percentage points; all six fits stop before the 500-epoch cap under the
+existing stopping rule. This demonstrates numerical stability for this
+specification, not certainty about individual behavior. At the separately
+validated 140-epoch budget, direct versus full-context broad-right MAE is
+4.27 versus 4.56 points in 2003 and 5.90 versus 4.88 in 2022. The direct
+candidate matches the independent 2003 benchmark substantially better but
+does not uniformly improve locality predictions. It remains a research
+candidate; no production parameters, published defaults or UI are replaced.
+The original claims of a large Dati or Haredi shift into the right are not
+supported by this audit and must not be presented as established findings.
 
 Primary entries: [CBS locality catalog](https://data.gov.il/api/3/action/package_show?id=localities-in-israel),
 [PIBA locality age profiles](https://data.gov.il/api/3/action/package_show?id=residents_in_israel_by_communities_and_age_groups),

@@ -5,3 +5,4 @@ torch>=2.2
 openpyxl>=3.1
 xlrd>=2.0.2
 pyogrio>=0.13
+pypdf>=5.0

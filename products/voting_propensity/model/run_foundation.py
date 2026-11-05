@@ -19,6 +19,9 @@ STAGES = {
     "fit-reconstructed": "fit_population_reconstruction",
     "historical-electorate": "historical_electorate",
     "historical-trends": "historical_trends",
+    "historical-right-bloc": "historical_right_bloc",
+    "historical-survey": "historical_survey_benchmark",
+    "historical-support-audit": "historical_support_audit",
 }
 
 
